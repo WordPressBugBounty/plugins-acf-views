@@ -33,20 +33,18 @@ class ComposerAutoloaderInit_org_wplake_advanced_views_optional_vendors
 
         $loader->register(true);
 
-        $includeFiles = \Composer\Autoload\ComposerStaticInit_org_wplake_advanced_views_optional_vendors::$files;
-        foreach ($includeFiles as $fileIdentifier => $file) {
-            composerRequire_org_wplake_advanced_views_optional_vendors($fileIdentifier, $file);
+        $filesToLoad = \Composer\Autoload\ComposerStaticInit_org_wplake_advanced_views_optional_vendors::$files;
+        $requireFile = \Closure::bind(static function ($fileIdentifier, $file) {
+            if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
+                $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
+
+                require $file;
+            }
+        }, null, null);
+        foreach ($filesToLoad as $fileIdentifier => $file) {
+            $requireFile($fileIdentifier, $file);
         }
 
         return $loader;
     }
-}
-
-/**
- * @param string $fileIdentifier
- * @param string $file
- * @return void
- */
-function composerRequire_org_wplake_advanced_views_optional_vendors($fileIdentifier, $file) {
-    require_once $file;
 }

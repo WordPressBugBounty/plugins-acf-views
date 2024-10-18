@@ -1321,7 +1321,7 @@ msgstr "ИЛИ"
 
 #: src/Groups/translations.php:318
 #: src/Groups/translations.php:509
-#: src/Groups/translations.php:512
+#: src/Groups/translations.php:510
 msgid "Fields"
 msgstr "Поля"
 
@@ -1553,11 +1553,7 @@ msgstr "Выберите Карты для экспорта"
 msgid "Note: Views and Cards with the same IDs are overridden."
 msgstr "Примечание: Виды и Карты с одинаковыми ИД переопределяются."
 
-#: src/Groups/translations.php:510
-msgid "Parent group"
-msgstr "Родительская группа"
-
-#: src/Groups/translations.php:511
+#: src/Groups/translations.php:512
 msgid "Parent field"
 msgstr "Родительское поле"
 
@@ -1633,7 +1629,7 @@ msgstr "Блок Meta Box"
 msgid "Pods Block"
 msgstr "Блок Pods"
 
-#: src/Groups/View_Data.php:311
+#: src/Groups/View_Data.php:312
 msgid "View settings"
 msgstr "Настройки вида"
 
@@ -2067,11 +2063,11 @@ msgstr "Поле \"%1$s\" неверно ожидается быть масси�
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
 msgstr "Поле \"%1$s\" неверно ожидается быть строкой. Строка %2$d"
 
-#: src/Views/View_Shortcode.php:217
+#: src/Views/View_Shortcode.php:221
 msgid "view-id attribute is missing or wrong"
 msgstr "атрибут view-id отсутствует или неверен"
 
-#: src/Views/View_Shortcode.php:303
+#: src/Views/View_Shortcode.php:310
 msgid "object-id argument contains the wrong value"
 msgstr "object-id аргумент содержит неверное значение"
 
@@ -2295,7 +2291,7 @@ msgstr "Управляет настройками веб-компонентов 
 msgid "Controls classes generation in the Default Template for new Views and Cards."
 msgstr "Управляет генерацией классов в шаблоне по умолчанию для новых представлений и карт."
 
-#: src/Views/View_Shortcode.php:428
+#: src/Views/View_Shortcode.php:435
 msgid "View id is wrong"
 msgstr "Неверный идентификатор представления"
 
@@ -2457,15 +2453,11 @@ msgstr "Если присутствует, это значение исполь�
 msgid "By saving Views and Cards in your GitLab repository, you can create your own library and reuse them on other websites. <br> <a target='_blank' href='https://docs.acfviews.com/templates/reusable-components-library-pro'>Read more</a>"
 msgstr "Сохраняя Views и Cards в вашем репозитории GitLab, вы можете создать свою собственную библиотеку и повторно использовать их на других веб-сайтах. <br> <a target='_blank' href='https://docs.acfviews.com/templates/reusable-components-library-pro'>Узнать больше</a>"
 
-#: src/Groups/translations.php:540
-msgid "Choose a parent group. If you require fields from various groups, keep this field blank."
-msgstr "Выберите родительскую группу. Если вам нужны поля из разных групп, оставьте это поле пустым."
-
-#: src/Groups/translations.php:541
+#: src/Groups/translations.php:542
 msgid "If you're making an internal View for the <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>group</a>, <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>repeater</a> or <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>flexible</a> field, then fill out this field."
 msgstr "Если вы создаете внутренний View для <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>группы</a>, <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>повторителя</a> или <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>гибкого</a> поля, то заполните это поле."
 
-#: src/Groups/translations.php:542
+#: src/Groups/translations.php:540
 msgid "Assign fields to your View. <br> Tip: hover mouse on the field number column and drag to reorder."
 msgstr "Назначьте поля вашему View. <br> Совет: наведите мышь на колонку с номерами полей и перетащите для изменения порядка."
 
@@ -2723,4 +2715,12 @@ msgstr ""
 
 #: src/Views/Cpt/Views_Cpt.php:125
 msgid "Name your View here (required)"
+msgstr ""
+
+#: src/Groups/translations.php:511
+msgid "Parent group (for Nested repeater or Flexible layout)"
+msgstr ""
+
+#: src/Groups/translations.php:541
+msgid "Choose a Parent group when setting up Nested repeater or Flexible layout."
 msgstr ""

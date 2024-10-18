@@ -11,7 +11,7 @@ $tabs = $view['tabs'] ?? array();
 ?>
 <div class="av-toolbar">
 	<h2 class="av-toolbar__title">
-		<i class="av-toolbar__icon dashicons dashicons-welcome-widgets-menus"></i>
+		<i class="av-toolbar__icon dashicons dashicons-layout"></i>
 		<span>
 			<?php
 			echo esc_html( $name )

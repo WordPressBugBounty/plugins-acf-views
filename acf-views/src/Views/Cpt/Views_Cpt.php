@@ -63,7 +63,7 @@ class Views_Cpt extends Cpt {
 			'can_export'          => false,
 			'rewrite'             => false,
 			'query_var'           => false,
-			'menu_icon'           => 'dashicons-format-gallery',
+			'menu_icon'           => 'dashicons-layout',
 			'supports'            => array( 'title', 'editor' ),
 			'show_in_graphql'     => false,
 			// right under ACF, which has 80.

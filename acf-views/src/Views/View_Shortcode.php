@@ -119,6 +119,10 @@ class View_Shortcode extends Shortcode {
 			0;
 	}
 
+	protected function is_within_gutenberg_query_loop(): bool {
+		return false === in_array( $this->query_loop_post_id, array( - 1, 0 ), true );
+	}
+
 	protected function get_data_post_id(
 		string $object_id,
 		int $current_page_id,
@@ -162,7 +166,7 @@ class View_Shortcode extends Shortcode {
 
 		// b. from the Gutenberg query loop.
 
-		if ( false === in_array( $this->query_loop_post_id, array( - 1, 0 ), true ) ) {
+		if ( true === $this->is_within_gutenberg_query_loop() ) {
 			$data_post_id = 0 !== $data_post_id ?
 				$data_post_id :
 				$this->query_loop_post_id;
@@ -282,8 +286,11 @@ class View_Shortcode extends Shortcode {
 			(string) $post_slug :
 			'';
 
-		// enable the $term$ mode by default, if we're on a taxonomy page (and nothing was set).
-		$object_id = is_tax() && '' === $object_id ?
+		// enable the 'term' mode by default if we're on a taxonomy page, nothing was set,
+		// and it doesn't happen inside the Gutenberg query loop.
+		$object_id = true === is_tax() &&
+					'' === $object_id &&
+					false === $this->is_within_gutenberg_query_loop() ?
 			'term' :
 			$object_id;
 

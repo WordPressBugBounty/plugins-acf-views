@@ -39,13 +39,25 @@ class View_Data extends Cpt_Data {
 	 * @label Fields
 	 */
 	public bool $fields_tab;
+
+	/**
+	 * @item \Org\Wplake\Advanced_Views\Groups\Item_Data
+	 * @var Item_Data[]
+	 * @label Fields
+	 * @instructions Assign fields to your View. <br> Tip: hover mouse on the field number column and drag to reorder.
+	 * @button_label Add Field
+	 * @collapsed local_acf_views_field__key
+	 * @a-no-tab 1
+	 */
+	public array $items;
+
 	/**
 	 * @a-type select
 	 * @return_format value
 	 * @allow_null 1
 	 * @ui 1
-	 * @label Parent group
-	 * @instructions Choose a parent group. If you require fields from various groups, keep this field blank.
+	 * @label Parent group (for Nested repeater or Flexible layout)
+	 * @instructions Choose a Parent group when setting up Nested repeater or Flexible layout.
 	 */
 	public string $group;
 
@@ -59,17 +71,6 @@ class View_Data extends Cpt_Data {
 	 * @conditional_logic [[{"field": "local_acf_views_view__group","operator": "!=","value": ""}]]
 	 */
 	public string $parent_field;
-
-	/**
-	 * @item \Org\Wplake\Advanced_Views\Groups\Item_Data
-	 * @var Item_Data[]
-	 * @label Fields
-	 * @instructions Assign fields to your View. <br> Tip: hover mouse on the field number column and drag to reorder.
-	 * @button_label Add Field
-	 * @collapsed local_acf_views_field__key
-	 * @a-no-tab 1
-	 */
-	public array $items;
 
 	/**
 	 * @a-type tab

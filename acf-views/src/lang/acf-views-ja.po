@@ -1321,7 +1321,7 @@ msgstr "または"
 
 #: src/Groups/translations.php:318
 #: src/Groups/translations.php:509
-#: src/Groups/translations.php:512
+#: src/Groups/translations.php:510
 msgid "Fields"
 msgstr "フィールド"
 
@@ -1553,11 +1553,7 @@ msgstr "エクスポートするカードを選択"
 msgid "Note: Views and Cards with the same IDs are overridden."
 msgstr "注意：同じIDのビューとカードは上書きされます。"
 
-#: src/Groups/translations.php:510
-msgid "Parent group"
-msgstr "親グループ"
-
-#: src/Groups/translations.php:511
+#: src/Groups/translations.php:512
 msgid "Parent field"
 msgstr "親フィールド"
 
@@ -1633,7 +1629,7 @@ msgstr "メタボックスブロック"
 msgid "Pods Block"
 msgstr "Podsブロック"
 
-#: src/Groups/View_Data.php:311
+#: src/Groups/View_Data.php:312
 msgid "View settings"
 msgstr "ビュー設定"
 
@@ -2083,11 +2079,11 @@ msgstr "\"%1$s\"フィールドは配列であると誤って想定されてい�
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
 msgstr "\"%1$s\"フィールドは文字列であると誤って想定されています。行%2$d"
 
-#: src/Views/View_Shortcode.php:217
+#: src/Views/View_Shortcode.php:221
 msgid "view-id attribute is missing or wrong"
 msgstr "view-id属性が不足しているか間違っています"
 
-#: src/Views/View_Shortcode.php:303
+#: src/Views/View_Shortcode.php:310
 msgid "object-id argument contains the wrong value"
 msgstr "object-id引数に誤った値が含まれています"
 
@@ -2295,7 +2291,7 @@ msgstr "新しいビューとカードのWebコンポーネント設定を制御
 msgid "Controls classes generation in the Default Template for new Views and Cards."
 msgstr "新しいビューとカードのデフォルトテンプレートでのクラス生成を制御します。"
 
-#: src/Views/View_Shortcode.php:428
+#: src/Views/View_Shortcode.php:435
 msgid "View id is wrong"
 msgstr "ビューIDが間違っています"
 
@@ -2457,15 +2453,11 @@ msgstr "この値が存在する場合、これはビューとカードの 'scri
 msgid "By saving Views and Cards in your GitLab repository, you can create your own library and reuse them on other websites. <br> <a target='_blank' href='https://docs.acfviews.com/templates/reusable-components-library-pro'>Read more</a>"
 msgstr "GitLabリポジトリにビューとカードを保存することで、独自のライブラリを作成し、他のウェブサイトで再利用できます。<br><a target='_blank' href='https://docs.acfviews.com/templates/reusable-components-library-pro'>詳細はこちら</a>"
 
-#: src/Groups/translations.php:540
-msgid "Choose a parent group. If you require fields from various groups, keep this field blank."
-msgstr "親グループを選択します。複数のグループからフィールドが必要な場合は、このフィールドを空白のままにしてください。"
-
-#: src/Groups/translations.php:541
+#: src/Groups/translations.php:542
 msgid "If you're making an internal View for the <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>group</a>, <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>repeater</a> or <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>flexible</a> field, then fill out this field."
 msgstr "<a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>グループ</a>、<a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>リピーター</a>、または<a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>フレキシブル</a>フィールドのための内部ビューを作成する場合、このフィールドを記入してください。"
 
-#: src/Groups/translations.php:542
+#: src/Groups/translations.php:540
 msgid "Assign fields to your View. <br> Tip: hover mouse on the field number column and drag to reorder."
 msgstr "ビューにフィールドを割り当てます。<br>ヒント：フィールド番号の列にマウスを合わせてドラッグして並び替えます。"
 
@@ -2723,4 +2715,12 @@ msgstr ""
 
 #: src/Views/Cpt/Views_Cpt.php:125
 msgid "Name your View here (required)"
+msgstr ""
+
+#: src/Groups/translations.php:511
+msgid "Parent group (for Nested repeater or Flexible layout)"
+msgstr ""
+
+#: src/Groups/translations.php:541
+msgid "Choose a Parent group when setting up Nested repeater or Flexible layout."
 msgstr ""

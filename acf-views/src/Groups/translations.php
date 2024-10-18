@@ -507,9 +507,9 @@ __("Note: Views and Cards with the same IDs are overridden.", "acf-views");
 // View_Data.php : labels
 
 __("Fields", "acf-views");
-__("Parent group", "acf-views");
-__("Parent field", "acf-views");
 __("Fields", "acf-views");
+__("Parent group (for Nested repeater or Flexible layout)", "acf-views");
+__("Parent field", "acf-views");
 __("Template", "acf-views");
 __("Default Template", "acf-views");
 __("Custom Template", "acf-views");
@@ -537,9 +537,9 @@ __("With Gutenberg Block (ACF)", "acf-views");
 
 // View_Data.php : descriptions
 
-__("Choose a parent group. If you require fields from various groups, keep this field blank.", "acf-views");
-__("If you're making an internal View for the <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>group</a>, <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>repeater</a> or <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>flexible</a> field, then fill out this field.", "acf-views");
 __("Assign fields to your View. <br> Tip: hover mouse on the field number column and drag to reorder.", "acf-views");
+__("Choose a Parent group when setting up Nested repeater or Flexible layout.", "acf-views");
+__("If you're making an internal View for the <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>group</a>, <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/repeater-pro'>repeater</a> or <a target='_blank' href='https://docs.acfviews.com/display-content/meta-fields/layout-fields/flexible-pro'>flexible</a> field, then fill out this field.", "acf-views");
 __("Output preview of the generated <a target='_blank' href='https://docs.acfviews.com/templates/template-engines/twig'>Twig</a> or <a target='_blank' href='https://docs.acfviews.com/templates/template-engines/blade'>Blade</a> template. <br> Important! Publish or Update your view to see the latest markup.", "acf-views");
 __("Write your own template with full control over the HTML markup. <br> Copy the Default Template code and make your changes. <br><br> Check out our Docs to learn more about <a target='_blank' href='https://docs.acfviews.com/templates/template-engines/twig'>Twig</a> or <a target='_blank' href='https://docs.acfviews.com/templates/template-engines/blade'>Blade</a> features. <br>Note: WordPress shortcodes inside the template are only supported in the Pro version. <br><br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace).", "acf-views");
 __("Define a unique <a target='_blank' href='https://getbem.com/introduction/'>BEM name</a> for the element that will be used in the markup, or leave it empty to use the default ('acf-view').", "acf-views");
