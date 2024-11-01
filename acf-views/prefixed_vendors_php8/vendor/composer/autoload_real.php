@@ -35,11 +35,7 @@ class ComposerAutoloaderInit_org_wplake_advanced_views_optional_vendors
 
         $filesToLoad = \Composer\Autoload\ComposerStaticInit_org_wplake_advanced_views_optional_vendors::$files;
         $requireFile = \Closure::bind(static function ($fileIdentifier, $file) {
-            if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
-                $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
-
-                require $file;
-            }
+           require_once $file;
         }, null, null);
         foreach ($filesToLoad as $fileIdentifier => $file) {
             $requireFile($fileIdentifier, $file);

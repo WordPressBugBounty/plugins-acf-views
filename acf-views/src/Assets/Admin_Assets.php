@@ -528,16 +528,40 @@ class Admin_Assets implements Hooks_Interface {
 		);
 	}
 
-	public function enqueue_admin_scripts(): void {
+	protected function is_target_screen(): bool {
 		$current_screen = get_current_screen();
 
 		if ( null === $current_screen ||
 			( ! in_array( $current_screen->id, array( Views_Cpt::NAME, Cards_Cpt::NAME ), true ) &&
 				! in_array( $current_screen->post_type, array( Views_Cpt::NAME, Cards_Cpt::NAME ), true ) ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function enqueue_admin_scripts(): void {
+		$current_screen = get_current_screen();
+
+		if ( null === $current_screen ||
+		false === $this->is_target_screen() ) {
 			return;
 		}
 
 		$this->enqueue_admin_assets( $current_screen->base );
+	}
+
+	public function enqueue_editor_styles(): void {
+		if ( false === $this->is_target_screen() ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			Views_Cpt::NAME . '_editor',
+			$this->plugin->get_assets_url( 'admin/css/editor.min.css' ),
+			array(),
+			$this->plugin->get_version()
+		);
 	}
 
 	public function set_hooks( Current_Screen $current_screen ): void {
@@ -546,5 +570,6 @@ class Admin_Assets implements Hooks_Interface {
 		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+		add_action( 'enqueue_block_assets', array( $this, 'enqueue_editor_styles' ) );
 	}
 }

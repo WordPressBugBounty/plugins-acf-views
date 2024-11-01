@@ -23,7 +23,7 @@ class Plugin implements Hooks_Interface {
 
 	private string $slug         = 'acf-views/acf-views.php';
 	private string $short_slug   = 'acf-views';
-	private string $version      = '3.7.5';
+	private string $version      = '3.7.6';
 	private bool $is_pro_version = false;
 	private bool $is_switching_versions;
 	private string $plugin_url;
