@@ -48,9 +48,8 @@ if ( true === class_exists( 'acf_field_select' ) ) {
 				'return_format' => 'value',
 			);
 
-			// ajax.
+			// Private-only ajax.
 			add_action( 'wp_ajax_acf/fields/av_slug_select/query', array( $this, 'ajax_query' ) );
-			add_action( 'wp_ajax_nopriv_acf/fields/av_slug_select/query', array( $this, 'ajax_query' ) );
 		}
 
 		/**
@@ -78,24 +77,9 @@ if ( true === class_exists( 'acf_field_select' ) ) {
 		}
 
 		public function ajax_query(): void {
-			if ( false === function_exists( 'acf_request_args' ) ) {
-				return;
-			}
-
-			$args = acf_request_args(
-				array(
-					'nonce'     => '',
-					'field_key' => '',
-				)
-			);
-
-			$nonce = sanitize_text_field( $args['nonce'] );
-
-			// two versions: the 'field_key' case is for the latest ACF versions,
-			// while the 'acf_nonce' case is for the older ones.
-			if ( false === wp_verify_nonce( $nonce, $args['field_key'] ) &&
-			false === wp_verify_nonce( $nonce, 'acf_nonce' ) ) {
-				die();
+			// Check for permissions instead of the nonce, as ACF team has changed it 3 times, and it keeps breaking.
+			if ( false === current_user_can( 'edit_posts' ) ) {
+				wp_die( 'No permissions' );
 			}
 
 			$per_page = 20;
