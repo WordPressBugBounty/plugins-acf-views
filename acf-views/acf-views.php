@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Views Framework: Lite Edition
  * Plugin URI: https://wplake.org/advanced-views-lite/
  * Description: Smart templates for the WordPress front-end, simplifying post queries and template creation.
- * Version: 3.7.7
+ * Version: 3.7.8
  * Author: WPLake
  * Author URI: https://wplake.org/advanced-views-lite/
  * Text Domain: acf-views
@@ -112,7 +112,7 @@ $acf_views = new class() {
 		}
 
 		add_action(
-			'plugins_loaded',
+			'init',
 			function () {
 				load_plugin_textdomain( 'acf-views', false, dirname( plugin_basename( __FILE__ ) ) . '/src/lang' );
 			},

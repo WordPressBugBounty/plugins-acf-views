@@ -4,7 +4,7 @@ Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.7.7
+Stable tag: 3.7.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -160,6 +160,11 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
 == Changelog ==
+
+= 3.7.8 (2024-12-07) =
+- WP 6.7: fixed PHP notice - _load_textdomain_just_in_time was called incorrectly
+- WP 6.7: added support for the new Interactivity API path
+- Improved compatibility with the SiteGround Optimizer plugin
 
 = 3.7.7 (2024-11-12) =
 - View & Card: made the ajax 'View' selector compatible with latest ACF.

@@ -97,10 +97,19 @@ class Front_Assets implements Hooks_Interface {
 		// turn alias into the full path, as WP won't mention in the 'importmap' if others don't use it.
 		// todo find a way to make it natively, so @wordpress/interactivity works.
 		if ( true === $is_wp_interactivity_in_use ) {
-			$scripts_suffix          = wp_scripts_get_suffix();
-			$wp_interactivity_script = includes_url( "js/dist/interactivity$scripts_suffix.js" );
+			$wp_file_system = $this->file_system->get_wp_filesystem();
+			$old_path       = true === defined( 'ABSPATH' ) &&
+								true === defined( 'WPINC' ) ?
+				ABSPATH . WPINC . '/js/dist/interactivity.min.js' :
+			'';
 
-			$js_code = str_replace( '@wordpress/interactivity', $wp_interactivity_script, $js_code );
+			$interactivity_path = '' !== $old_path &&
+									true === $wp_file_system->is_file( $old_path ) ?
+				includes_url( 'js/dist/interactivity.min.js' ) :
+				// Since WP 6.7.
+				includes_url( 'js/dist/script-modules/interactivity/index.min.js' );
+
+			$js_code = str_replace( '@wordpress/interactivity', $interactivity_path, $js_code );
 		}
 
 		if ( false === $cpt_data->is_web_component() ) {

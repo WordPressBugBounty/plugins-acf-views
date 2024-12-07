@@ -529,7 +529,10 @@ class Admin_Assets implements Hooks_Interface {
 	}
 
 	protected function is_target_screen(): bool {
-		$current_screen = get_current_screen();
+		// can be missing, when called via Rest API by SiteGround_Optimizer in the 'enqueue_block_assets' hook.
+		$current_screen = true === function_exists( 'get_current_screen' ) ?
+			get_current_screen() :
+			null;
 
 		if ( null === $current_screen ||
 			( ! in_array( $current_screen->id, array( Views_Cpt::NAME, Cards_Cpt::NAME ), true ) &&
