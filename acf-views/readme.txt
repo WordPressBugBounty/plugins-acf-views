@@ -1,109 +1,75 @@
-=== Advanced Views Framework - Display Posts, WooCommerce, ACF, MetaBox and Pods fields ===
+=== Advanced Views - Display Posts, Custom Fields, and More ===
 Contributors: wplakeorg
 Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 3.7.8
+Stable tag: 3.7.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Smart templates for the WordPress front-end, simplifying post queries and template creation.
+Effortlessly display WordPress posts, custom fields, and WooCommerce data.
 
 == Description ==
 
-Smart templates for the WordPress front-end, simplifying post queries and template creation.
+Advanced Views is a powerful, flexible tool that lets you **display posts, custom fields, and content from ACF, MetaBox, Pods, WooCommerce, and WordPress itself**.
 
-**The Better Way to Query and Display Content**
+Whether you're building a custom layout, creating dynamic templates, or designing advanced content displays,
+this plugin simplifies the process - without relying on bulky page builders.
 
-A specialized WordPress framework designed to enhance and customize content display and functionality.
+==Why Choose Advanced Views?==
 
-A modern, straightforward, yet versatile solution.
+✅ **Display Posts & Custom Fields Anywhere** – Show posts, Custom Post Types (CPT), WooCommerce products, and metadata effortlessly.
+✅ **Supports ACF, MetaBox, and Pods** – Retrieve and display data from [multiple field plugins](https://docs.acfviews.com/getting-started/supported-data-vendors) with ease.
+✅ **Solution for Everyone** – Perfect for site owners, developers, and designers who want full control over content display.
+✅ **Smart, Lightweight, and Developer-Friendly** – Uses [Twig & Blade templates](https://docs.acfviews.com/templates/template-engines) with automatic escaping, and [Just-in-Time assets strategy](https://docs.acfviews.com/templates/css-and-js#id-1.1-just-in-time-assets) for smooth performance.
 
-https://vimeo.com/965546564
+==🎨 One Plugin – Multiple Content Sources==
 
-==🌟 One Tool. Many Content Sources==
+Advanced Views [seamlessly integrates](https://docs.acfviews.com/getting-started/supported-data-vendors) with:
 
-Advanced Views plugin can pull data from [multiple sources](https://docs.acfviews.com/getting-started/supported-data-vendors).
+🔹 WordPress Posts & Pages
+🔹 Custom Post Types (CPTs)
+🔹 [WooCommerce](https://wordpress.org/plugins/woocommerce/) Products & Fields
+🔹 [Advanced Custom Fields](https://wordpress.org/plugins/advanced-custom-fields/) (ACF)
+🔹 [MetaBox](https://wordpress.org/plugins/meta-box/) & [Pods](https://wordpress.org/plugins/pods/) Fields
 
-Out-of-the-box, the plugin supports **over 130 field types** from 5 different data vendors:
+Whether you're crafting a blog, directory, or custom WooCommerce store, Advanced Views makes it easy to query and display dynamic content.
 
-* WordPress, [WooCommerce](https://wordpress.org/plugins/woocommerce/), [Advanced Custom Fields](https://wordpress.org/plugins/advanced-custom-fields/) (ACF) plugin, [MetaBox](https://wordpress.org/plugins/meta-box/) and [Pods](https://wordpress.org/plugins/pods/)
-
-**🎨 Tool for Everybody**
-
-* Made for Web Developers.
-* Website Owner Friendly.
-* Easy for Web Designers.
-
-**🕵️‍♂️ See the Plugin in Action**
-
-Visit the [live playground](https://playground.wordpress.net/?blueprint-url=https://wplake.org/playground/advanced_views_lite-latest-101.json) we've prepared for you.
-
-== 🛸 Development without hassle ==
+== 🚀 Powerful Features ==
 
 High-quality results without the time-consuming steps.
 
-* Provides a Robust foundation
-* Reduces the time required for project implementation
-* [Smart tool](https://docs.acfviews.com/getting-started/introduction/key-aspects) without the typical pitfalls of page builders
+**🔄 Smart Content Queries & Display**
 
-**Many Reasons to Love It**
+🔹 Easily [display posts, custom fields](https://docs.acfviews.com/getting-started/introduction/creating-your-first-view), and taxonomies with powerful [WP_Query enhancements](https://docs.acfviews.com/getting-started/introduction/creating-your-first-card)
+🔹 Filter, sort, and customize results with Twig or Blade templates.
 
-* [Reusable Components](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-8.-reusable-components)
-* [Built-in Data Binding](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.1-built-in-data-binding)
-* [Just-in-Time assets](https://docs.acfviews.com/templates/css-and-js#id-1.1-just-in-time-assets)
-* [Twig & Blade templates](https://docs.acfviews.com/templates/template-engines)
-* [Automatic escaping](https://docs.acfviews.com/templates/template-engines#c-includes-automatic-auto-escaping)
-* [WebComponents](https://docs.acfviews.com/templates/css-and-js#id-4.1-web-components)
-* [WP Interactivity API](https://docs.acfviews.com/templates/css-and-js/wordpress-interactivity-api)
-* [Live Reload feature](https://docs.acfviews.com/templates/live-reload)
-* [IDE/Git friendly](https://docs.acfviews.com/templates/file-system-storage)
-* [TS/Sass friendly](https://docs.acfviews.com/templates/file-system-storage#sass-and-typescript-usage)
-* [Tailwind friendly](https://docs.acfviews.com/templates/file-system-storage#tailwind-usage)
-* [Multilingual](https://docs.acfviews.com/templates/multilingual)
+**📌 Pre-Built Components for Quick Setup**
 
-**💡 Built-in Data Binding with Template Generation**
+🔹 Use [ready-made components](https://docs.acfviews.com/templates/pre-built-components) for fast and easy content structuring.
+🔹 Includes meta fields, responsive CSS rules, and reusable templates.
 
-Focus on critical aspects of your project rather than grappling with data conversions and extensive documentation. 
+**⚡ Streamlined Development Workflow**
 
-* [On-the-fly](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.-view-component) data format conversions
-* Automated template generation
+🔹 **[Built-in Data Binding](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.1-built-in-data-binding) & [Template Generation](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.2-automated-template-generation)** – No need to manually convert field data.
+🔹 **[File System Storage option](https://docs.acfviews.com/templates/file-system-storage) & [Live Reload feature](https://docs.acfviews.com/templates/live-reload)** – Works seamlessly with IDEs, Git, Sass, and TypeScript.
 
-**📢 Up-to-date Smart Templates**
+**🛠️ Simplified WordPress Queries**
 
-Assists with maintaining the [connection between fields](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.3-seamless-data-connection) in the database and their usage within the template.
+🔹 Master WP_Query with [intuitive wrappers](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-4.-card-component) that make querying posts and fields easier.
+🔹 Bulk template validation to keep everything running smoothly.
 
-* Built-in template validation with a bulk option
-* Code editor for quick template changes
-* [File system storage](https://docs.acfviews.com/templates/file-system-storage) option when using IDE, Version control or Sass/Typescript assets
+**📚 Extensive Documentation & Friendly Support**
 
-**⚙️ Simplified DB Queries**
+🔹 [Step-by-step guides](https://docs.acfviews.com/) to help you get started.
+🔹 [Community forum](https://wordpress.org/support/plugin/acf-views/) for free support, plus [Pro version support](https://wplake.org/acf-views-support/) for premium users.
 
-[Wrapper](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-4.-card-component) for the built-in WordPress functions to simplify querying.
+==🔗 Pro Version for Even More Features!==
 
-* Master [WP_Query](https://developer.wordpress.org/reference/classes/wp_query/) easily  
-* Filter and sort the results 
-* [Twig templates](https://docs.acfviews.com/templates/twig-templates) for layout customization  
+Unlock advanced features, more integrations, and premium support with [Advanced Views Pro](https://wplake.org/advanced-views-pro/).
 
-**🧩 Pre-built Components Library**
-
-Includes [a set](https://docs.acfviews.com/templates/pre-built-components) of commonly used elements.
-
-* Quick to get started  
-* Easy to customize
-* Meta fields and responsive CSS rules are included
-
-== 📚 Extensive Docs and Friendly Support ==
-
-[Official documentation](https://docs.acfviews.com/getting-started/introduction) that covers all the main aspects and features, with helpful guides on how to use and extend functionality.
-
-* Reach out to the [community forum](https://wordpress.org/support/plugin/acf-views/) for help
-* [Personal support](https://wplake.org/acf-views-support/) for the Pro version
-
-==🔗 Much More Available in Pro!==
-
-[See Pro Features](https://wplake.org/advanced-views-pro/)
+📢 Get started today and take full control over how you display posts, CPTs, and custom fields!
 
 == Screenshots ==
 
@@ -160,6 +126,25 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
 == Changelog ==
+
+= 3.7.14 (2025-03-21) =
+- Improved compatibility with non-block themes
+- UX improvements & readme update
+
+= 3.7.12 (2025-03-14) =
+- Improved compatibility with Masteriyo LMS
+- UX improvements
+
+= 3.7.11 (2025-03-08) =
+- View: fixed conditional logic-related bug
+
+= 3.7.10 (2025-03-03) =
+- Improved compatibility with the [MetaBox Lite plugin](https://metabox.io/lite/)
+- Improved compatibility with the Impreza and Zephyr themes
+- Improved PHP 8.2 support (get rid of the deprecated message in the Front_Assets class)
+
+= 3.7.9 (2025-01-13) =
+- Improved WP Interactivity Api support in block themes
 
 = 3.7.8 (2024-12-07) =
 - WP 6.7: fixed PHP notice - _load_textdomain_just_in_time was called incorrectly

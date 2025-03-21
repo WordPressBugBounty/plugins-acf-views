@@ -73,27 +73,21 @@ class Automatic_Reports extends Action implements Hooks_Interface {
 		// IT DOESN'T SEND ANY PRIVATE DATA, only a DOMAIN.
 		// And the domain is only used to avoid multiple counting from one website.
 		$args = array(
-			'_viewsCount'                     => $this->get_count_of_posts( Views_Cpt::NAME ),
-			'_cardsCount'                     => $this->get_count_of_posts( Cards_Cpt::NAME ),
+			'_viewsCount'                    => $this->get_count_of_posts( Views_Cpt::NAME ),
+			'_cardsCount'                    => $this->get_count_of_posts( Cards_Cpt::NAME ),
 			// 'is_plugin_active()' is available only later
-			'_isAcfPro'                       => class_exists( 'acf_pro' ),
-			'_isAcf'                          => class_exists( 'acf' ) && false === defined( 'ACF_VIEWS_INNER_ACF' ),
-			'_isWoo'                          => class_exists( 'WooCommerce' ),
-			'_isMetaBox'                      => class_exists( 'RW_Meta_Box' ),
-			'_isPods'                         => class_exists( 'Pods' ),
+			'_isAcfPro'                      => class_exists( 'acf_pro' ),
+			'_isAcf'                         => class_exists( 'acf' ) && false === defined( 'ACF_VIEWS_INNER_ACF' ),
+			'_isWoo'                         => class_exists( 'WooCommerce' ),
+			'_isMetaBox'                     => class_exists( 'RW_Meta_Box' ),
+			'_isPods'                        => class_exists( 'Pods' ),
 			// check only for Views, as Views and Cards use the same setting.
-			'_isFsStorageActive'              => $this->views_data_storage->get_file_system()->is_active(),
-			'_gitRepositoriesCount'           => count( $this->settings->get_git_repositories() ),
-			'_language'                       => get_bloginfo( 'language' ),
-			'_phpErrors'                      => $error_logs,
-			'_isEnhancedCompatibleModeActive' => $this->settings->is_enhanced_compatible_mode_active(),
+			'_isFsStorageActive'             => $this->views_data_storage->get_file_system()->is_active(),
+			'_gitRepositoriesCount'          => count( $this->settings->get_git_repositories() ),
+			'_language'                      => get_bloginfo( 'language' ),
+			'_phpErrors'                     => $error_logs,
+			'_isCptAdminOptimizationEnabled' => $this->settings->is_cpt_admin_optimization_enabled(),
 		);
-
-		// send the environment data, so we can debug the issue.
-		if ( true === $this->settings->is_enhanced_compatible_mode_active() ) {
-		    // @phpcs:ignore
-		    $args['_debugDump'] = print_r( $this->get_environment_data(), true );
-		}
 
 		return $args;
 	}

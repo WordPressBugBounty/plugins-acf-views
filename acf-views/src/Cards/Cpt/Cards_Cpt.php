@@ -29,6 +29,9 @@ class Cards_Cpt extends Cpt {
 	}
 
 	public function add_cpt(): void {
+		// translators: %1$s - link opening tag, %2$s - link closing tag.
+		$not_found_label = __( 'No Cards yet. %1$s Add New Card %2$s', 'acf-views' );
+
 		$labels = array(
 			'name'               => __( 'Cards', 'acf-views' ),
 			'singular_name'      => __( 'Card', 'acf-views' ),
@@ -42,7 +45,7 @@ class Cards_Cpt extends Cpt {
 			'edit_item'          => __( 'Edit Card', 'acf-views' ),
 			'update_item'        => __( 'Update Card', 'acf-views' ),
 			'search_items'       => __( 'Search Card', 'acf-views' ),
-			'not_found'          => __( 'Not Found', 'acf-views' ),
+			'not_found'          => $this->inject_add_new_item_link( $not_found_label ),
 			'not_found_in_trash' => __( 'Not Found In Trash', 'acf-views' ),
 		);
 

@@ -29,7 +29,7 @@ class Settings_Data extends Group {
 	const FIELD_CLASSES_GENERATION                 = 'classes_generation';
 	const FIELD_SASS_TEMPLATE                      = 'sass_template';
 	const FIELD_TS_TEMPLATE                        = 'ts_template';
-	const FIELD_IS_ENHANCED_COMPATIBLE_MODE_ACTIVE = 'is_enhanced_compatible_mode_active';
+	const FIELD_IS_CPT_ADMIN_OPTIMIZATION_ENABLED  = 'is_cpt_admin_optimization_enabled';
 
 	/**
 	 * @a-type tab
@@ -46,6 +46,7 @@ class Settings_Data extends Group {
 	 * @instructions Enable to store View and Card data inside the theme folder (instead of the database). <br> This allows you to edit files using your favourite editor (IDE), and do version control with auto sync. <a target='_blank' href='https://docs.acfviews.com/templates/file-system-storage'>Read more</a>
 	 */
 	public bool $is_file_system_storage;
+
 	/**
 	 * @label Live Reload mode: interval (in seconds)
 	 * @instructions Controls how often the refresh requests are sent when on-page Live Reload Mode is enabled. A smaller number means faster updates, but it also increases server load.
@@ -57,11 +58,15 @@ class Settings_Data extends Group {
 	 */
 	public int $live_reload_inactive_delay_seconds;
 	/**
+	 * @label Optimize View and Card admin screen performance
+	 * @instructions This setting improves loading speed by disabling third-party scripts on View and Card admin screens. <br> Note: While it noticeably reduces loading time for plugin-heavy installations, with specific themes it also may cause layout issues (on View and Card screens).
+	 */
+	public bool $is_cpt_admin_optimization_enabled;
+	/**
 	 * @label Disable automatic reports
 	 * @instructions Automatic error and usage reports to developers, enabling faster issue resolution and plugin improvement. <br> The reports do not include any private or sensitive information. <br> Note: In the Pro edition, the license key/domain pair is always sent, regardless of this setting.
 	 */
 	public bool $is_automatic_reports_disabled;
-
 	/**
 	 * @a-type tab
 	 * @label Defaults
@@ -130,11 +135,6 @@ class Settings_Data extends Group {
 	 * @label Debugging
 	 */
 	public bool $debugging_tab;
-	/**
-	 * @label Enhanced compatible mode
-	 * @instructions Enable when you're stuck at the View or Card loading screen. <br> Reason: Advanced Views, by default, reduces unused scripts to speed up the editor loading, and this may cause issues in some rare cases.
-	 */
-	public bool $is_enhanced_compatible_mode_active;
 	/**
 	 * @a-type textarea
 	 * @rows 16

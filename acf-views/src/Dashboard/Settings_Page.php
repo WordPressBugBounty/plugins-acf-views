@@ -345,8 +345,8 @@ class Settings_Page extends Action implements Hooks_Interface {
 					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_CLASSES_GENERATION ):
 						$value = $this->settings->get_classes_generation();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_ENHANCED_COMPATIBLE_MODE_ACTIVE ):
-						$value = $this->settings->is_enhanced_compatible_mode_active();
+					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_CPT_ADMIN_OPTIMIZATION_ENABLED ):
+						$value = $this->settings->is_cpt_admin_optimization_enabled();
 						break;
 					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_SASS_TEMPLATE ):
 						$value = $this->settings->get_sass_template();
@@ -388,7 +388,7 @@ class Settings_Page extends Action implements Hooks_Interface {
 		$this->settings->set_template_engine( $this->settings_data->template_engine );
 		$this->settings->set_web_components_type( $this->settings_data->web_components_type );
 		$this->settings->set_classes_generation( $this->settings_data->classes_generation );
-		$this->settings->set_is_enhanced_compatible_mode_active( $this->settings_data->is_enhanced_compatible_mode_active );
+		$this->settings->set_is_cpt_admin_optimization_enabled( $this->settings_data->is_cpt_admin_optimization_enabled );
 		$this->settings->set_sass_template( $this->settings_data->sass_template );
 		$this->settings->set_ts_template( $this->settings_data->ts_template );
 

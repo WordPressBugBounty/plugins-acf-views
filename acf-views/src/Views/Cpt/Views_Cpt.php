@@ -16,10 +16,13 @@ class Views_Cpt extends Cpt {
 	const NAME = 'acf_views';
 
 	public function add_cpt(): void {
+		// translators: %1$s - link opening tag, %2$s - link closing tag.
+		$not_found_label = __( 'No Views yet. %1$s Add New View %2$s', 'acf-views' );
+
 		$labels = array(
 			'name'               => __( 'Views', 'acf-views' ),
 			'singular_name'      => __( 'View', 'acf-views' ),
-			'menu_name'          => __( 'Advanced Views Framework', 'acf-views' ),
+			'menu_name'          => __( 'Advanced Views', 'acf-views' ),
 			'parent_item_colon'  => __( 'Parent View', 'acf-views' ),
 			'all_ite__(ms'       => __( 'Views', 'acf-views' ),
 			'view_item'          => __( 'Browse View', 'acf-views' ),
@@ -29,7 +32,7 @@ class Views_Cpt extends Cpt {
 			'edit_item'          => __( 'Edit View', 'acf-views' ),
 			'update_item'        => __( 'Update View', 'acf-views' ),
 			'search_items'       => __( 'Search View', 'acf-views' ),
-			'not_found'          => __( 'Not Found', 'acf-views' ),
+			'not_found'          => $this->inject_add_new_item_link( $not_found_label ),
 			'not_found_in_trash' => __( 'Not Found In Trash', 'acf-views' ),
 		);
 

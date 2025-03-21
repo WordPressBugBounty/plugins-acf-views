@@ -17,7 +17,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
             'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\' => 39,
             'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Mbstring\\' => 60,
             'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Ctype\\' => 57,
-            'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\' => 48,
             'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\' => 56,
             'Org\\Wplake\\Advanced_Views\\' => 26,
         ),
@@ -35,10 +34,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Ctype\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
-        ),
-        'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/container/src',
         ),
         'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\' => 
         array (
@@ -350,9 +345,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\Interfaces\\TableStorageInterface' => __DIR__ . '/..' . '/lightsource/acf-groups/src/Interfaces/TableStorageInterface.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\Loader' => __DIR__ . '/..' . '/lightsource/acf-groups/src/Loader.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\TableStorage' => __DIR__ . '/..' . '/lightsource/acf-groups/src/TableStorage.php',
-        'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php',
-        'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php',
-        'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\NotFoundExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/NotFoundExceptionInterface.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Ctype\\Ctype' => __DIR__ . '/..' . '/symfony/polyfill-ctype/Ctype.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\Cache\\CacheInterface' => __DIR__ . '/..' . '/twig/twig/src/Cache/CacheInterface.php',

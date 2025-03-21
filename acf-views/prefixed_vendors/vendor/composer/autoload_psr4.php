@@ -9,7 +9,6 @@ return array(
     'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\' => array($vendorDir . '/twig/twig/src'),
     'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
-    'Org\\Wplake\\Advanced_Views\\Vendors\\Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'Org\\Wplake\\Advanced_Views\\Vendors\\LightSource\\AcfGroups\\' => array($vendorDir . '/lightsource/acf-groups/src'),
     'Org\\Wplake\\Advanced_Views\\' => array($baseDir . '/../src'),
 );
