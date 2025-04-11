@@ -2,9 +2,9 @@
 Contributors: wplakeorg
 Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 3.7.14
+Stable tag: 3.7.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,8 +14,7 @@ Effortlessly display WordPress posts, custom fields, and WooCommerce data.
 
 Advanced Views is a powerful, flexible tool that lets you **display posts, custom fields, and content from ACF, MetaBox, Pods, WooCommerce, and WordPress itself**.
 
-Whether you're building a custom layout, creating dynamic templates, or designing advanced content displays,
-this plugin simplifies the process - without relying on bulky page builders.
+Whether you're building a custom layout, creating dynamic templates, or designing advanced content displays, this plugin simplifies the process - without relying on bulky page builders.
 
 ==Why Choose Advanced Views?==
 
@@ -126,6 +125,12 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
 == Changelog ==
+
+= 3.7.15 (2025-04-11) =
+- Fix: shortcode not rendered in Elementor with block-based theme
+- Enhancement: [Translations loading](https://wordpress.org/support/topic/function-_load_textdomain_just_in_time-was-called-incorrectly-113/)
+- Enhancement: Code editor improvements
+- Maintenance: compatibility with upcoming WP 6.8
 
 = 3.7.14 (2025-03-21) =
 - Improved compatibility with non-block themes

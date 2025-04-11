@@ -2078,11 +2078,11 @@ msgstr "Se espera incorrectamente que el campo \"%1$s\" sea un arreglo. Línea %
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
 msgstr "Se espera incorrectamente que el campo \"%1$s\" sea una cadena. Línea %2$d"
 
-#: src/Views/View_Shortcode.php:221
+#: src/Views/View_Shortcode.php:216
 msgid "view-id attribute is missing or wrong"
 msgstr "falta el atributo de view-id o es incorrecto"
 
-#: src/Views/View_Shortcode.php:310
+#: src/Views/View_Shortcode.php:315
 msgid "object-id argument contains the wrong value"
 msgstr "el argumento de object-id contiene un valor incorrecto"
 
@@ -2290,7 +2290,7 @@ msgstr "Controla la configuración del componente web para nuevas vistas y tarje
 msgid "Controls classes generation in the Default Template for new Views and Cards."
 msgstr "Controla la generación de clases en la plantilla predeterminada para nuevas vistas y tarjetas."
 
-#: src/Views/View_Shortcode.php:435
+#: src/Views/View_Shortcode.php:440
 msgid "View id is wrong"
 msgstr "La identificación de la vista es incorrecta"
 
@@ -2373,10 +2373,6 @@ msgstr "Para fines de depuración. Aquí puedes ver la consulta que se ejecutar�
 msgid "Add a class name without a dot (e.g. 'class-name') or multiple classes with single space as a delimiter (e.g. 'class-name1 class-name2'). These classes are added to the wrapping HTML element. <a target='_blank' href='https://www.w3schools.com/cssref/sel_class.asp'>Learn more about CSS Classes</a>."
 msgstr "Agrega un nombre de clase sin punto (por ejemplo, 'nombre-clase') o múltiples clases separadas por un espacio. Estas clases se agregan al elemento HTML envolvente. <a target='_blank' href='https://www.w3schools.com/cssref/sel_class.asp'>Más información sobre Clases CSS</a>."
 
-#: src/Groups/translations.php:78
-msgid "Define your CSS style rules. <br> This will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this card. <br><br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace). <br><br> Don't style the View fields here, each View has its own CSS field for this goal. <br><br> Magic shortcuts are available (and will use the BEM Unique Name if defined) : <br><br> '#card' will be replaced with '.acf-card--id--X' (or '.bem-name'). <br> '#this__' will be replaced with '.acf-card__' (or '.bem-name__'). <br><br> We recommend using #card { #this__items { //... }, #this__heading { //... } } format, which is possible thanks to the <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>built-in CSS nesting</a>. <br><br> Alternatively, you can use '#card__', will be replaced with '.acf-card--id--X .acf-card__' (or '.bem-name .bem-name__')."
-msgstr "Define tus reglas de estilo CSS. <br> Esto se agregará dentro de las etiquetas &lt;style&gt;&lt;/style&gt; SOLAMENTE a las páginas que tengan esta tarjeta. <br><br> Presiona Ctrl (Cmd) + Alt + L para formatear el código. Presiona Ctrl + F para buscar (o reemplazar). <br><br> No apliques estilos a los campos de Vista aquí; cada Vista tiene su propio campo de CSS para este propósito. <br><br> Hay disponibles atajos mágicos (y usarán el Nombre BEM Único si está definido): <br><br> '#card' se reemplazará con '.acf-card--id--X' (o '.bem-name'). <br> '#this__' se reemplazará con '.acf-card__' (o '.bem-name__'). <br><br> Recomendamos usar el formato #card { #this__items { //... }, #this__heading { //... } }, que es posible gracias al <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>anidamiento CSS integrado</a>. <br><br> Alternativamente, puedes usar '#card__', que se reemplazará con '.acf-card--id--X .acf-card__' (o '.bem-name .bem-name__')."
-
 #: src/Groups/translations.php:80
 msgid "Select the slider library to enable. <br> Customize the slider after saving, by editing the JS Code in the CSS & JS tab."
 msgstr "Selecciona la biblioteca de sliders para habilitarla. <br> Personaliza el slider después de guardar, editando el código JS en la pestaña de CSS y JS."
@@ -2436,10 +2432,6 @@ msgstr "Asigna campos a tu Vista. <br> Consejo: coloca el ratón sobre la column
 #: src/Groups/translations.php:546
 msgid "Add a class name without a dot (e.g. “class-name”) or multiple classes with single space as a delimiter (e.g. “class-name1 class-name2”). <br> These classes are added to the wrapping HTML element. <a target='_blank' href='https://www.w3schools.com/cssref/sel_class.asp'>Learn more about CSS Classes</a>."
 msgstr "Agrega un nombre de clase sin punto (por ejemplo, “nombre-clase”) o múltiples clases separadas por un espacio (por ejemplo, “nombre-clase1 nombre-clase2”). <br> Estas clases se añaden al elemento HTML contenedor. <a target='_blank' href='https://www.w3schools.com/cssref/sel_class.asp'>Aprende más sobre Clases CSS</a>."
-
-#: src/Groups/translations.php:550
-msgid "Define your CSS style rules. <br> Rules defined here will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this View. <br><br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace). <br><br> Magic shortcuts are available (and will use the BEM Unique Name if defined) : <br><br> '#view' will be replaced with '.acf-view--id--X' (or '.bem-name'). <br> '#this__' will be replaced with '.acf-view__' (or '.bem-name__'). <br><br> We recommend using #view { #this__first-field { //... }, #this__second-field { //... } } format, which is possible thanks to the <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>built-in CSS nesting</a>. <br><br> Alternatively, you can use '#view__', which will be replaced with '.acf-view--id--X .acf-view__' (or '.bem-name .bem-name__')."
-msgstr "Define tus reglas de estilo CSS. <br> Las reglas definidas aquí se añadirán dentro de las etiquetas &lt;style&gt;&lt;/style&gt; SOLAMENTE a las páginas que tienen esta Vista. <br><br> Presiona Ctrl (Cmd) + Alt + L para formatear el código. Presiona Ctrl + F para buscar (o reemplazar). <br><br> Hay accesos directos especiales disponibles (y utilizarán el Nombre BEM Único si está definido): <br><br> '#view' se reemplazará con '.acf-view--id--X' (o '.nombre-bem'). <br> '#this__' se reemplazará con '.acf-view__' (o '.nombre-bem__'). <br><br> Recomendamos usar el formato #view { #this__primer-campo { //... }, #this__segundo-campo { //... } } , posible gracias al <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>anidamiento CSS integrado</a>. <br><br> Alternativamente, puedes usar '#view__', que se reemplazará con '.acf-view--id--X .acf-view__' (o '.nombre-bem .nombre-bem__')."
 
 #: src/Groups/translations.php:553
 msgid "If a block vendor is selected then a separate Gutenberg block for this View will be available. <a target='_blank' href='https://docs.acfviews.com/display-content/custom-gutenberg-blocks-pro'>Read more</a>."
@@ -2722,4 +2714,12 @@ msgstr ""
 #. translators: %1$s - link opening tag, %2$s - link closing tag.
 #: src/Views/Cpt/Views_Cpt.php:20
 msgid "No Views yet. %1$s Add New View %2$s"
+msgstr ""
+
+#: src/Groups/translations.php:78
+msgid "Define your CSS style rules. <br> This will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this card. <br><br> Press Ctrl (Cmd) + Alt + L to format the code; Ctrl + F to search/replace; Ctrl + Space for autocomplete. <br><br> Don't style the View fields here, each View has its own CSS field for this goal. <br><br> Magic shortcuts are available (and will use the BEM Unique Name if defined) : <br><br> '#card' will be replaced with '.acf-card--id--X' (or '.bem-name'). <br> '#this__' will be replaced with '.acf-card__' (or '.bem-name__'). <br><br> We recommend using #card { #this__items { //... }, #this__heading { //... } } format, which is possible thanks to the <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>built-in CSS nesting</a>. <br><br> Alternatively, you can use '#card__', will be replaced with '.acf-card--id--X .acf-card__' (or '.bem-name .bem-name__')."
+msgstr ""
+
+#: src/Groups/translations.php:550
+msgid "Define your CSS style rules. <br> Rules defined here will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this View. <br><br> Press Ctrl (Cmd) + Alt + L to format the code; Ctrl + F to search/replace; Ctrl + Space for autocomplete. <br><br> Magic shortcuts are available (and will use the BEM Unique Name if defined) : <br><br> '#view' will be replaced with '.acf-view--id--X' (or '.bem-name'). <br> '#this__' will be replaced with '.acf-view__' (or '.bem-name__'). <br><br> We recommend using #view { #this__first-field { //... }, #this__second-field { //... } } format, which is possible thanks to the <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>built-in CSS nesting</a>. <br><br> Alternatively, you can use '#view__', which will be replaced with '.acf-view--id--X .acf-view__' (or '.bem-name .bem-name__')."
 msgstr ""

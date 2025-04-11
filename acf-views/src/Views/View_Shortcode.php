@@ -36,6 +36,7 @@ class View_Shortcode extends Shortcode {
 	 */
 	private array $displaying_views;
 	private int $query_loop_post_id;
+	private bool $is_gutenberg_query_loop_in_use;
 
 	public function __construct(
 		Settings $settings,
@@ -49,7 +50,8 @@ class View_Shortcode extends Shortcode {
 		$this->views_data_storage = $views_data_storage;
 		$this->view_factory       = $view_factory;
 
-		$this->displaying_views = array();
+		$this->displaying_views               = array();
+		$this->is_gutenberg_query_loop_in_use = false;
 		// don't use '0' as the default, because it can be 0 in the 'render_callback' hook.
 		$this->query_loop_post_id = - 1;
 	}
@@ -62,6 +64,11 @@ class View_Shortcode extends Shortcode {
 		return View_Data::UNIQUE_ID_PREFIX;
 	}
 
+	protected function is_default_gutenberg_query_loop(): bool {
+		return $this->is_gutenberg_query_loop_in_use &&
+				-1 === $this->query_loop_post_id;
+	}
+
 	/**
 	 * Block theme: skip execution for the Gutenberg common call, as query-loop may be used, and the post id won't be available yet
 	 * Exceptions:
@@ -70,19 +77,7 @@ class View_Shortcode extends Shortcode {
 	 *
 	 * @param array<string,mixed> $attrs
 	 */
-	protected function maybe_skip_shortcode( string $object_id, array $attrs ): bool {
-		$is_mount_point = isset( $attrs['mount-point'] );
-
-		// we shouldn't skip shortcode if it's inner (View's shortcode in another View), otherwise it won't be rendered.
-		$is_inner_shortcode = count( $this->displaying_views ) > 0;
-
-		if ( false === wp_is_block_theme() ||
-			- 1 !== $this->query_loop_post_id ||
-			true === $is_inner_shortcode ||
-			'' !== $object_id ||
-			true === $is_mount_point ) {
-			return false;
-		}
+	protected function print_shortcode( array $attrs ): bool {
 
 		printf( '[%s', esc_html( self::NAME ) );
 
@@ -119,7 +114,7 @@ class View_Shortcode extends Shortcode {
 			0;
 	}
 
-	protected function is_within_gutenberg_query_loop(): bool {
+	protected function is_gutenberg_loop_post_id_set(): bool {
 		return false === in_array( $this->query_loop_post_id, array( - 1, 0 ), true );
 	}
 
@@ -166,7 +161,7 @@ class View_Shortcode extends Shortcode {
 
 		// b. from the Gutenberg query loop.
 
-		if ( true === $this->is_within_gutenberg_query_loop() ) {
+		if ( true === $this->is_gutenberg_loop_post_id_set() ) {
 			$data_post_id = 0 !== $data_post_id ?
 				$data_post_id :
 				$this->query_loop_post_id;
@@ -222,8 +217,18 @@ class View_Shortcode extends Shortcode {
 			);
 		}
 
-		if ( true === $this->maybe_skip_shortcode( $object_id, $attrs ) ) {
-			return;
+		if ( $this->is_default_gutenberg_query_loop() ) {
+			$is_inner_shortcode = count( $this->displaying_views ) > 0;
+			$is_mount_point     = isset( $attrs['mount-point'] );
+
+			// we shouldn't skip shortcode if it's inner (View's shortcode in another View),
+			// otherwise it won't be rendered.
+			if ( ! $is_inner_shortcode &&
+				! $is_mount_point &&
+				'' === $object_id ) {
+				$this->print_shortcode( $attrs );
+				return;
+			}
 		}
 
 		if ( ! $this->is_shortcode_available_for_user( wp_get_current_user()->roles, $attrs ) ) {
@@ -290,7 +295,7 @@ class View_Shortcode extends Shortcode {
 		// and it doesn't happen inside the Gutenberg query loop.
 		$object_id = true === is_tax() &&
 					'' === $object_id &&
-					false === $this->is_within_gutenberg_query_loop() ?
+					false === $this->is_gutenberg_loop_post_id_set() ?
 			'term' :
 			$object_id;
 
@@ -444,6 +449,17 @@ class View_Shortcode extends Shortcode {
 		exit;
 	}
 
+	/**
+	 * @param array<string,mixed> $block
+	 */
+	public function sniff_for_query_loop_block( string $block_content, array $block ): string {
+		if ( 'core/query' === $block['blockName'] ) {
+			$this->is_gutenberg_query_loop_in_use = true;
+		}
+
+		return $block_content;
+	}
+
 	public function set_hooks( Current_Screen $current_screen ): void {
 		parent::set_hooks( $current_screen );
 
@@ -453,5 +469,7 @@ class View_Shortcode extends Shortcode {
 			add_action( 'wp_ajax_nopriv_advanced_views', array( $this, 'get_ajax_response' ) );
 			add_action( 'wp_ajax_advanced_views', array( $this, 'get_ajax_response' ) );
 		}
+
+		add_filter( 'render_block', array( $this, 'sniff_for_query_loop_block' ), 10, 2 );
 	}
 }
