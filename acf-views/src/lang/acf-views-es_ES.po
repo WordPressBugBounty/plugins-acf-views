@@ -15,8 +15,8 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: acf-views.php
-#: src/Plugin.php:206
-#: src/Plugin.php:332
+#: src/Plugin.php:218
+#: src/Plugin.php:344
 msgid "Advanced Views Lite"
 msgstr "Advanced Views Lite"
 
@@ -68,7 +68,7 @@ msgstr "Vista Previa de la Consulta"
 msgid "Custom data"
 msgstr "Datos Personalizados"
 
-#: src/Cards/Card_Shortcode.php:72
+#: src/Shortcode/Card_Shortcode.php:73
 msgid "card-id attribute is missing or wrong"
 msgstr "Falta el atributo card-id o es incorrecto"
 
@@ -1778,7 +1778,7 @@ msgstr "Copiar al portapapeles"
 
 #: src/Parents/Cpt/Table/Fs_Only_Tab.php:80
 #: src/Parents/Cpt/Table/Pre_Built_Tab.php:99
-#: src/Plugin.php:188
+#: src/Plugin.php:200
 msgid "Read more"
 msgstr "Leer más"
 
@@ -1847,7 +1847,7 @@ msgid "Bulk validation - Used to validate the Custom Template field of all exist
 msgstr "Validación masiva - Se utiliza para validar el campo de Plantilla Personalizada de todos los elementos existentes y muestra los elementos que han fallado la validación."
 
 #: src/Parents/Cpt/Table/Bulk_Validation_Tab.php:125
-#: src/Parents/Shortcode.php:211
+#: src/Shortcode/Shortcode.php:214
 msgid "Edit"
 msgstr "Editar"
 
@@ -1914,51 +1914,51 @@ msgstr "Verifica y arregla los permisos de archivos para trabajar con Vistas y T
 msgid "Note: Do not disable the FS storage feature before fixing it, otherwise your data will be lost."
 msgstr "Nota: No desactives la función de almacenamiento FS antes de arreglarla, de lo contrario, tus datos se perderán."
 
-#: src/Parents/Shortcode.php:116
+#: src/Shortcode/Shortcode.php:119
 msgid "Shortcode error:"
 msgstr "Error de shortcode:"
 
-#: src/Plugin.php:110
+#: src/Plugin.php:111
 msgid "Upgrade to Pro"
 msgstr "Actualizar a Pro"
 
-#: src/Plugin.php:111
+#: src/Plugin.php:112
 msgid "Activate your license"
 msgstr "Activar tu licencia"
 
-#: src/Plugin.php:119
+#: src/Plugin.php:120
 msgid "to unlock."
 msgstr "para desbloquear."
 
-#: src/Plugin.php:129
+#: src/Plugin.php:130
 msgid "ACF Pro"
 msgstr "ACF Pro"
 
-#: src/Plugin.php:130
+#: src/Plugin.php:131
 msgid "version is required for this feature"
 msgstr "se requiere versión para esta característica"
 
-#: src/Plugin.php:139
+#: src/Plugin.php:140
 msgid "MB Blocks"
 msgstr "Bloques MB"
 
-#: src/Plugin.php:140
+#: src/Plugin.php:141
 msgid "extension is required for this feature"
 msgstr "se requiere extensión para esta característica"
 
-#: src/Plugin.php:173
+#: src/Plugin.php:185
 msgid "Compatibility issue detected! \"Advanced Views\" plugin requires \"PHPDoc\" comments in code."
 msgstr "¡Problema de compatibilidad detectado! El plugin \"Advanced Views\" requiere comentarios \"PHPDoc\" en el código."
 
-#: src/Plugin.php:177
+#: src/Plugin.php:189
 msgid "Please change the \"opcache.save_comments\" option in your php.ini file to the default value of \"1\" on your hosting."
 msgstr "Por favor, cambia la opción \"opcache.save_comments\" en tu archivo php.ini al valor predeterminado de \"1\" en tu hosting."
 
-#: src/Plugin.php:327
+#: src/Plugin.php:339
 msgid "'Advanced Views Lite' and 'Advanced Views Pro' should not be active at the same time. We've automatically deactivated"
 msgstr "'Advanced Views Lite' y 'Advanced Views Pro' no deben estar activos al mismo tiempo. Hemos desactivado automáticamente"
 
-#: src/Plugin.php:333
+#: src/Plugin.php:345
 msgid "Advanced Views Pro"
 msgstr "Advanced Views Pro"
 
@@ -2078,11 +2078,11 @@ msgstr "Se espera incorrectamente que el campo \"%1$s\" sea un arreglo. Línea %
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
 msgstr "Se espera incorrectamente que el campo \"%1$s\" sea una cadena. Línea %2$d"
 
-#: src/Views/View_Shortcode.php:216
+#: src/Shortcode/View_Shortcode.php:94
 msgid "view-id attribute is missing or wrong"
 msgstr "falta el atributo de view-id o es incorrecto"
 
-#: src/Views/View_Shortcode.php:315
+#: src/Shortcode/View_Shortcode.php:179
 msgid "object-id argument contains the wrong value"
 msgstr "el argumento de object-id contiene un valor incorrecto"
 
@@ -2253,7 +2253,7 @@ msgstr "Encontré una alternativa"
 msgid "Delete all the plugin data (cannot be undone)"
 msgstr "Eliminar todos los datos del plugin (no se puede deshacer)"
 
-#: src/Cards/Card_Shortcode.php:124
+#: src/Shortcode/Card_Shortcode.php:125
 msgid "Card id is wrong"
 msgstr "La identificación de la tarjeta es incorrecta"
 
@@ -2290,7 +2290,7 @@ msgstr "Controla la configuración del componente web para nuevas vistas y tarje
 msgid "Controls classes generation in the Default Template for new Views and Cards."
 msgstr "Controla la generación de clases en la plantilla predeterminada para nuevas vistas y tarjetas."
 
-#: src/Views/View_Shortcode.php:440
+#: src/Shortcode/View_Shortcode.php:254
 msgid "View id is wrong"
 msgstr "La identificación de la vista es incorrecta"
 

@@ -2,22 +2,22 @@
 # This file is distributed under the same license as the Advanced Views Lite plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Views Lite 3.7.15\n"
+"Project-Id-Version: Advanced Views Lite 3.7.16\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/acf-views\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-04-11T12:21:02+00:00\n"
+"POT-Creation-Date: 2025-04-18T14:03:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: acf-views\n"
 
 #. Plugin Name of the plugin
 #: acf-views.php
-#: src/Plugin.php:206
-#: src/Plugin.php:332
+#: src/Plugin.php:218
+#: src/Plugin.php:344
 msgid "Advanced Views Lite"
 msgstr ""
 
@@ -138,14 +138,6 @@ msgstr ""
 
 #: src/Cards/Card_Markup.php:253
 msgid "Manually edit these rules by disabling Layout Rules, otherwise these rules are updated every time you press the Update button"
-msgstr ""
-
-#: src/Cards/Card_Shortcode.php:72
-msgid "card-id attribute is missing or wrong"
-msgstr ""
-
-#: src/Cards/Card_Shortcode.php:124
-msgid "Card id is wrong"
 msgstr ""
 
 #. translators: %1$s - link opening tag, %2$s - link closing tag.
@@ -2423,7 +2415,7 @@ msgid "Bulk validation - Used to validate the Custom Template field of all exist
 msgstr ""
 
 #: src/Parents/Cpt/Table/Bulk_Validation_Tab.php:125
-#: src/Parents/Shortcode.php:211
+#: src/Shortcode/Shortcode.php:214
 msgid "Edit"
 msgstr ""
 
@@ -2490,7 +2482,7 @@ msgstr ""
 
 #: src/Parents/Cpt/Table/Fs_Only_Tab.php:80
 #: src/Parents/Cpt/Table/Pre_Built_Tab.php:99
-#: src/Plugin.php:188
+#: src/Plugin.php:200
 msgid "Read more"
 msgstr ""
 
@@ -2532,52 +2524,72 @@ msgstr ""
 msgid "%s template engine is not available (PHP >= 8.2.0 is required)."
 msgstr ""
 
-#: src/Parents/Shortcode.php:116
-msgid "Shortcode error:"
-msgstr ""
-
-#: src/Plugin.php:110
+#: src/Plugin.php:111
 msgid "Upgrade to Pro"
 msgstr ""
 
-#: src/Plugin.php:111
+#: src/Plugin.php:112
 msgid "Activate your license"
 msgstr ""
 
-#: src/Plugin.php:119
+#: src/Plugin.php:120
 msgid "to unlock."
 msgstr ""
 
-#: src/Plugin.php:129
+#: src/Plugin.php:130
 msgid "ACF Pro"
 msgstr ""
 
-#: src/Plugin.php:130
+#: src/Plugin.php:131
 msgid "version is required for this feature"
 msgstr ""
 
-#: src/Plugin.php:139
+#: src/Plugin.php:140
 msgid "MB Blocks"
 msgstr ""
 
-#: src/Plugin.php:140
+#: src/Plugin.php:141
 msgid "extension is required for this feature"
 msgstr ""
 
-#: src/Plugin.php:173
+#: src/Plugin.php:185
 msgid "Compatibility issue detected! \"Advanced Views\" plugin requires \"PHPDoc\" comments in code."
 msgstr ""
 
-#: src/Plugin.php:177
+#: src/Plugin.php:189
 msgid "Please change the \"opcache.save_comments\" option in your php.ini file to the default value of \"1\" on your hosting."
 msgstr ""
 
-#: src/Plugin.php:327
+#: src/Plugin.php:339
 msgid "'Advanced Views Lite' and 'Advanced Views Pro' should not be active at the same time. We've automatically deactivated"
 msgstr ""
 
-#: src/Plugin.php:333
+#: src/Plugin.php:345
 msgid "Advanced Views Pro"
+msgstr ""
+
+#: src/Shortcode/Card_Shortcode.php:73
+msgid "card-id attribute is missing or wrong"
+msgstr ""
+
+#: src/Shortcode/Card_Shortcode.php:125
+msgid "Card id is wrong"
+msgstr ""
+
+#: src/Shortcode/Shortcode.php:119
+msgid "Shortcode error:"
+msgstr ""
+
+#: src/Shortcode/View_Shortcode.php:94
+msgid "view-id attribute is missing or wrong"
+msgstr ""
+
+#: src/Shortcode/View_Shortcode.php:179
+msgid "object-id argument contains the wrong value"
+msgstr ""
+
+#: src/Shortcode/View_Shortcode.php:254
+msgid "View id is wrong"
 msgstr ""
 
 #: src/Template_Engines/Template_Engines.php:144
@@ -2711,16 +2723,4 @@ msgstr ""
 #. translators: 1: field name, 2: line number.
 #: src/Views/View.php:384
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
-msgstr ""
-
-#: src/Views/View_Shortcode.php:216
-msgid "view-id attribute is missing or wrong"
-msgstr ""
-
-#: src/Views/View_Shortcode.php:315
-msgid "object-id argument contains the wrong value"
-msgstr ""
-
-#: src/Views/View_Shortcode.php:440
-msgid "View id is wrong"
 msgstr ""

@@ -9,11 +9,13 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '51724525bc2d2aa189b9ba531a1b4e26' => __DIR__ . '/..' . '/wplake/typed/src/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'O' => 
         array (
+            'Org\\Wplake\\Advanced_Views\\Vendors\\WPLake\\Typed\\' => 47,
             'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\' => 39,
             'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Mbstring\\' => 60,
             'Org\\Wplake\\Advanced_Views\\Vendors\\Symfony\\Polyfill\\Ctype\\' => 57,
@@ -23,6 +25,10 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
     );
 
     public static $prefixDirsPsr4 = array (
+        'Org\\Wplake\\Advanced_Views\\Vendors\\WPLake\\Typed\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wplake/typed/src',
+        ),
         'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
@@ -63,7 +69,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Cards\\Card' => __DIR__ . '/../..' . '/../src/Cards/Card.php',
         'Org\\Wplake\\Advanced_Views\\Cards\\Card_Factory' => __DIR__ . '/../..' . '/../src/Cards/Card_Factory.php',
         'Org\\Wplake\\Advanced_Views\\Cards\\Card_Markup' => __DIR__ . '/../..' . '/../src/Cards/Card_Markup.php',
-        'Org\\Wplake\\Advanced_Views\\Cards\\Card_Shortcode' => __DIR__ . '/../..' . '/../src/Cards/Card_Shortcode.php',
         'Org\\Wplake\\Advanced_Views\\Cards\\Cpt\\Cards_Cpt' => __DIR__ . '/../..' . '/../src/Cards/Cpt/Cards_Cpt.php',
         'Org\\Wplake\\Advanced_Views\\Cards\\Cpt\\Cards_Cpt_Meta_Boxes' => __DIR__ . '/../..' . '/../src/Cards/Cpt/Cards_Cpt_Meta_Boxes.php',
         'Org\\Wplake\\Advanced_Views\\Cards\\Cpt\\Cards_Cpt_Save_Actions' => __DIR__ . '/../..' . '/../src/Cards/Cpt/Cards_Cpt_Save_Actions.php',
@@ -250,7 +255,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Parents\\Instance_Factory' => __DIR__ . '/../..' . '/../src/Parents/Instance_Factory.php',
         'Org\\Wplake\\Advanced_Views\\Parents\\Safe_Array_Arguments' => __DIR__ . '/../..' . '/../src/Parents/Safe_Array_Arguments.php',
         'Org\\Wplake\\Advanced_Views\\Parents\\Safe_Query_Arguments' => __DIR__ . '/../..' . '/../src/Parents/Safe_Query_Arguments.php',
-        'Org\\Wplake\\Advanced_Views\\Parents\\Shortcode' => __DIR__ . '/../..' . '/../src/Parents/Shortcode.php',
         'Org\\Wplake\\Advanced_Views\\Plugin' => __DIR__ . '/../..' . '/../src/Plugin.php',
         'Org\\Wplake\\Advanced_Views\\Pro\\Assets\\Admin_Assets' => __DIR__ . '/../..' . '/../src/Pro/Assets/Admin_Assets.php',
         'Org\\Wplake\\Advanced_Views\\Pro\\Assets\\Front_Assets' => __DIR__ . '/../..' . '/../src/Pro/Assets/Front_Assets.php',
@@ -321,6 +325,10 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Pro\\Views\\View' => __DIR__ . '/../..' . '/../src/Pro/Views/View.php',
         'Org\\Wplake\\Advanced_Views\\Pro\\Views\\View_Factory' => __DIR__ . '/../..' . '/../src/Pro/Views/View_Factory.php',
         'Org\\Wplake\\Advanced_Views\\Settings' => __DIR__ . '/../..' . '/../src/Settings.php',
+        'Org\\Wplake\\Advanced_Views\\Shortcode\\Card_Shortcode' => __DIR__ . '/../..' . '/../src/Shortcode/Card_Shortcode.php',
+        'Org\\Wplake\\Advanced_Views\\Shortcode\\Shortcode' => __DIR__ . '/../..' . '/../src/Shortcode/Shortcode.php',
+        'Org\\Wplake\\Advanced_Views\\Shortcode\\Shortcode_Block' => __DIR__ . '/../..' . '/../src/Shortcode/Shortcode_Block.php',
+        'Org\\Wplake\\Advanced_Views\\Shortcode\\View_Shortcode' => __DIR__ . '/../..' . '/../src/Shortcode/View_Shortcode.php',
         'Org\\Wplake\\Advanced_Views\\Template_Engines\\Blade' => __DIR__ . '/../..' . '/../src/Template_Engines/Blade.php',
         'Org\\Wplake\\Advanced_Views\\Template_Engines\\Template_Engine' => __DIR__ . '/../..' . '/../src/Template_Engines/Template_Engine.php',
         'Org\\Wplake\\Advanced_Views\\Template_Engines\\Template_Engine_Interface' => __DIR__ . '/../..' . '/../src/Template_Engines/Template_Engine_Interface.php',
@@ -523,6 +531,7 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\TwigTest' => __DIR__ . '/..' . '/twig/twig/src/TwigTest.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\Util\\DeprecationCollector' => __DIR__ . '/..' . '/twig/twig/src/Util/DeprecationCollector.php',
         'Org\\Wplake\\Advanced_Views\\Vendors\\Twig\\Util\\TemplateDirIterator' => __DIR__ . '/..' . '/twig/twig/src/Util/TemplateDirIterator.php',
+        'Org\\Wplake\\Advanced_Views\\Vendors\\WPLake\\Typed\\Typed' => __DIR__ . '/..' . '/wplake/typed/src/Typed.php',
         'Org\\Wplake\\Advanced_Views\\Views\\Cpt\\Table\\Views_Bulk_Validation_Tab' => __DIR__ . '/../..' . '/../src/Views/Cpt/Table/Views_Bulk_Validation_Tab.php',
         'Org\\Wplake\\Advanced_Views\\Views\\Cpt\\Table\\Views_Cpt_Table' => __DIR__ . '/../..' . '/../src/Views/Cpt/Table/Views_Cpt_Table.php',
         'Org\\Wplake\\Advanced_Views\\Views\\Cpt\\Table\\Views_Pre_Built_Tab' => __DIR__ . '/../..' . '/../src/Views/Cpt/Table/Views_Pre_Built_Tab.php',
@@ -540,7 +549,6 @@ class ComposerStaticInit_org_wplake_advanced_views_prefixed_vendors
         'Org\\Wplake\\Advanced_Views\\Views\\View' => __DIR__ . '/../..' . '/../src/Views/View.php',
         'Org\\Wplake\\Advanced_Views\\Views\\View_Factory' => __DIR__ . '/../..' . '/../src/Views/View_Factory.php',
         'Org\\Wplake\\Advanced_Views\\Views\\View_Markup' => __DIR__ . '/../..' . '/../src/Views/View_Markup.php',
-        'Org\\Wplake\\Advanced_Views\\Views\\View_Shortcode' => __DIR__ . '/../..' . '/../src/Views/View_Shortcode.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

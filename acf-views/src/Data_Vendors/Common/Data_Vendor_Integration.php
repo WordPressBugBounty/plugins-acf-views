@@ -17,7 +17,7 @@ use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
 use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
 use Org\Wplake\Advanced_Views\Views\Source;
 use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Views\View_Shortcode;
+use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;

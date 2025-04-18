@@ -5,7 +5,7 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Dashboard;
 
 use Exception;
-use Org\Wplake\Advanced_Views\Cards\Card_Shortcode;
+use Org\Wplake\Advanced_Views\Shortcode\Card_Shortcode;
 use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
 use Org\Wplake\Advanced_Views\Current_Screen;
 use Org\Wplake\Advanced_Views\Groups\View_Data;
@@ -14,7 +14,7 @@ use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
 use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
 use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\View_Shortcode;
+use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
 use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;

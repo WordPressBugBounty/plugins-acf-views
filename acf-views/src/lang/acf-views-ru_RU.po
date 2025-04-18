@@ -15,8 +15,8 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: acf-views.php
-#: src/Plugin.php:206
-#: src/Plugin.php:332
+#: src/Plugin.php:218
+#: src/Plugin.php:344
 msgid "Advanced Views Lite"
 msgstr "Advanced Views Lite"
 
@@ -68,7 +68,7 @@ msgstr "Предпросмотр запроса"
 msgid "Custom data"
 msgstr "Пользовательские данные"
 
-#: src/Cards/Card_Shortcode.php:72
+#: src/Shortcode/Card_Shortcode.php:73
 msgid "card-id attribute is missing or wrong"
 msgstr "атрибут card-id отсутствует или неверен"
 
@@ -1762,7 +1762,7 @@ msgstr "Копировать в буфер обмена"
 
 #: src/Parents/Cpt/Table/Fs_Only_Tab.php:80
 #: src/Parents/Cpt/Table/Pre_Built_Tab.php:99
-#: src/Plugin.php:188
+#: src/Plugin.php:200
 msgid "Read more"
 msgstr "Читать далее"
 
@@ -1831,7 +1831,7 @@ msgid "Bulk validation - Used to validate the Custom Template field of all exist
 msgstr "Массовая проверка - используется для проверки поля Пользовательского шаблона всех существующих элементов и отображения элементов, которые не прошли проверку."
 
 #: src/Parents/Cpt/Table/Bulk_Validation_Tab.php:125
-#: src/Parents/Shortcode.php:211
+#: src/Shortcode/Shortcode.php:214
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -1898,51 +1898,51 @@ msgstr "Проверьте и исправьте права доступа к ф
 msgid "Note: Do not disable the FS storage feature before fixing it, otherwise your data will be lost."
 msgstr "Примечание: Не отключайте функцию хранения FS до ее исправления, иначе ваши данные будут потеряны."
 
-#: src/Parents/Shortcode.php:116
+#: src/Shortcode/Shortcode.php:119
 msgid "Shortcode error:"
 msgstr "Ошибка шорткода:"
 
-#: src/Plugin.php:110
+#: src/Plugin.php:111
 msgid "Upgrade to Pro"
 msgstr "Обновить до Pro"
 
-#: src/Plugin.php:111
+#: src/Plugin.php:112
 msgid "Activate your license"
 msgstr "Активировать вашу лицензию"
 
-#: src/Plugin.php:119
+#: src/Plugin.php:120
 msgid "to unlock."
 msgstr "чтобы разблокировать."
 
-#: src/Plugin.php:129
+#: src/Plugin.php:130
 msgid "ACF Pro"
 msgstr "ACF Pro"
 
-#: src/Plugin.php:130
+#: src/Plugin.php:131
 msgid "version is required for this feature"
 msgstr "версия требуется для этой функции"
 
-#: src/Plugin.php:139
+#: src/Plugin.php:140
 msgid "MB Blocks"
 msgstr "MB Blocks"
 
-#: src/Plugin.php:140
+#: src/Plugin.php:141
 msgid "extension is required for this feature"
 msgstr "расширение требуется для этой функции"
 
-#: src/Plugin.php:173
+#: src/Plugin.php:185
 msgid "Compatibility issue detected! \"Advanced Views\" plugin requires \"PHPDoc\" comments in code."
 msgstr "Обнаружена проблема совместимости! Плагин \"Advanced Views\" требует комментарии \"PHPDoc\" в коде."
 
-#: src/Plugin.php:177
+#: src/Plugin.php:189
 msgid "Please change the \"opcache.save_comments\" option in your php.ini file to the default value of \"1\" on your hosting."
 msgstr "Пожалуйста, измените опцию \"opcache.save_comments\" в вашем файле php.ini на значение по умолчанию \"1\" на вашем хостинге."
 
-#: src/Plugin.php:327
+#: src/Plugin.php:339
 msgid "'Advanced Views Lite' and 'Advanced Views Pro' should not be active at the same time. We've automatically deactivated"
 msgstr "'Advanced Views Lite' и 'Advanced Views Pro' не должны быть активны одновременно. Мы автоматически деактивировали"
 
-#: src/Plugin.php:333
+#: src/Plugin.php:345
 msgid "Advanced Views Pro"
 msgstr "Advanced Views Pro"
 
@@ -2062,11 +2062,11 @@ msgstr "Поле \"%1$s\" неверно ожидается быть масси�
 msgid "The \"%1$s\" field is incorrectly expected to be a string. Line %2$d"
 msgstr "Поле \"%1$s\" неверно ожидается быть строкой. Строка %2$d"
 
-#: src/Views/View_Shortcode.php:216
+#: src/Shortcode/View_Shortcode.php:94
 msgid "view-id attribute is missing or wrong"
 msgstr "атрибут view-id отсутствует или неверен"
 
-#: src/Views/View_Shortcode.php:315
+#: src/Shortcode/View_Shortcode.php:179
 msgid "object-id argument contains the wrong value"
 msgstr "object-id аргумент содержит неверное значение"
 
@@ -2253,7 +2253,7 @@ msgstr "Я нашел альтернативу"
 msgid "Delete all the plugin data (cannot be undone)"
 msgstr "Удалить все данные плагина (нельзя отменить)"
 
-#: src/Cards/Card_Shortcode.php:124
+#: src/Shortcode/Card_Shortcode.php:125
 msgid "Card id is wrong"
 msgstr "Неверный идентификатор карты"
 
@@ -2290,7 +2290,7 @@ msgstr "Управляет настройками веб-компонентов 
 msgid "Controls classes generation in the Default Template for new Views and Cards."
 msgstr "Управляет генерацией классов в шаблоне по умолчанию для новых представлений и карт."
 
-#: src/Views/View_Shortcode.php:440
+#: src/Shortcode/View_Shortcode.php:254
 msgid "View id is wrong"
 msgstr "Неверный идентификатор представления"
 

@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Views Lite
  * Plugin URI: https://wplake.org/advanced-views-lite/
  * Description: Effortlessly display WordPress posts, custom fields, and WooCommerce data.
- * Version: 3.7.15
+ * Version: 3.7.16
  * Author: WPLake
  * Author URI: https://wplake.org/advanced-views-lite/
  * Text Domain: acf-views
@@ -20,7 +20,6 @@ use Org\Wplake\Advanced_Views\Assets\Live_Reloader_Component;
 use Org\Wplake\Advanced_Views\Bridge\Advanced_Views;
 use Org\Wplake\Advanced_Views\Cards\{Card_Factory,
 	Card_Markup,
-	Card_Shortcode,
 	Cpt\Cards_Cpt,
 	Cpt\Cards_Cpt_Meta_Boxes,
 	Cpt\Cards_Cpt_Save_Actions,
@@ -62,6 +61,9 @@ use Org\Wplake\Advanced_Views\Parents\Cpt\Table\Fs_Only_Tab;
 use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Db_Management;
 use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\File_System;
 use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Fs_Fields;
+use Org\Wplake\Advanced_Views\Shortcode\Card_Shortcode;
+use Org\Wplake\Advanced_Views\Shortcode\Shortcode_Block;
+use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
 use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
 use Org\Wplake\Advanced_Views\Vendors\LightSource\AcfGroups\Creator;
 use Org\Wplake\Advanced_Views\Vendors\LightSource\AcfGroups\Loader as GroupsLoader;
@@ -73,9 +75,9 @@ use Org\Wplake\Advanced_Views\Views\{Cpt\Table\Views_Bulk_Validation_Tab,
 	Cpt\Views_Cpt_Save_Actions,
 	Data_Storage\Views_Data_Storage,
 	Fields\Field_Markup,
+	View,
 	View_Factory,
-	View_Markup,
-	View_Shortcode};
+	View_Markup};
 
 defined( 'ABSPATH' ) || exit;
 
@@ -280,13 +282,15 @@ $acf_views = new class() {
 
 		$views_cpt_assets_reducer            = new Cpt_Assets_Reducer( $this->settings, Views_Cpt::NAME );
 		$views_cpt_gutenberg_editor_settings = new Cpt_Gutenberg_Editor_Settings( Views_Cpt::NAME );
+		$shortcode_block                     = new Shortcode_Block( array( View_Shortcode::NAME, View_Shortcode::OLD_NAME ) );
 
 		$this->view_shortcode = new View_Shortcode(
 			$this->settings,
 			$this->views_data_storage,
 			$this->front_assets,
 			$this->live_reloader_component,
-			$this->view_factory
+			$this->view_factory,
+			$shortcode_block
 		);
 
 		$view_cpt_meta_boxes->set_hooks( $current_screen );
@@ -299,6 +303,7 @@ $acf_views = new class() {
 		$views_cpt_assets_reducer->set_hooks( $current_screen );
 		$this->views_cpt_save_actions->set_hooks( $current_screen );
 		$this->view_shortcode->set_hooks( $current_screen );
+		$shortcode_block->set_hooks( $current_screen );
 	}
 
 	private function cards( Current_Screen $current_screen ): void {
