@@ -118,11 +118,13 @@ final class Shortcode_Block implements Hooks_Interface {
 	protected function get_shortcode_block_arguments( array $defaults ): array {
 		$default_context = arr( $defaults, 'usesContext' );
 
-		return array(
-			...$defaults,
-			'usesContext'     => array( ...$default_context, 'postId' ),
-			'render_callback' => fn( array $attributes, string $content, WP_Block $block )=>
-			$this->render_shortcode_block( $content, $block->context ),
+		return array_merge(
+			$defaults,
+			array(
+				'usesContext'     => array_merge( $default_context, array( 'postId' ) ),
+				'render_callback' => fn( array $attributes, string $content, WP_Block $block )=>
+				$this->render_shortcode_block( $content, $block->context ),
+			)
 		);
 	}
 
@@ -144,7 +146,7 @@ final class Shortcode_Block implements Hooks_Interface {
 		);
 
 		// shortcode can be both wrapped and not wrapped in the brackets.
-		$supported_shortcodes = array( ...$this->supported_shortcode_names, ...$supported_shortcode_prefixes );
+		$supported_shortcodes = array_merge( $this->supported_shortcode_names, $supported_shortcode_prefixes );
 
 		$matched_shortcodes = array_filter(
 			$supported_shortcodes,

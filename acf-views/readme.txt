@@ -4,7 +4,7 @@ Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 3.7.16
+Stable tag: 3.7.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -125,6 +125,9 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
 == Changelog ==
+
+= 3.7.17 (2025-04-19) =
+- Fix: Shortcode_Block - rewritten PHP 7.4 incompatible code
 
 = 3.7.16 (2025-04-18) =
 - Fix: shortcode in Block theme template with Query Loop
