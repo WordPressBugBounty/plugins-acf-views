@@ -6,7 +6,7 @@ namespace Org\Wplake\Advanced_Views;
 
 use DateTime;
 use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,7 +14,6 @@ class Settings {
 	const QUERY_ARG_PAGE_DEV_MODE = 'avf_page-dev-mode';
 
 	use Safe_Array_Arguments;
-	use Safe_Query_Arguments;
 
 	private Options $options;
 
@@ -338,7 +337,7 @@ class Settings {
 
 	public function is_page_dev_mode(): bool {
 		if ( null === $this->is_page_dev_mode ) {
-			$this->is_page_dev_mode = '' !== $this->get_query_string_arg_for_non_action( self::QUERY_ARG_PAGE_DEV_MODE );
+			$this->is_page_dev_mode = '' !== Query_Arguments::get_string_for_non_action( self::QUERY_ARG_PAGE_DEV_MODE );
 		}
 
 		return $this->is_page_dev_mode;

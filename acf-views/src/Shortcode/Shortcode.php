@@ -116,7 +116,7 @@ abstract class Shortcode implements Hooks_Interface {
 
 		printf(
 			"<p style='color:red;'>%s %s %s</p>",
-			esc_html( __( 'Shortcode error:', 'acf-views' ) ),
+			esc_html( __( 'AVF shortcode render error:', 'acf-views' ) ),
 			esc_html( $error ),
 			esc_html( sprintf( '(%s %s)', $shortcode, implode( ' ', $attrs ) ) )
 		);

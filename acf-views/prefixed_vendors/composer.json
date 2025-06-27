@@ -18,6 +18,7 @@
   },
   "autoload": {
     "psr-4": {
+      "Org\\Wplake\\Advanced_Views\\Pro\\": "../pro",
       "Org\\Wplake\\Advanced_Views\\": "../src"
     }
   },

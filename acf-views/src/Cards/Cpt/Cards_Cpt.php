@@ -6,13 +6,12 @@ namespace Org\Wplake\Advanced_Views\Cards\Cpt;
 
 use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
 use Org\Wplake\Advanced_Views\Parents\Cpt\Cpt;
-use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
 use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
 
 defined( 'ABSPATH' ) || exit;
 
 class Cards_Cpt extends Cpt {
-	use Safe_Query_Arguments;
 
 	const NAME = 'acf_cards';
 
@@ -55,7 +54,7 @@ class Cards_Cpt extends Cpt {
 		);
 		$description .= '<br>';
 		$description .= __(
-			'<a target="_blank" href="https://docs.acfviews.com/getting-started/introduction/key-aspects#id-2.-integration-approaches">Attach the Card</a> to the target place, for example using <a target="_blank" href="https://docs.acfviews.com/shortcode-attributes/card-shortcode">the shortcode</a>, to display queried items with their fields.',
+			'<a target="_blank" href="https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches">Attach the Card</a> to the target place, for example using <a target="_blank" href="https://docs.advanced-views.com/shortcode-attributes/card-shortcode">the shortcode</a>, to display queried items with their fields.',
 			'acf-views'
 		) .
 						'<br>'
@@ -117,7 +116,7 @@ class Cards_Cpt extends Cpt {
 			date_i18n( 'M j, Y @ G:i', strtotime( $post->post_date ) )
 		);
 
-		$revision_id = $this->get_query_int_arg_for_non_action( 'revision' );
+		$revision_id = Query_Arguments::get_int_for_non_action( 'revision' );
 
 		if ( 0 !== $revision_id ) {
 			$restored_message  = __( 'Card restored to revision from', 'acf-views' );

@@ -4,7 +4,7 @@ Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 3.7.17
+Stable tag: 3.7.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,13 +19,13 @@ Whether you're building a custom layout, creating dynamic templates, or designin
 ==Why Choose Advanced Views?==
 
 ✅ **Display Posts & Custom Fields Anywhere** – Show posts, Custom Post Types (CPT), WooCommerce products, and metadata effortlessly.
-✅ **Supports ACF, MetaBox, and Pods** – Retrieve and display data from [multiple field plugins](https://docs.acfviews.com/getting-started/supported-data-vendors) with ease.
+✅ **Supports ACF, MetaBox, and Pods** – Retrieve and display data from [multiple field plugins](https://docs.advanced-views.com/getting-started/supported-data-vendors) with ease.
 ✅ **Solution for Everyone** – Perfect for site owners, developers, and designers who want full control over content display.
-✅ **Smart, Lightweight, and Developer-Friendly** – Uses [Twig & Blade templates](https://docs.acfviews.com/templates/template-engines) with automatic escaping, and [Just-in-Time assets strategy](https://docs.acfviews.com/templates/css-and-js#id-1.1-just-in-time-assets) for smooth performance.
+✅ **Smart, Lightweight, and Developer-Friendly** – Uses [Twig & Blade templates](https://docs.advanced-views.com/templates/template-engines) with automatic escaping, and [Just-in-Time assets strategy](https://docs.advanced-views.com/templates/css-and-js#id-1.1-just-in-time-assets) for smooth performance.
 
 ==🎨 One Plugin – Multiple Content Sources==
 
-Advanced Views [seamlessly integrates](https://docs.acfviews.com/getting-started/supported-data-vendors) with:
+Advanced Views [seamlessly integrates](https://docs.advanced-views.com/getting-started/supported-data-vendors) with:
 
 🔹 WordPress Posts & Pages
 🔹 Custom Post Types (CPTs)
@@ -41,34 +41,40 @@ High-quality results without the time-consuming steps.
 
 **🔄 Smart Content Queries & Display**
 
-🔹 Easily [display posts, custom fields](https://docs.acfviews.com/getting-started/introduction/creating-your-first-view), and taxonomies with powerful [WP_Query enhancements](https://docs.acfviews.com/getting-started/introduction/creating-your-first-card)
+🔹 Easily [display posts, custom fields](https://docs.advanced-views.com/getting-started/introduction/creating-your-first-view), and taxonomies with powerful [WP_Query enhancements](https://docs.advanced-views.com/getting-started/introduction/creating-your-first-card)
 🔹 Filter, sort, and customize results with Twig or Blade templates.
 
 **📌 Pre-Built Components for Quick Setup**
 
-🔹 Use [ready-made components](https://docs.acfviews.com/templates/pre-built-components) for fast and easy content structuring.
+🔹 Use [ready-made components](https://docs.advanced-views.com/templates/pre-built-components) for fast and easy content structuring.
 🔹 Includes meta fields, responsive CSS rules, and reusable templates.
 
 **⚡ Streamlined Development Workflow**
 
-🔹 **[Built-in Data Binding](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.1-built-in-data-binding) & [Template Generation](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-3.2-automated-template-generation)** – No need to manually convert field data.
-🔹 **[File System Storage option](https://docs.acfviews.com/templates/file-system-storage) & [Live Reload feature](https://docs.acfviews.com/templates/live-reload)** – Works seamlessly with IDEs, Git, Sass, and TypeScript.
+🔹 **[Built-in Data Binding](https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-3.1-built-in-data-binding) & [Template Generation](https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-3.2-automated-template-generation)** – No need to manually convert field data.
+🔹 **[File System Storage option](https://docs.advanced-views.com/templates/file-system-storage) & [Live Reload feature](https://docs.advanced-views.com/templates/live-reload)** – Works seamlessly with IDEs, Git, Sass, and TypeScript.
 
 **🛠️ Simplified WordPress Queries**
 
-🔹 Master WP_Query with [intuitive wrappers](https://docs.acfviews.com/getting-started/introduction/key-aspects#id-4.-card-component) that make querying posts and fields easier.
+🔹 Master WP_Query with [intuitive wrappers](https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-4.-card-component) that make querying posts and fields easier.
 🔹 Bulk template validation to keep everything running smoothly.
 
 **📚 Extensive Documentation & Friendly Support**
 
-🔹 [Step-by-step guides](https://docs.acfviews.com/) to help you get started.
+🔹 [Step-by-step guides](https://docs.advanced-views.com/) to help you get started.
 🔹 [Community forum](https://wordpress.org/support/plugin/acf-views/) for free support, plus [Pro version support](https://wplake.org/acf-views-support/) for premium users.
 
-==🔗 Pro Version for Even More Features!==
+==🔓 Unlock More with Advanced Views Pro==
 
-Unlock advanced features, more integrations, and premium support with [Advanced Views Pro](https://wplake.org/advanced-views-pro/).
+[Advanced Views Pro](https://advanced-views.com/pro/) takes your content displays to the next level with powerful features designed for flexibility, interactivity, and efficiency:
 
-📢 Get started today and take full control over how you display posts, CPTs, and custom fields!
+✅ **Repeater, Group & Flexible Fields Support** - Display complex nested fields — including repeaters within repeaters and flexible content layouts.
+✅ **Meta & Taxonomy Filters** - Powerful backend filters based on custom fields and taxonomies.
+✅ **AJAX Pagination** - Improve user experience by loading new content pages seamlessly without full page reloads.
+✅ **Sliders & Gallery Field Integration** - Assign slider and gallery fields directly in your Views, enabling slick interactive carousels and image galleries out of the box.
+✅ **Custom Data Integration** - Inject additional PHP variables into templates for more tailored content outputs beyond the standard fields.
+✅ **Custom Gutenberg Blocks** - Turn any View into a reusable Gutenberg block, making it simple to insert dynamic content inside the block editor.
+✅ **Reusable Component Libraries** - Build and manage a library of reusable components to maintain design consistency and speed up site building.
 
 == Screenshots ==
 
@@ -91,7 +97,7 @@ From your WordPress dashboard:
 3. Click "Install Now" and "Activate" for the Advanced Views plugin
 4. Visit the new menu item "Advanced Views Framework" and click "Add New" to create your first View
 
-See our official [plugin documentation](https://docs.acfviews.com/getting-started/introduction) for more.
+See our official [plugin documentation](https://docs.advanced-views.com/getting-started/introduction) for more.
 
 **Installation for Advanced Views: Pro edition**
 
@@ -116,7 +122,7 @@ Advanced Views supports all the field sources provided by your chosen meta vendo
 
 For example, if you're using ACF (Advanced Custom Fields), you can access fields from option pages, user profiles, terms, comments, and menus.
 
-You can refer to the [documentation](https://docs.acfviews.com/getting-started/supported-data-vendors) for the specific list of supported field sources for your meta vendor.
+You can refer to the [documentation](https://docs.advanced-views.com/getting-started/supported-data-vendors) for the specific list of supported field sources for your meta vendor.
 
 = Can I display fields inside the Gutenberg Query Loop? =
 
@@ -125,6 +131,13 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
 == Changelog ==
+
+= 3.7.18 (2025-06-27) =
+- Enhancement: Woo - Stock quantity and featured fields support
+- Enhancement: View - labels for default field groups
+- Enhancement: Shortcode - View/Card not found error message
+- Enhancement: Plugins list - AVF action links
+- Enhancement: Tools - migrated Debugging tab (from the Settings)
 
 = 3.7.17 (2025-04-19) =
 - Fix: Shortcode_Block - rewritten PHP 7.4 incompatible code
@@ -190,12 +203,12 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 = 3.7.1 (2024-07-22) =
 - View: Post - added attachment link and attachment video fields
 - WebComponent: Improved the shadow DOM type option
-- Introduced the [Live Reload feature](https://docs.acfviews.com/templates/live-reload)
+- Introduced the [Live Reload feature](https://docs.advanced-views.com/templates/live-reload)
 - Libraries CSS improvement: turned to inline styles
 - Minor enhancements
 
 = 3.7.0 (2024-07-09) =
-- Added [Blade template engine](https://docs.acfviews.com/templates/template-engines/blade) support (as a Twig alternative)
+- Added [Blade template engine](https://docs.advanced-views.com/templates/template-engines/blade) support (as a Twig alternative)
 - WP Taxonomy Terms field: fixed a visible label on the empty value
 
 = 3.6.2 (2024-07-04) =
@@ -210,7 +223,7 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 - Card: added a new option to load posts from the page context (e.g. archive/author/category)
 - ACF vendor: added the Icon field type support
 - Markup generator: enhancement to use semantic div alternatives (section/p tags where it's relevant)
-- Tailwind: [improved support](https://docs.acfviews.com/templates/file-system-storage#tailwind-usage)
+- Tailwind: [improved support](https://docs.advanced-views.com/templates/file-system-storage#tailwind-usage)
 - UX improvements
 
 = 3.5.3 (2024-05-31): =
@@ -221,8 +234,8 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 - Updated translations
 
 = 3.5.0 (2024-05-21): =
-- Added [WP Interactivity support](https://docs.acfviews.com/templates/wordpress-interactivity-api)
-- Added [Tailwind support](https://docs.acfviews.com/templates/file-system-storage#tailwind-usage)
+- Added [WP Interactivity support](https://docs.advanced-views.com/templates/wordpress-interactivity-api)
+- Added [Tailwind support](https://docs.advanced-views.com/templates/file-system-storage#tailwind-usage)
 - Added support for Taxonomies without string titles
 - Added Defaults tab in the settings
 - Added a setting to control the class generation in the default template
@@ -254,7 +267,7 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 - Minor improvements
 
 = 3.4.0 (2024-03-04): =
-- Added the [pre-build components](https://docs.acfviews.com/templates/pre-built-components)
+- Added the [pre-build components](https://docs.advanced-views.com/templates/pre-built-components)
 - Internal improvements
 - Improved WP playground compatibility
 - Readme update
@@ -273,7 +286,7 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 = 3.3.0 (2024-02-22): =
 - Updated codebase to the WordPress coding standards
 - Introduced logging (the Debugging tab in the Settings)
-- View & Card: added the 'shadow-dom' option to the [web component setting](https://docs.acfviews.com/templates/css-and-js#web-components-for-js-code)
+- View & Card: added the 'shadow-dom' option to the [web component setting](https://docs.advanced-views.com/templates/css-and-js#web-components-for-js-code)
 
 = 3.2.3 (2024-02-10): =
 - Internal improvements
@@ -312,6 +325,6 @@ Please make sure you've added it via the built-in Shortcode block, as it won't w
 
 = 3.0.0 (2024-01-17): =
 - Removed 'ACF' dependency
-- Added [file system option](https://docs.acfviews.com/templates/file-system-storage) for template storage
+- Added [file system option](https://docs.advanced-views.com/templates/file-system-storage) for template storage
 - Added MetaBox fields support
-- Added a [native way to render](https://docs.acfviews.com/shortcode-attributes/common-arguments#id-2.-using-advanced-views-class) Views and Cards in PHP
+- Added a [native way to render](https://docs.advanced-views.com/shortcode-attributes/common-arguments#id-2.-using-advanced-views-class) Views and Cards in PHP

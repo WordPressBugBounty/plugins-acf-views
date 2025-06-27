@@ -33,7 +33,7 @@ abstract class Cpt implements Hooks_Interface {
 
 	protected function get_storage_label(): string {
 		$description  = __(
-			'<a target="_blank" href="https://docs.acfviews.com/templates/file-system-storage">File system storage</a> is',
+			'<a target="_blank" href="https://docs.advanced-views.com/templates/file-system-storage">File system storage</a> is',
 			'acf-views'
 		);
 		$description .= ' ';

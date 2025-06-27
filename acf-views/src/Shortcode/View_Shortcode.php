@@ -9,7 +9,7 @@ use Org\Wplake\Advanced_Views\Assets\Live_Reloader_Component;
 use Org\Wplake\Advanced_Views\Current_Screen;
 use Org\Wplake\Advanced_Views\Groups\View_Data;
 use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
 use Org\Wplake\Advanced_Views\Settings;
 use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
 use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
@@ -26,7 +26,6 @@ final class View_Shortcode extends Shortcode {
 	const REST_ROUTE_NAME = 'view';
 
 	use Safe_Array_Arguments;
-	use Safe_Query_Arguments;
 
 	private View_Factory $view_factory;
 	private Views_Data_Storage $views_data_storage;
@@ -91,8 +90,10 @@ final class View_Shortcode extends Shortcode {
 			$this->print_error_markup(
 				self::NAME,
 				$attrs,
-				__( 'view-id attribute is missing or wrong', 'acf-views' )
+				__( 'View is missing', 'acf-views' )
 			);
+
+			return;
 		}
 
 		if ( ! $this->is_shortcode_available_for_user( wp_get_current_user()->roles, $attrs ) ) {
@@ -239,7 +240,7 @@ final class View_Shortcode extends Shortcode {
 	}
 
 	public function get_ajax_response(): void {
-		$view_id = $this->get_query_string_arg_for_non_action( '_viewId', 'post' );
+		$view_id = Query_Arguments::get_string_for_non_action( '_viewId', 'post' );
 
 		if ( '' === $view_id ) {
 			// it may be a Card request.

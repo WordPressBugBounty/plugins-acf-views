@@ -11,7 +11,7 @@ use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
 use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
 use Org\Wplake\Advanced_Views\Current_Screen;
 use Org\Wplake\Advanced_Views\Groups\Card_Data;
-use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
 use Org\Wplake\Advanced_Views\Shortcode\Shortcode;
 use Org\Wplake\Advanced_Views\Settings;
 
@@ -21,8 +21,6 @@ final class Card_Shortcode extends Shortcode {
 	const NAME            = 'avf_card';
 	const OLD_NAME        = 'acf_cards';
 	const REST_ROUTE_NAME = 'card';
-
-	use Safe_Query_Arguments;
 
 	protected Card_Factory $card_factory;
 	protected Cards_Data_Storage $cards_data_storage;
@@ -70,8 +68,10 @@ final class Card_Shortcode extends Shortcode {
 			$this->print_error_markup(
 				self::NAME,
 				$attrs,
-				__( 'card-id attribute is missing or wrong', 'acf-views' )
+				__( 'Card is missing', 'acf-views' )
 			);
+
+			return;
 		}
 
 		$classes = $attrs['class'] ?? '';
@@ -110,7 +110,7 @@ final class Card_Shortcode extends Shortcode {
 	}
 
 	public function get_ajax_response(): void {
-		$card_id = $this->get_query_string_arg_for_non_action( '_cardId', 'post' );
+		$card_id = Query_Arguments::get_string_for_non_action( '_cardId', 'post' );
 
 		if ( '' === $card_id ) {
 			// it may be a Card request.

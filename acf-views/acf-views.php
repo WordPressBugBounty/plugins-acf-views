@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Views Lite
  * Plugin URI: https://wplake.org/advanced-views-lite/
  * Description: Effortlessly display WordPress posts, custom fields, and WooCommerce data.
- * Version: 3.7.17
+ * Version: 3.7.18
  * Author: WPLake
  * Author URI: https://wplake.org/advanced-views-lite/
  * Text Domain: acf-views
@@ -32,10 +32,11 @@ use Org\Wplake\Advanced_Views\Cards\{Card_Factory,
 	Query_Builder};
 use Org\Wplake\Advanced_Views\Dashboard\Admin_Bar;
 use Org\Wplake\Advanced_Views\Dashboard\Dashboard;
-use Org\Wplake\Advanced_Views\Dashboard\Demo_Import;
+use Org\Wplake\Advanced_Views\Tools\Debug_Dump_Creator;
+use Org\Wplake\Advanced_Views\Tools\Demo_Import;
 use Org\Wplake\Advanced_Views\Dashboard\Live_Reloader;
 use Org\Wplake\Advanced_Views\Dashboard\Settings_Page;
-use Org\Wplake\Advanced_Views\Dashboard\Tools;
+use Org\Wplake\Advanced_Views\Tools\Tools;
 use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
 use Org\Wplake\Advanced_Views\Groups\{Card_Data,
 	Field_Data,
@@ -46,7 +47,6 @@ use Org\Wplake\Advanced_Views\Groups\{Card_Data,
 	Integration\Item_Data_Integration,
 	Integration\Meta_Field_Data_Integration,
 	Integration\Mount_Point_Data_Integration,
-	Integration\Settings_Data_Integration,
 	Integration\Tax_Field_Data_Integration,
 	Integration\Tools_Data_Integration,
 	Integration\View_Data_Integration,
@@ -435,10 +435,6 @@ $acf_views = new class() {
 			$this->views_data_storage,
 			$this->cards_data_storage
 		);
-		$settings_data_integration     = new Settings_Data_Integration(
-			$this->views_data_storage,
-			$this->cards_data_storage
-		);
 		$custom_acf_field_types        = new Custom_Acf_Field_Types( $this->views_data_storage );
 
 		$acf_dependency->set_hooks( $current_screen );
@@ -452,7 +448,6 @@ $acf_views = new class() {
 		$cards_mount_point_integration->set_hooks( $current_screen );
 		$tax_field_data_integration->set_hooks( $current_screen );
 		$tools_data_integration->set_hooks( $current_screen );
-		$settings_data_integration->set_hooks( $current_screen );
 		$custom_acf_field_types->set_hooks( $current_screen );
 
 		// only now, when views() are called.
@@ -488,12 +483,22 @@ $acf_views = new class() {
 			$this->cards_cpt_save_actions,
 		);
 
-		$tools                   = new Tools(
-			new Tools_Data( $this->group_creator ),
+		$tools_data         = new Tools_Data( $this->group_creator );
+		$debug_dump_creator = new Debug_Dump_Creator(
+			$tools_data,
+			$this->logger,
+			$this->views_data_storage,
+			$this->cards_data_storage
+		);
+		$tools              = new Tools(
+			$tools_data,
 			$this->cards_data_storage,
 			$this->views_data_storage,
-			$this->plugin
+			$this->plugin,
+			$this->logger,
+			$debug_dump_creator
 		);
+
 		$this->automatic_reports = new Automatic_Reports(
 			$this->logger,
 			$this->plugin,

@@ -14,12 +14,12 @@ use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
 defined( 'ABSPATH' ) || exit;
 
 class Plugin implements Hooks_Interface {
-	const DOCS_URL          = 'https://docs.acfviews.com/';
-	const PRO_VERSION_URL   = 'https://wplake.org/advanced-views-pro/';
-	const PRO_PRICING_URL   = 'https://wplake.org/advanced-views-pro/#pricing';
-	const BASIC_VERSION_URL = 'https://wplake.org/advanced-views-lite/';
+	const DOCS_URL          = 'https://docs.advanced-views.com/';
+	const PRO_VERSION_URL   = 'https://advanced-views.com/pro/';
+	const PRO_PRICING_URL   = 'https://advanced-views.com/pro/#tiers';
+	const BASIC_VERSION_URL = 'https://advanced-views.com';
 	const SURVEY_URL        = 'https://forms.gle/Wjb16B4mzgLEQvru6';
-	const CONFLICTS_URL     = 'https://docs.acfviews.com/troubleshooting/compatibility#conflicts';
+	const CONFLICTS_URL     = 'https://docs.advanced-views.com/troubleshooting/compatibility#conflicts';
 
 	private string $slug       = 'acf-views/acf-views.php';
 	private string $short_slug = 'acf-views';

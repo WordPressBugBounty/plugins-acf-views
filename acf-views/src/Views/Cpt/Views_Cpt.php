@@ -6,13 +6,11 @@ namespace Org\Wplake\Advanced_Views\Views\Cpt;
 
 use Org\Wplake\Advanced_Views\Current_Screen;
 use Org\Wplake\Advanced_Views\Parents\Cpt\Cpt;
-use Org\Wplake\Advanced_Views\Parents\Safe_Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
 
 defined( 'ABSPATH' ) || exit;
 
 class Views_Cpt extends Cpt {
-	use Safe_Query_Arguments;
-
 	const NAME = 'acf_views';
 
 	public function add_cpt(): void {
@@ -42,7 +40,7 @@ class Views_Cpt extends Cpt {
 		);
 		$description .= '<br>' .
 						__(
-							'<a target="_blank" href="https://docs.acfviews.com/getting-started/introduction/key-aspects#id-2.-integration-approaches">Attach the View</a> to the target place, for example using <a target="_blank" href="https://docs.acfviews.com/shortcode-attributes/view-shortcode">the shortcode</a>, to display field values of the post, page or CPT item.',
+							'<a target="_blank" href="https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches">Attach the View</a> to the target place, for example using <a target="_blank" href="https://docs.advanced-views.com/shortcode-attributes/view-shortcode">the shortcode</a>, to display field values of the post, page or CPT item.',
 							'acf-views'
 						);
 		$description .= '<br><br>';
@@ -94,7 +92,7 @@ class Views_Cpt extends Cpt {
 			date_i18n( 'M j, Y @ G:i', strtotime( $post->post_date ) )
 		);
 
-		$revision = $this->get_query_int_arg_for_non_action( 'revision' );
+		$revision = Query_Arguments::get_int_for_non_action( 'revision' );
 
 		if ( 0 !== $revision ) {
 			$restored_message  = __( 'View restored to revision from', 'acf-views' );
