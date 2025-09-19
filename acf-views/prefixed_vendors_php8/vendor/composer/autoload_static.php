@@ -97,10 +97,10 @@ class ComposerStaticInit_org_wplake_advanced_views_optional_vendors
         ),
         'Org\\Wplake\\Advanced_Views\\Optional_Vendors\\Illuminate\\Support\\' => 
         array (
-            0 => __DIR__ . '/..' . '/illuminate/collections',
-            1 => __DIR__ . '/..' . '/illuminate/conditionable',
-            2 => __DIR__ . '/..' . '/illuminate/macroable',
-            3 => __DIR__ . '/..' . '/illuminate/support',
+            0 => __DIR__ . '/..' . '/illuminate/support',
+            1 => __DIR__ . '/..' . '/illuminate/collections',
+            2 => __DIR__ . '/..' . '/illuminate/conditionable',
+            3 => __DIR__ . '/..' . '/illuminate/macroable',
         ),
         'Org\\Wplake\\Advanced_Views\\Optional_Vendors\\Illuminate\\Pipeline\\' => 
         array (
