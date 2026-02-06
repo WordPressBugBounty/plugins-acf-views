@@ -6,10 +6,10 @@ namespace Org\Wplake\Advanced_Views\Data_Vendors\Acf\Fields;
 
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\Link_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\List_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,13 +79,13 @@ class Page_Link_Field extends List_Field {
 		return $this->link_field->get_validation_template_variables( $variable_field_data );
 	}
 
-	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_data ): void {
-		$markup_data->set_is_with_field_wrapper(
-			$markup_data->get_field_meta()->is_multiple() ||
-			$markup_data->is_with_field_wrapper()
+	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_field_data ): void {
+		$markup_field_data->set_is_with_field_wrapper(
+			$markup_field_data->get_field_meta()->is_multiple() ||
+			$markup_field_data->is_with_field_wrapper()
 		);
 
-		$this->link_field->print_markup( $item_id, $markup_data );
+		$this->link_field->print_markup( $item_id, $markup_field_data );
 	}
 
 	/**
@@ -95,8 +95,8 @@ class Page_Link_Field extends List_Field {
 		return array_merge(
 			parent::get_conditional_fields( $field_meta ),
 			array(
-				Field_Data::FIELD_LINK_LABEL,
-				Field_Data::FIELD_IS_LINK_TARGET_BLANK,
+				Field_Settings::FIELD_LINK_LABEL,
+				Field_Settings::FIELD_IS_LINK_TARGET_BLANK,
 			)
 		);
 	}

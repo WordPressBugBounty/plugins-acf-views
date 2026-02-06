@@ -4,46 +4,49 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Pods;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Common\Data_Vendor_Integration;
+use Org\Wplake\Advanced_Views\Data_Vendors\Common\Settings_Vendor_Integration;
 use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
 
-class Pods_Integration extends Data_Vendor_Integration {
+class Pods_Integration extends Settings_Vendor_Integration {
 
 	private Pods_Data_Vendor $pods_data_vendor;
 
 	public function __construct(
-		Item_Data $item,
-		Views_Data_Storage $views_data_storage,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Data_Vendors $data_vendors,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Pods_Data_Vendor $data_vendor,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Pods_Data_Vendor $pods_data_vendor,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	) {
 		parent::__construct(
-			$item,
-			$views_data_storage,
+			$item_settings,
+			$layouts_settings_storage,
 			$data_vendors,
-			$views_cpt_save_actions,
-			$view_factory,
-			$data_vendor,
-			$view_shortcode,
-			$settings
+			$layouts_cpt_save_actions,
+			$layout_factory,
+			$pods_data_vendor,
+			$layout_shortcode,
+			$settings,
+			$plugin_cpt
 		);
 
-		$this->pods_data_vendor = $data_vendor;
+		$this->pods_data_vendor = $pods_data_vendor;
 	}
 
 	protected function get_vendor_post_type(): string {
@@ -51,9 +54,9 @@ class Pods_Integration extends Data_Vendor_Integration {
 	}
 
 	/**
-	 * @return array<int,array<string,mixed>>
+	 * @return mixed[]
 	 */
-	protected function get_group_fields( WP_Post $group ): array {
+	protected function get_group_fields( WP_Post $wp_post ): array {
 		if ( false === function_exists( 'pods_api' ) ) {
 			return array();
 		}
@@ -65,19 +68,19 @@ class Pods_Integration extends Data_Vendor_Integration {
 			return array();
 		}
 
-		$group = pods_api()->load_group(
+		$wp_post = pods_api()->load_group(
 			array(
-				'id' => $group->ID,
+				'id' => $wp_post->ID,
 			)
 		);
 
-		if ( false === is_object( $group ) ||
-			false === method_exists( $group, 'get_fields' ) ||
-			false === method_exists( $group, 'get_parent_object' ) ) {
+		if ( false === is_object( $wp_post ) ||
+			false === method_exists( $wp_post, 'get_fields' ) ||
+			false === method_exists( $wp_post, 'get_parent_object' ) ) {
 			return array();
 		}
 
-		$pod = $group->get_parent_object();
+		$pod = $wp_post->get_parent_object();
 		if ( false === is_object( $pod ) ||
 			false === method_exists( $pod, 'get_args' ) ) {
 			return array();
@@ -91,7 +94,7 @@ class Pods_Integration extends Data_Vendor_Integration {
 
 		$fields = array();
 
-		foreach ( $group->get_fields() as $field ) {
+		foreach ( $wp_post->get_fields() as $field ) {
 			if ( false === is_object( $field ) ||
 				false === method_exists( $field, 'get_args' ) ) {
 				continue;
@@ -112,13 +115,13 @@ class Pods_Integration extends Data_Vendor_Integration {
 	}
 
 	/**
-	 * @param array<string,mixed> $field
+	 * @param mixed[] $field
 	 */
-	protected function get_group_key_by_from_post( WP_Post $from_post, array $field ): string {
+	protected function get_group_key_by_from_post( WP_Post $wp_post, array $field ): string {
 		// filled in $this->getGroupFields() method.
 		$pod_type = $this->get_string_arg( '_pod_name', $field );
 
-		$group_id = $this->pods_data_vendor->get_pods_group_id( $pod_type, $from_post->post_name );
+		$group_id = $this->pods_data_vendor->get_pods_group_id( $pod_type, $wp_post->post_name );
 
 		return $this->pods_data_vendor->get_group_key( $group_id );
 	}
@@ -170,7 +173,7 @@ class Pods_Integration extends Data_Vendor_Integration {
 	}
 
 	public function add_tab_to_meta_group(): void {
-		add_filter(
+		self::add_filter(
 			'pods_view_output',
 			function ( string $output, string $view_file ): string {
 				if ( false === strpos( $view_file, 'pods/ui/admin/setup-edit.php' ) ) {
@@ -237,7 +240,7 @@ class Pods_Integration extends Data_Vendor_Integration {
 	/**
 	 * @param mixed $pod
 	 *
-	 * @return View_Data[]
+	 * @return Layout_Settings[]
 	 */
 	protected function get_related_acf_views( string $pod_name, $pod ): array {
 		if ( false === is_object( $pod ) ||
@@ -276,7 +279,7 @@ class Pods_Integration extends Data_Vendor_Integration {
 	}
 
 	public function add_column_to_list_table(): void {
-		add_filter(
+		self::add_filter(
 			'pods_ui_pre_init',
 			function ( array $options ): array {
 				$page = Query_Arguments::get_string_for_non_action( 'page' );

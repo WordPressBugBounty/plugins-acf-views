@@ -4,38 +4,38 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields;
 
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 
 defined( 'ABSPATH' ) || exit;
 
 class Select_Field extends List_Field {
 	const LOOP_ITEM_NAME = 'choice_item';
 
-	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_data ): void {
-		$twig_name = $markup_data->get_field_meta()->is_multiple() ?
+	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_field_data ): void {
+		$twig_name = $markup_field_data->get_field_meta()->is_multiple() ?
 			'choice_item' :
 			$field_id;
 
-		$markup_data->set_is_with_field_wrapper(
-			$markup_data->get_field_meta()->is_multiple() ||
-			$markup_data->is_with_field_wrapper()
+		$markup_field_data->set_is_with_field_wrapper(
+			$markup_field_data->get_field_meta()->is_multiple() ||
+			$markup_field_data->is_with_field_wrapper()
 		);
 
 		printf(
 			'<div class="%s">',
 			esc_html(
-				$this->get_field_class( 'choice', $markup_data )
+				$this->get_field_class( 'choice', $markup_field_data )
 			)
 		);
 
 		echo "\r\n";
-		$markup_data->increment_and_print_tabs();
+		$markup_field_data->increment_and_print_tabs();
 
-		$markup_data->get_template_generator()->print_array_item( $twig_name, 'title' );
+		$markup_field_data->get_template_generator()->print_array_item( $twig_name, 'title' );
 
 		echo "\r\n";
-		$markup_data->decrement_and_print_tabs();
+		$markup_field_data->decrement_and_print_tabs();
 
 		echo '</div>';
 	}

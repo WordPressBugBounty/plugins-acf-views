@@ -22,6 +22,7 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Comment\{Comment_Author_Ema
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Comment_Items\{Comment_Item_Fields, Comment_Items_List_Field};
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Menu\{Menu_Fields, Menu_Items_Field};
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Menu_Item\{Menu_Item_Fields, Menu_Item_Link_Field};
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Post\{Post_Attachment_Link,
 	Post_Attachment_Video,
 	Post_Author_Field,
@@ -48,17 +49,17 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\User\{User_Author_Link_Fiel
 	User_First_Name_Field,
 	User_Last_Name_Field,
 	User_Website_Field};
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Settings;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\Field_Meta;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Source;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Source;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -77,9 +78,9 @@ class Wp_Data_Vendor extends Data_Vendor {
 				Post_Fields::FIELD_TITLE_LINK       => false === $is_field_name_as_label ?
 					__( 'Title with link', 'acf-views' ) : 'post_title_link',
 				Post_Fields::FIELD_CONTENT          => false === $is_field_name_as_label ?
-					__( 'Content (product description)', 'acf-views' ) : 'post_content',
+					__( 'Post Content / Product Description', 'acf-views' ) : 'post_content',
 				Post_Fields::FIELD_EXCERPT          => false === $is_field_name_as_label ?
-					__( 'Excerpt (product short description)', 'acf-views' ) : 'post_excerpt',
+					__( 'Post Excerpt / Short Product Description', 'acf-views' ) : 'post_excerpt',
 				Post_Fields::FIELD_THUMBNAIL        => false === $is_field_name_as_label ?
 					__( 'Featured Image', 'acf-views' ) : 'post_featured_image',
 				Post_Fields::FIELD_THUMBNAIL_LINK   => false === $is_field_name_as_label ?
@@ -234,14 +235,15 @@ class Wp_Data_Vendor extends Data_Vendor {
 	}
 
 	public function make_integration_instance(
-		Item_Data $item_data,
-		Views_Data_Storage $views_data_storage,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Data_Vendors $data_vendors,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Repeater_Field_Data $repeater_field_data,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Repeater_Field_Settings $repeater_field_settings,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	): ?Data_Vendor_Integration_Interface {
 		return null;
 	}
@@ -325,7 +327,7 @@ class Wp_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<string,mixed> $data
+	 * @param mixed[] $data
 	 */
 	public function fill_field_meta( Field_Meta_Interface $field_meta, array $data = array() ): void {
 		if ( 0 === strpos( $field_meta->get_field_id(), Taxonomy_Term_Fields::PREFIX ) ) {
@@ -358,10 +360,10 @@ class Wp_Data_Vendor extends Data_Vendor {
 	 * @return mixed
 	 */
 	public function get_field_value(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
-		?Item_Data $item_data = null,
+		?Item_Settings $item_settings = null,
 		bool $is_formatted = false,
 		?array $local_data = null
 	) {
@@ -423,7 +425,7 @@ class Wp_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @return array<string, mixed>|null
+	 * @return mixed[]|null
 	 */
 	public function get_group_export_data( string $group_id ): ?array {
 		// the feature is not supported.
@@ -431,8 +433,8 @@ class Wp_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<int|string, mixed> $group_data
-	 * @param array<string, mixed> $meta_data
+	 * @param mixed[] $group_data
+	 * @param mixed[] $meta_data
 	 */
 	public function import_group( array $group_data, array $meta_data ): ?string {
 		// the feature is not supported.

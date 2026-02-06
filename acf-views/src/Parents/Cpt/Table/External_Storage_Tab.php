@@ -4,43 +4,43 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Parents\Cpt\Table;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
-use Org\Wplake\Advanced_Views\Groups\Card_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Logger;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Data_Storage;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
-use Org\Wplake\Advanced_Views\Upgrades;
-
 defined( 'ABSPATH' ) || exit;
+
+use Org\Wplake\Advanced_Views\Compatibility\Migration\Version_Migrator;
+use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Logger;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
+use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Settings_Storage;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
 
 abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 	const KEY_RESULT_ITEMS  = '';
 	const KEY_RESULT_GROUPS = '';
 
-	private Cpt_Data_Storage $cpt_data_storage;
+	private Cpt_Settings_Storage $cpt_settings_storage;
 	private Data_Vendors $data_vendors;
-	private Upgrades $upgrades;
+	private Version_Migrator $version_migrator;
 	private Logger $logger;
 
 	public function __construct(
 		Cpt_Table $cpt_table,
-		Cpt_Data_Storage $cpt_data_storage,
+		Cpt_Settings_Storage $cpt_settings_storage,
 		Data_Vendors $data_vendors,
-		Upgrades $upgrades,
+		Version_Migrator $version_migrator,
 		Logger $logger
 	) {
 		parent::__construct( $cpt_table );
 
-		$this->cpt_data_storage = $cpt_data_storage;
-		$this->data_vendors     = $data_vendors;
-		$this->upgrades         = $upgrades;
-		$this->logger           = $logger;
+		$this->cpt_settings_storage = $cpt_settings_storage;
+		$this->data_vendors         = $data_vendors;
+		$this->version_migrator     = $version_migrator;
+		$this->logger               = $logger;
 	}
 
-	abstract protected function get_cpt_data( string $unique_id ): Cpt_Data;
+	abstract protected function get_cpt_data( string $unique_id ): Cpt_Settings;
 
 	/**
 	 * @param array<string,string> $field_values
@@ -66,11 +66,11 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 		}
 
 		// 1. get item, maybe it's already exists (then we'll override it)
-		$cpt_data = $this->cpt_data_storage->get( $unique_id );
+		$cpt_data = $this->cpt_settings_storage->get( $unique_id );
 
-		$title = $data_json[ View_Data::getAcfFieldName( View_Data::FIELD_TITLE ) ] ?? '';
+		$title = $data_json[ Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_TITLE ) ] ?? '';
 		$title = '' === $title ?
-			( $data_json[ Card_Data::getAcfFieldName( Card_Data::FIELD_TITLE ) ] ?? '' ) :
+			( $data_json[ Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_TITLE ) ] ?? '' ) :
 			$title;
 		$title = true === is_string( $title ) ?
 			$title :
@@ -78,7 +78,7 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 		// 2. insert if missing
 		$cpt_data = false === $cpt_data->isLoaded() ?
-			$this->cpt_data_storage->create_new( 'publish', $title, null, $unique_id ) :
+			$this->cpt_settings_storage->create_new( 'publish', $title, null, $unique_id ) :
 			$cpt_data;
 
 		if ( null === $cpt_data ) {
@@ -98,24 +98,24 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 		// 4. set fs field values
 		foreach ( $field_values as $file_field => $value ) {
-			$this->cpt_data_storage->get_fs_fields()->set_fs_field( $cpt_data, $file_field, $value );
+			$this->cpt_settings_storage->get_fs_fields()->set_fs_field( $cpt_data, $file_field, $value );
 		}
 
 		// 5. perform upgrades (if items were created with the old plugin version)
 		$previous_plugin_version = $cpt_data->plugin_version;
 		// we don't need it for instances outside of Git repository.
 		$cpt_data->plugin_version = '';
-		$this->upgrades->upgrade_imported_item( $previous_plugin_version, $cpt_data );
+		$this->version_migrator->migrate_cpt_settings( $previous_plugin_version, $cpt_data );
 
 		// 6. save
-		$this->cpt_data_storage->save( $cpt_data );
+		$this->cpt_settings_storage->save( $cpt_data );
 
 		// 7. import related meta groups (if present)
 		$related_groups_import_result = $this->data_vendors->import_related_group_files( $field_values );
 
-		$cpt_import_result = new Import_Result();
-		$cpt_import_result->add_unique_id( $unique_id );
-		$cpt_import_result->merge_related_groups_import_result( $related_groups_import_result );
+		$import_result = new Import_Result();
+		$import_result->add_unique_id( $unique_id );
+		$import_result->merge_related_groups_import_result( $related_groups_import_result );
 
 		$this->logger->debug(
 			'Import CPT Data done',
@@ -124,7 +124,7 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 			)
 		);
 
-		return $cpt_import_result;
+		return $import_result;
 	}
 
 	protected function get_logger(): Logger {
@@ -147,18 +147,18 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 		// result groups argument is optional, as can be no related items.
 		$result_groups = Query_Arguments::get_string_for_non_action( static::KEY_RESULT_GROUPS );
 
-		$cpt_import_result = new Import_Result();
-		$cpt_import_result->from_query_string( $result_items, $result_groups );
+		$import_result = new Import_Result();
+		$import_result->from_query_string( $result_items, $result_groups );
 
 		$views_count = 0;
 		$cards_count = 0;
 
-		foreach ( $cpt_import_result->get_unique_ids() as $unique_id ) {
+		foreach ( $import_result->get_unique_ids() as $unique_id ) {
 			// views and cards have different storages,
 			// while in this class we have only the single one.
 			$cpt_data = $this->get_cpt_data( $unique_id );
 
-			if ( true === ( $cpt_data instanceof View_Data ) ) {
+			if ( true === ( $cpt_data instanceof Layout_Settings ) ) {
 				++$views_count;
 			} else {
 				++$cards_count;
@@ -167,7 +167,7 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 		$grouped_meta_group_links = array();
 
-		foreach ( $cpt_import_result->get_related_groups_import_result()->get_group_ids() as $vendor_name => $group_ids ) {
+		foreach ( $import_result->get_related_groups_import_result()->get_group_ids() as $vendor_name => $group_ids ) {
 			$grouped_meta_group_links[ $vendor_name ] = array();
 			foreach ( $group_ids as $group_id ) {
 				$group_link_data = $this->data_vendors->get_group_link_by_group_id( $group_id, $vendor_name );
@@ -191,7 +191,9 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 		if ( $views_count > 0 ) {
 			echo '<p>';
-			echo esc_html( (string) $views_count ) . ' ' . esc_html( _n( 'View', 'Views', $views_count, 'acf-views' ) );
+			echo esc_html( (string) $views_count ) . ' ' . esc_html(
+				_n( 'Item', 'Items', $views_count, 'acf-views' )
+			);
 			echo ' ';
 			// translators: x Views successfully imported: .
 			esc_html_e( 'successfully imported:', 'acf-views' );
@@ -201,12 +203,12 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 			$counter          = 0;
 			$views_last_index = $views_count - 1;
 
-			foreach ( $cpt_import_result->get_unique_ids() as $unique_id ) {
+			foreach ( $import_result->get_unique_ids() as $unique_id ) {
 				// views and cards have different storages,
 				// while in this class we have only the single one.
 				$cpt_data = $this->get_cpt_data( $unique_id );
 
-				if ( false === ( $cpt_data instanceof View_Data ) ) {
+				if ( false === ( $cpt_data instanceof Layout_Settings ) ) {
 					continue;
 				}
 
@@ -228,7 +230,7 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 
 		if ( $cards_count > 0 ) {
 			echo '<p>';
-			echo esc_html( (string) $cards_count ) . ' ' . esc_html( _n( 'Card', 'Cards', $cards_count, 'acf-views' ) );
+			echo esc_html( (string) $cards_count ) . ' ' . esc_html( _n( 'Item', 'Items', $cards_count, 'acf-views' ) );
 			echo ' ';
 			// translators: x Cards successfully imported: .
 			esc_html_e( 'successfully imported:', 'acf-views' );
@@ -238,12 +240,12 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 			$counter         = 0;
 			$card_last_index = $cards_count - 1;
 
-			foreach ( $cpt_import_result->get_unique_ids() as $unique_id ) {
+			foreach ( $import_result->get_unique_ids() as $unique_id ) {
 				// views and cards have different storages,
 				// while in this class we have only the single one.
 				$cpt_data = $this->get_cpt_data( $unique_id );
 
-				if ( false === ( $cpt_data instanceof Card_Data ) ) {
+				if ( false === ( $cpt_data instanceof Post_Selection_Settings ) ) {
 					continue;
 				}
 
@@ -300,8 +302,8 @@ abstract class External_Storage_Tab extends Cpt_Table_Tab {
 		echo '</div>';
 	}
 
-	protected function get_cpt_data_storage(): Cpt_Data_Storage {
-		return $this->cpt_data_storage;
+	protected function get_cpt_data_storage(): Cpt_Settings_Storage {
+		return $this->cpt_settings_storage;
 	}
 
 	protected function get_data_vendors(): Data_Vendors {

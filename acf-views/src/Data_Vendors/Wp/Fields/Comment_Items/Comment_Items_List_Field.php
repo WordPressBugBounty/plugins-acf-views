@@ -6,11 +6,11 @@ namespace Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Comment_Items;
 
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\Custom_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\Markup_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 use WP_Comment;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,16 +18,16 @@ defined( 'ABSPATH' ) || exit;
 class Comment_Items_List_Field extends Markup_Field {
 	use Custom_Field;
 
-	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_data ): void {
+	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_field_data ): void {
 		// opening 'comment' div.
 		printf(
 			'<div class="%s">',
 			esc_html(
-				$this->get_field_class( 'comment', $markup_data )
+				$this->get_field_class( 'comment', $markup_field_data )
 			),
 		);
 		echo "\r\n";
-		$markup_data->increment_and_print_tabs();
+		$markup_field_data->increment_and_print_tabs();
 
 		// comment author name.
 		printf(
@@ -35,48 +35,48 @@ class Comment_Items_List_Field extends Markup_Field {
 			esc_html(
 				$this->get_field_class(
 					'comment-author-name',
-					$markup_data
+					$markup_field_data
 				)
 			)
 		);
 
 		echo "\r\n";
-		$markup_data->increment_and_print_tabs();
+		$markup_field_data->increment_and_print_tabs();
 
-		$markup_data->get_template_generator()->print_array_item( $item_id, 'author_name' );
+		$markup_field_data->get_template_generator()->print_array_item( $item_id, 'author_name' );
 
 		echo "\r\n";
-		$markup_data->decrement_and_print_tabs();
+		$markup_field_data->decrement_and_print_tabs();
 
 		echo '</div>';
 
 		// comment author email.
 		echo "\r\n";
-		$markup_data->print_tabs();
+		$markup_field_data->print_tabs();
 
 		printf(
 			'<div class="%s">',
 			esc_html(
 				$this->get_field_class(
 					'comment-content',
-					$markup_data
+					$markup_field_data
 				)
 			)
 		);
 
 		echo "\r\n";
-		$markup_data->increment_and_print_tabs();
+		$markup_field_data->increment_and_print_tabs();
 
-		$markup_data->get_template_generator()->print_array_item( 'comment_item', 'content', true );
+		$markup_field_data->get_template_generator()->print_array_item( 'comment_item', 'content', true );
 
 		echo "\r\n";
-		$markup_data->decrement_and_print_tabs();
+		$markup_field_data->decrement_and_print_tabs();
 
 		echo '</div>';
 
 		// closing 'comment' div.
 		echo "\r\n";
-		$markup_data->decrement_and_print_tabs();
+		$markup_field_data->decrement_and_print_tabs();
 
 		echo '</div>';
 	}
@@ -85,12 +85,12 @@ class Comment_Items_List_Field extends Markup_Field {
 	 * @return array<string,string>
 	 */
 	protected function get_item_twig_args(
-		?WP_Comment $comment,
-		Field_Data $field_data,
+		?WP_Comment $wp_comment,
+		Field_Settings $field_settings,
 		bool $is_for_validation = false
 	): array {
 		if ( $is_for_validation ||
-			null === $comment ) {
+			null === $wp_comment ) {
 			return array(
 				'author_name' => 'Name',
 				'content'     => 'Comment content',
@@ -99,8 +99,8 @@ class Comment_Items_List_Field extends Markup_Field {
 
 		return array(
 			// avoid double encoding in Twig.
-			'author_name' => html_entity_decode( $comment->comment_author, ENT_QUOTES ),
-			'content'     => html_entity_decode( $comment->comment_content, ENT_QUOTES ),
+			'author_name' => html_entity_decode( $wp_comment->comment_author, ENT_QUOTES ),
+			'content'     => html_entity_decode( $wp_comment->comment_content, ENT_QUOTES ),
 		);
 	}
 
@@ -140,7 +140,7 @@ class Comment_Items_List_Field extends Markup_Field {
 			}
 
 			$comment_key                        = $top_comment->comment_ID ?? $comment->comment_ID;
-			$grouped_comments[ $comment_key ]   = $grouped_comments[ $comment_key ] ?? array();
+			$grouped_comments[ $comment_key ] ??= array();
 			$grouped_comments[ $comment_key ][] = $comment;
 		}
 
@@ -212,8 +212,8 @@ class Comment_Items_List_Field extends Markup_Field {
 	}
 
 	public function is_with_field_wrapper(
-		View_Data $view_data,
-		Field_Data $field,
+		Layout_Settings $layout_settings,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta
 	): bool {
 		return true;
@@ -226,8 +226,8 @@ class Comment_Items_List_Field extends Markup_Field {
 		return array_merge(
 			parent::get_conditional_fields( $field_meta ),
 			array(
-				Field_Data::FIELD_ACF_VIEW_ID,
-				Field_Data::FIELD_SLIDER_TYPE,
+				Field_Settings::FIELD_ACF_VIEW_ID,
+				Field_Settings::FIELD_SLIDER_TYPE,
 			)
 		);
 	}

@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Parents;
 
 use Org\Wplake\Advanced_Views\Assets\Front_Assets;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,19 +22,17 @@ abstract class Instance_Factory {
 	 */
 	abstract protected function get_template_variables_for_validation( string $unique_id ): array;
 
-	protected function add_used_cpt_data( Cpt_Data $cpt_data ): void {
-		$this->front_assets->add_asset( $cpt_data );
+	protected function add_used_cpt_data( Cpt_Settings $cpt_settings ): void {
+		$this->front_assets->add_asset( $cpt_settings );
 	}
 
 	/**
-	 * @param array<string,mixed>|null $twig_variables
+	 * @param mixed[]|null $twig_variables
 	 *
-	 * @return array<string,mixed>
+	 * @return mixed[]
 	 */
 	public function get_autocomplete_variables( string $unique_id, ?array $twig_variables = null ): array {
-		$twig_variables_for_validation = null !== $twig_variables ?
-			$twig_variables :
-			$this->get_template_variables_for_validation( $unique_id );
+		$twig_variables_for_validation = $twig_variables ?? $this->get_template_variables_for_validation( $unique_id );
 
 		foreach ( $twig_variables_for_validation as $key => $value ) {
 			if ( is_array( $value ) ) {
@@ -57,5 +56,5 @@ abstract class Instance_Factory {
 	 * @return array<string,mixed>
 	 */
 	// @phpstan-ignore-next-line
-	abstract public function get_rest_api_response( string $unique_id, WP_REST_Request $request ): array;
+	abstract public function get_rest_api_response( string $unique_id, WP_REST_Request $wprest_request ): array;
 }

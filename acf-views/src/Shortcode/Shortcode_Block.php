@@ -1,27 +1,20 @@
 <?php
 
-
 declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Shortcode;
 
-use Org\Wplake\Advanced_Views\Assets\Front_Assets;
-use Org\Wplake\Advanced_Views\Assets\Live_Reloader_Component;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Data_Storage;
+defined( 'ABSPATH' ) || exit;
+
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Instance_Factory;
-use Org\Wplake\Advanced_Views\Settings;
 use WP_Block;
-use WP_REST_Request;
 use WP_Block_Template;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\int;
 
-defined( 'ABSPATH' ) || exit;
-
-final class Shortcode_Block implements Hooks_Interface {
+final class Shortcode_Block extends Hookable implements Hooks_Interface {
 	private int $context_post_id;
 	/**
 	 * @var string[]
@@ -37,10 +30,10 @@ final class Shortcode_Block implements Hooks_Interface {
 		$this->context_post_id = - 1;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		add_filter( 'register_block_type_args', array( $this, 'extend_core_shortcode_block' ), 10, 2 );
+	public function set_hooks( Route_Detector $route_detector ): void {
+		self::add_filter( 'register_block_type_args', array( $this, 'extend_core_shortcode_block' ), 10, 2 );
 
-		add_filter( 'get_block_templates', array( $this, 'trim_shortcode_brackets' ) );
+		self::add_filter( 'get_block_templates', array( $this, 'trim_shortcode_brackets' ) );
 	}
 
 	/**
@@ -122,8 +115,8 @@ final class Shortcode_Block implements Hooks_Interface {
 			$defaults,
 			array(
 				'usesContext'     => array_merge( $default_context, array( 'postId' ) ),
-				'render_callback' => fn( array $attributes, string $content, WP_Block $block )=>
-				$this->render_shortcode_block( $content, $block->context ),
+				'render_callback' => fn( array $attributes, string $content, WP_Block $wp_block )=>
+				$this->render_shortcode_block( $content, $wp_block->context ),
 			)
 		);
 	}
@@ -206,7 +199,7 @@ final class Shortcode_Block implements Hooks_Interface {
 
 		return (string) preg_replace_callback(
 			$pattern,
-			function ( array $matches ) use( $block_name ) {
+			function ( array $matches ) use ( $block_name ) {
 				$shortcode = $matches[1] ?? '';
 
 				$shortcode_without_brackets = trim( $shortcode, '[] ' );

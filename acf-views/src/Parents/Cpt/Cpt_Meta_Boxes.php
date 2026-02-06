@@ -4,15 +4,16 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Parents\Cpt;
 
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Html;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-abstract class Cpt_Meta_Boxes implements Hooks_Interface {
+abstract class Cpt_Meta_Boxes extends Hookable implements Hooks_Interface {
 	private Html $html;
 	private Plugin $plugin;
 
@@ -31,7 +32,7 @@ abstract class Cpt_Meta_Boxes implements Hooks_Interface {
 		add_meta_box(
 			'acf-views_support',
 			__( 'Having issues?', 'acf-views' ),
-			function () {
+			function (): void {
 				$this->html->print_postbox_support();
 			},
 			array(
@@ -45,7 +46,7 @@ abstract class Cpt_Meta_Boxes implements Hooks_Interface {
 			add_meta_box(
 				'acf-views_upgrade',
 				__( 'Unlock with Pro', 'acf-views' ),
-				function () {
+				function (): void {
 					$this->html->print_postbox_upgrade();
 				},
 				array(
@@ -57,11 +58,11 @@ abstract class Cpt_Meta_Boxes implements Hooks_Interface {
 		}
 	}
 
-	public function print_mount_points( Cpt_Data $cpt_data ): void {
+	public function print_mount_points( Cpt_Settings $cpt_settings ): void {
 		$post_types      = array();
 		$safe_post_links = array();
 
-		foreach ( $cpt_data->mount_points as $mount_point ) {
+		foreach ( $cpt_settings->mount_points as $mount_point ) {
 			$post_types      = array_merge( $post_types, $mount_point->post_types );
 			$safe_post_links = array_merge( $safe_post_links, $mount_point->posts );
 		}
@@ -99,11 +100,11 @@ abstract class Cpt_Meta_Boxes implements Hooks_Interface {
 		}
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
+		self::add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 	}
 }

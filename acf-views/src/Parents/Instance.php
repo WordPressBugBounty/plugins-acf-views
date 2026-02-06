@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Parents;
 
 use Error;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
 use WP_REST_Request;
 
@@ -13,12 +14,12 @@ defined( 'ABSPATH' ) || exit;
 abstract class Instance {
 	private string $template;
 	private Template_Engines $template_engines;
-	private Cpt_Data $cpt_data;
+	private Cpt_Settings $cpt_settings;
 	private string $classes;
 
-	public function __construct( Template_Engines $template_engines, Cpt_Data $cpt_data, string $template, string $classes = '' ) {
+	public function __construct( Template_Engines $template_engines, Cpt_Settings $cpt_settings, string $template, string $classes = '' ) {
 		$this->template_engines = $template_engines;
-		$this->cpt_data         = $cpt_data;
+		$this->cpt_settings     = $cpt_settings;
 		$this->template         = $template;
 		$this->classes          = $classes;
 	}
@@ -38,27 +39,27 @@ abstract class Instance {
 	): bool;
 
 	/**
-	 * @param mixed $php_code_return
+	 * @param mixed $controller
 	 *
 	 * @return array<string,mixed>
 	 */
-	abstract protected function get_ajax_response_args( $php_code_return ): array;
+	abstract protected function get_ajax_response_args( $controller ): array;
 
 	/**
-	 * @param mixed $php_code_return
+	 * @param mixed $controller
 	 *
 	 * @return array<string,mixed>
 	 */
 	// @phpstan-ignore-next-line
-	abstract protected function get_rest_api_response_args( WP_REST_Request $request, $php_code_return ): array;
+	abstract protected function get_rest_api_response_args( WP_REST_Request $wprest_request, $controller ): array;
 
 	protected function get_classes(): string {
 		$classes  = '';
 		$classes .= '' !== $this->classes ?
 			$this->classes . ' ' :
 			'';
-		$classes .= '' !== $this->cpt_data->css_classes ?
-			$this->cpt_data->css_classes . ' ' :
+		$classes .= '' !== $this->cpt_settings->css_classes ?
+			$this->cpt_settings->css_classes . ' ' :
 			'';
 
 		return $classes;
@@ -101,7 +102,7 @@ abstract class Instance {
 		$message = sprintf(
 		// translators: %s is the template engine name.
 			__( '%s template engine is not available (PHP >= 8.2.0 is required).', 'acf-views' ),
-			ucfirst( $this->cpt_data->template_engine )
+			ucfirst( $this->cpt_settings->template_engine )
 		);
 
 		echo '<p style="color:red;">' . esc_html( $message ) . '</p>';
@@ -115,8 +116,8 @@ abstract class Instance {
 	}
 
 	// @phpstan-ignore-next-line
-	public function get_rest_api_response( WP_REST_Request $request, string $php_code = '' ): array {
-		return $this->get_rest_api_response_args( $request, $this->eval_php_code( $php_code ) );
+	public function get_rest_api_response( WP_REST_Request $wprest_request, string $php_code = '' ): array {
+		return $this->get_rest_api_response_args( $wprest_request, $this->eval_php_code( $php_code ) );
 	}
 
 	public function get_markup_validation_error(): string {

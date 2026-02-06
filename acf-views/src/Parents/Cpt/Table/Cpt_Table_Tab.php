@@ -5,14 +5,15 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Parents\Cpt\Table;
 
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-abstract class Cpt_Table_Tab implements Hooks_Interface {
+abstract class Cpt_Table_Tab extends Hookable implements Hooks_Interface {
 
 	private Cpt_Table $cpt_table;
 
@@ -26,7 +27,7 @@ abstract class Cpt_Table_Tab implements Hooks_Interface {
 
 	abstract public function maybe_show_action_result_message(): void;
 
-	abstract public function print_row_title( Tab_Data $cpt_table_tab_data, Cpt_Data $cpt_data ): void;
+	abstract public function print_row_title( Tab_Data $tab_data, Cpt_Settings $cpt_settings ): void;
 
 	protected function get_cpt_name(): string {
 		return $this->cpt_table->get_cpt_name();
@@ -69,14 +70,14 @@ abstract class Cpt_Table_Tab implements Hooks_Interface {
 		$this->cpt_table->add_tab( $tab_data );
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin_cpt_related( $this->get_cpt_name(), Current_Screen::CPT_LIST ) ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_cpt_admin_route( $this->get_cpt_name(), Route_Detector::CPT_LIST ) ) {
 			return;
 		}
 
 		$this->cpt_table->add_new_tab_callback( array( $this, 'add_tab' ) );
 
-		add_action( 'admin_init', array( $this, 'maybe_perform_actions' ) );
-		add_action( 'admin_notices', array( $this, 'maybe_show_action_result_message' ) );
+		self::add_action( 'admin_init', array( $this, 'maybe_perform_actions' ) );
+		self::add_action( 'admin_notices', array( $this, 'maybe_show_action_result_message' ) );
 	}
 }

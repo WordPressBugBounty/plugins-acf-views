@@ -23,19 +23,21 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\User_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
 use Org\Wplake\Advanced_Views\Data_Vendors\Pods\Fields\Pods_Pick_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Pods\Fields\Pods_Upload_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Settings;
 use Org\Wplake\Advanced_Views\Logger;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\Field_Meta;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Source;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Source;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use Pods_Migrate_Packages;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -144,7 +146,10 @@ class Pods_Data_Vendor extends Data_Vendor {
 				$date_time_type = $this->get_string_arg( 'datetime_type', $data );
 
 				if ( 'wp' === $date_time_type ) {
-					return get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+					$date_format = get_option( 'date_format' );
+					$time_format = get_option( 'time_format' );
+
+					return sprintf( '%s %s', string( $date_format ), string( $time_format ) );
 				}
 
 				$display_format = $this->get_string_arg( 'datetime_format', $data );
@@ -172,9 +177,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 				if ( 'wp' === $date_type ) {
 					$format = get_option( 'date_format' );
 
-					return true === is_string( $format ) ?
-						$format :
-						'';
+					return string( $format );
 				}
 
 				$display_format = $this->get_string_arg( 'date_format', $data );
@@ -186,9 +189,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 				if ( 'wp' === $time_type ) {
 					$format = get_option( 'time_format' );
 
-					return true === is_string( $format ) ?
-						$format :
-						'';
+					return string( $format );
 				}
 
 				$display_time_format = '24' === $time_type ?
@@ -240,7 +241,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @return array<string,string>
+	 * @return mixed[]
 	 */
 	protected function get_dynamic_choices( string $pick_object ): array {
 		$pick_related_objects = $this->get_pick_related_objects();
@@ -263,7 +264,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 	/**
 	 * @param array<string,mixed> $data
 	 *
-	 * @return array<string,string>
+	 * @return mixed[]
 	 */
 	protected function get_choices( array $data ): array {
 		$pick_object = $this->get_string_arg( 'pick_object', $data );
@@ -405,24 +406,26 @@ class Pods_Data_Vendor extends Data_Vendor {
 	}
 
 	public function make_integration_instance(
-		Item_Data $item_data,
-		Views_Data_Storage $views_data_storage,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Data_Vendors $data_vendors,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Repeater_Field_Data $repeater_field_data,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Repeater_Field_Settings $repeater_field_settings,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	): ?Data_Vendor_Integration_Interface {
 		return new Pods_Integration(
-			$item_data,
-			$views_data_storage,
+			$item_settings,
+			$layouts_settings_storage,
 			$data_vendors,
-			$views_cpt_save_actions,
-			$view_factory,
+			$layouts_cpt_save_actions,
+			$layout_factory,
 			$this,
-			$view_shortcode,
-			$settings
+			$layout_shortcode,
+			$settings,
+			$plugin_cpt
 		);
 	}
 
@@ -601,7 +604,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<string,mixed> $data
+	 * @param mixed[] $data
 	 */
 	public function fill_field_meta( Field_Meta_Interface $field_meta, array $data = array() ): void {
 		if ( array() === $data ) {
@@ -682,10 +685,10 @@ class Pods_Data_Vendor extends Data_Vendor {
 	 * @return mixed
 	 */
 	public function get_field_value(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
-		?Item_Data $item_data = null,
+		?Item_Settings $item_settings = null,
 		bool $is_formatted = false,
 		?array $local_data = null
 	) {
@@ -794,7 +797,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 	 * Exports of the whole pod
 	 * (as the group is dependent part, and won't be exported if the pod is missing)
 	 *
-	 * @return array<string, mixed>|null
+	 * @return mixed[]|null
 	 */
 	public function get_group_export_data( string $group_id ): ?array {
 		$pod = $this->get_pod_object_by_group_id( $group_id );
@@ -844,7 +847,7 @@ class Pods_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<string, mixed> $groups_data
+	 * @param mixed[] $groups_data
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -860,8 +863,8 @@ class Pods_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<int|string, mixed> $group_data
-	 * @param array<string, mixed> $meta_data
+	 * @param mixed[] $group_data
+	 * @param mixed[] $meta_data
 	 */
 	public function import_group( array $group_data, array $meta_data ): ?string {
 		if ( false === class_exists( 'Pods_Migrate_Packages' ) ||

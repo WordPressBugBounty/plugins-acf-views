@@ -23,18 +23,22 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box\Fields\Mb_File_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box\Fields\Mb_Gallery_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box\Fields\Mb_Image_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box\Fields\Mb_Taxonomy_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Settings;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\Field_Meta;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Source;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Source;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use RWMB_Field;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\int;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -83,7 +87,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	 * @return array<string,string>
 	 */
 	protected function get_field_request_args(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
 		&$source_id
@@ -156,7 +160,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 
 			$field_key = '' === $parent_choice_value ?
 				$this->get_field_key( $group_id, $field_id ) :
-				Field_Data::create_field_key( $parent_choice_value, $field_id );
+				Field_Settings::create_field_key( $parent_choice_value, $field_id );
 
 			if ( true === $is_meta_format ) {
 				$value = new Field_Meta( $this->get_name(), $field_id );
@@ -168,7 +172,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 					'';
 				// hidden type doesn't have label.
 				$name  = 'hidden' !== $field_type ?
-					$field['name'] :
+					string( $field, 'name' ) :
 					__( 'Hidden', 'acf-views' );
 				$value = sprintf( '%s (%s%s)', $name, $repeatable_field, $field_type );
 
@@ -260,7 +264,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	 *
 	 * @return mixed
 	 */
-	protected function format_group_item_value( $raw_value, Field_Data $field_data, Field_Meta_Interface $field_meta, Source $source ) {
+	protected function format_group_item_value( $raw_value, Field_Settings $field_settings, Field_Meta_Interface $field_meta, Source $source ) {
 		/**
 		 * Hand fix for maps.
 		 * https://docs.metabox.io/fields/osm/#outputting-a-map-in-a-group
@@ -271,7 +275,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 				array( 'RWMB_OSM_Field', 'render_map' ) :
 				array( 'RWMB_Map_Field', 'render_map' );
 
-			$field_request_args = $this->get_field_request_args( $field_data, $field_meta, $source, $source_id );
+			$field_request_args = $this->get_field_request_args( $field_settings, $field_meta, $source, $source_id );
 
 			return true === is_callable( $render_map_callback ) ?
 				call_user_func( $render_map_callback, $raw_value, $field_request_args ) :
@@ -286,7 +290,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	 *
 	 * @return array<int|string,mixed>
 	 */
-	protected function format_group_value( $raw_value, Field_Data $field_data, Field_Meta_Interface $field_meta, Item_Data $item_data, Source $source ): array {
+	protected function format_group_value( $raw_value, Field_Settings $field_settings, Field_Meta_Interface $field_meta, Item_Settings $item_settings, Source $source ): array {
 		$raw_value = true === is_array( $raw_value ) ?
 			$raw_value :
 			array();
@@ -297,8 +301,9 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 		if ( true === $field_meta->is_repeater() ) {
 			foreach ( $raw_value as $raw_row ) {
 				$formatted_row = array();
+				$raw_row       = arr( $raw_row );
 
-				foreach ( $item_data->repeater_fields as $repeater_field ) {
+				foreach ( $item_settings->repeater_fields as $repeater_field ) {
 					$repeater_field_id   = $repeater_field->get_field_meta()->get_field_id();
 					$repeater_field_name = $repeater_field->get_field_meta()->get_name();
 
@@ -317,14 +322,14 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 		// self-repeatable.
 		if ( null !== $self_repeatable ) {
 			foreach ( $raw_value as $item ) {
-				$formatted_value[] = $this->format_group_item_value( $item, $field_data, $self_repeatable, $source );
+				$formatted_value[] = $this->format_group_item_value( $item, $field_settings, $self_repeatable, $source );
 			}
 
 			return $formatted_value;
 		}
 
 		// group.
-		foreach ( $item_data->repeater_fields as $repeater_field ) {
+		foreach ( $item_settings->repeater_fields as $repeater_field ) {
 			$repeater_field_id   = $repeater_field->get_field_meta()->get_field_id();
 			$repeater_field_name = $repeater_field->get_field_meta()->get_name();
 
@@ -348,24 +353,26 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	}
 
 	public function make_integration_instance(
-		Item_Data $item_data,
-		Views_Data_Storage $views_data_storage,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Data_Vendors $data_vendors,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Repeater_Field_Data $repeater_field_data,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Repeater_Field_Settings $repeater_field_settings,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	): ?Data_Vendor_Integration_Interface {
 		return new Meta_Box_Integration(
-			$item_data,
-			$views_data_storage,
+			$item_settings,
+			$layouts_settings_storage,
 			$data_vendors,
-			$views_cpt_save_actions,
-			$view_factory,
+			$layouts_cpt_save_actions,
+			$layout_factory,
 			$this,
-			$view_shortcode,
-			$settings
+			$layout_shortcode,
+			$settings,
+			$plugin_cpt
 		);
 	}
 
@@ -496,7 +503,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<string,mixed> $data
+	 * @param mixed[] $data
 	 */
 	public function fill_field_meta( Field_Meta_Interface $field_meta, array $data = array() ): void {
 		if ( array() === $data ) {
@@ -594,17 +601,17 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	 * @return mixed
 	 */
 	public function get_field_value(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
-		?Item_Data $item_data = null,
+		?Item_Settings $item_settings = null,
 		bool $is_formatted = false,
 		?array $local_data = null
 	) {
 		$field_id = $field_meta->get_field_id();
 
 		$source_id       = $source->get_id();
-		$args            = $this->get_field_request_args( $field_data, $field_meta, $source, $source_id );
+		$args            = $this->get_field_request_args( $field_settings, $field_meta, $source, $source_id );
 		$self_repeatable = $field_meta->get_self_repeatable_meta();
 
 		if ( null !== $local_data ) {
@@ -638,7 +645,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 						null;
 				} else {
 					// self repeatable maps can't be read via rwmb_get_value - https://support.metabox.io/topic/bug-clonable-map-field-not-displaying-data/.
-					$value = get_post_meta( $source_id, $field_id, true );
+					$value = get_post_meta( int( $source_id ), $field_id, true );
 				}
 			} else {
 				$value = false !== function_exists( 'mb_get_block_field' ) ?
@@ -660,11 +667,11 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 				 * Instead of looping through each field and formatting it, it returns HTML for the whole array as single string.
 				 * Note: get_post_meta() works with clonable map, while rwmb_get_value not - https://support.metabox.io/topic/bug-clonable-map-field-not-displaying-data/
 				 */
-				$value = get_post_meta( $source_id, $field_id, true );
+				$value = get_post_meta( int( $source_id ), $field_id, true );
 
 				// It's impossible to format the group value without the item data.
-				$value = null !== $item_data ?
-					$this->format_group_value( $value, $field_data, $field_meta, $item_data, $source ) :
+				$value = null !== $item_settings ?
+					$this->format_group_value( $value, $field_settings, $field_meta, $item_settings, $source ) :
 					$value;
 			}
 			return $value;
@@ -758,7 +765,7 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @return array<string, mixed>|null
+	 * @return mixed[]|null
 	 */
 	public function get_group_export_data( string $group_id ): ?array {
 		$post = get_page_by_path( $group_id, OBJECT, 'meta-box' );
@@ -791,8 +798,8 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<int|string, mixed> $group_data
-	 * @param array<string, mixed> $meta_data
+	 * @param mixed[] $group_data
+	 * @param mixed[] $meta_data
 	 */
 	public function import_group( array $group_data, array $meta_data ): ?string {
 		if ( false === function_exists( 'rwmb_get_registry' ) ) {
@@ -826,7 +833,6 @@ class Meta_Box_Data_Vendor extends Data_Vendor {
 			$group_data['ID'] = $existing_post->ID;
 		}
 
-		// @phpstan-ignore-next-line
 		$post_id = wp_insert_post( $group_data, true );
 
 		if ( true === is_wp_error( $post_id ) ) {

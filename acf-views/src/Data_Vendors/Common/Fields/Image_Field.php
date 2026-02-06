@@ -6,27 +6,27 @@ namespace Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields;
 
 use Org\Wplake\Advanced_Views\Front_Asset\Acf_Views_Lightbox_Front_Asset;
 use Org\Wplake\Advanced_Views\Front_Asset\Light_Gallery_Front_Asset;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 
 defined( 'ABSPATH' ) || exit;
 
 class Image_Field extends Markup_Field {
-	protected function print_inner_attributes( string $field_id, Markup_Field_Data $markup_data ): void {
+	protected function print_inner_attributes( string $field_id, Markup_Field_Data $markup_field_data ): void {
 		$inner_attributes = array();
 
-		foreach ( $markup_data->get_field_assets() as $field_asset ) {
+		foreach ( $markup_field_data->get_field_assets() as $field_asset ) {
 			$inner_attributes = array_merge(
 				$inner_attributes,
-				$field_asset->get_inner_variable_attributes( $markup_data->get_field_data(), $field_id )
+				$field_asset->get_inner_variable_attributes( $markup_field_data->get_field_data(), $field_id )
 			);
 		}
 
 		foreach ( $inner_attributes as $name => $variable_info ) {
-			$markup_data->get_template_generator()->print_array_item_attribute(
+			$markup_field_data->get_template_generator()->print_array_item_attribute(
 				$name,
 				$variable_info['field_id'],
 				$variable_info['item_key']
@@ -193,26 +193,26 @@ class Image_Field extends Markup_Field {
 
 
 	public function is_with_field_wrapper(
-		View_Data $view_data,
-		Field_Data $field,
+		Layout_Settings $layout_settings,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta
 	): bool {
-		return $view_data->is_with_unnecessary_wrappers;
+		return $layout_settings->is_with_unnecessary_wrappers;
 	}
 
 	/**
 	 * @return string[]
 	 */
 	public function get_conditional_fields( Field_Meta_Interface $field_meta ): array {
-		$conditional_fields = array( Field_Data::FIELD_IMAGE_SIZE );
+		$conditional_fields = array( Field_Settings::FIELD_IMAGE_SIZE );
 
 		// repeatable fields aren't supported (they've markup like a repeater field).
 		if ( null === $field_meta->get_self_repeatable_meta() ) {
 			$conditional_fields = array_merge(
 				$conditional_fields,
 				array(
-					Field_Data::FIELD_LIGHTBOX_TYPE,
-					Field_Data::FIELD_GALLERY_WITH_LIGHT_BOX,
+					Field_Settings::FIELD_LIGHTBOX_TYPE,
+					Field_Settings::FIELD_GALLERY_WITH_LIGHT_BOX,
 				)
 			);
 		}
@@ -220,10 +220,10 @@ class Image_Field extends Markup_Field {
 		return array_merge( parent::get_conditional_fields( $field_meta ), $conditional_fields );
 	}
 
-	public function get_front_assets( Field_Data $field_data ): array {
+	public function get_front_assets( Field_Settings $field_settings ): array {
 		$front_assets = array();
 
-		switch ( $field_data->lightbox_type ) {
+		switch ( $field_settings->lightbox_type ) {
 			case 'simple':
 				$front_assets[] = Acf_Views_Lightbox_Front_Asset::NAME;
 				break;
@@ -232,6 +232,6 @@ class Image_Field extends Markup_Field {
 				break;
 		}
 
-		return array_merge( parent::get_front_assets( $field_data ), $front_assets );
+		return array_merge( parent::get_front_assets( $field_settings ), $front_assets );
 	}
 }

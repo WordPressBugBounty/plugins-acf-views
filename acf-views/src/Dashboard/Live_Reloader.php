@@ -6,40 +6,40 @@ namespace Org\Wplake\Advanced_Views\Dashboard;
 
 use Exception;
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Shortcode\Card_Shortcode;
-use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
+use Org\Wplake\Advanced_Views\Shortcode\Post_Selection_Shortcode;
+use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use WP_REST_Request;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-class Live_Reloader implements Hooks_Interface {
+class Live_Reloader extends Hookable implements Hooks_Interface {
 	use Safe_Array_Arguments;
 
-	private Views_Data_Storage $views_data_storage;
-	private Cards_Data_Storage $cards_data_storage;
-	private View_Shortcode $view_shortcode;
-	private Card_Shortcode $card_shortcode;
+	private Layouts_Settings_Storage $layouts_settings_storage;
+	private Post_Selections_Settings_Storage $post_selections_settings_storage;
+	private Layout_Shortcode $layout_shortcode;
+	private Post_Selection_Shortcode $post_selection_shortcode;
 	private int $request_post_id;
 
 	public function __construct(
-		Views_Data_Storage $views_data_storage,
-		Cards_Data_Storage $cards_data_storage,
-		View_Shortcode $view_shortcode,
-		Card_Shortcode $card_shortcode
+		Layouts_Settings_Storage $layouts_settings_storage,
+		Post_Selections_Settings_Storage $post_selections_settings_storage,
+		Layout_Shortcode $layout_shortcode,
+		Post_Selection_Shortcode $post_selection_shortcode
 	) {
-		$this->views_data_storage = $views_data_storage;
-		$this->cards_data_storage = $cards_data_storage;
-		$this->view_shortcode     = $view_shortcode;
-		$this->card_shortcode     = $card_shortcode;
-		$this->request_post_id    = 0;
+		$this->layouts_settings_storage         = $layouts_settings_storage;
+		$this->post_selections_settings_storage = $post_selections_settings_storage;
+		$this->layout_shortcode                 = $layout_shortcode;
+		$this->post_selection_shortcode         = $post_selection_shortcode;
+		$this->request_post_id                  = 0;
 	}
 
 	/**
@@ -77,8 +77,8 @@ class Live_Reloader implements Hooks_Interface {
 		return null;
 	}
 
-	protected function get_css_code( Cpt_Data $cpt_data ): string {
-		$css = $cpt_data->get_css_code( Cpt_Data::CODE_MODE_DISPLAY );
+	protected function get_css_code( Cpt_Settings $cpt_settings ): string {
+		$css = $cpt_settings->get_css_code( Cpt_Settings::CODE_MODE_DISPLAY );
 
 		// remove all the whitespaces.
 		$css = str_replace( array( "\t", "\n", "\r" ), '', $css );
@@ -99,11 +99,11 @@ class Live_Reloader implements Hooks_Interface {
 
 		$media_rules = array();
 		foreach ( $media_queries as $media_query ) {
-			$media_condition = trim( $media_query[1] ?? '' );
-			$media_content   = trim( $media_query[2] ?? '' );
+			$media_condition = trim( $media_query[1] );
+			$media_content   = trim( $media_query[2] );
 
-			$media_rules[ $media_condition ]  = $media_rules[ $media_condition ] ?? '';
-			$media_rules[ $media_condition ] .= $media_content;
+			$media_rules[ $media_condition ] ??= '';
+			$media_rules[ $media_condition ]  .= $media_content;
 		}
 
 		foreach ( $media_rules as $media_condition => $media_content ) {
@@ -121,36 +121,36 @@ class Live_Reloader implements Hooks_Interface {
 	 * @return array<string,mixed>
 	 */
 	protected function get_item_response_arguments(
-		Cpt_Data $cpt_data,
+		Cpt_Settings $cpt_settings,
 		array $shortcode_arguments,
 		array $old_code_hashes,
 		bool $is_assets_only
 	): array {
-		$shortcode = true === ( $cpt_data instanceof View_Data ) ?
-			$this->view_shortcode :
-			$this->card_shortcode;
+		$renderer = true === ( $cpt_settings instanceof Layout_Settings ) ?
+			$this->layout_shortcode :
+			$this->post_selection_shortcode;
 
-		$new_code_hashes = $cpt_data->get_code_hashes();
-		$is_css_changed  = $this->get_string_arg( Cpt_Data::HASH_CSS, $old_code_hashes ) !==
-							$new_code_hashes[ Cpt_Data::HASH_CSS ];
-		$is_js_changed   = $this->get_string_arg( Cpt_Data::HASH_JS, $old_code_hashes ) !==
-							$new_code_hashes[ Cpt_Data::HASH_JS ];
-		$is_html_changed = $this->get_string_arg( Cpt_Data::HASH_HTML, $old_code_hashes ) !==
-							$new_code_hashes[ Cpt_Data::HASH_HTML ];
+		$new_code_hashes = $cpt_settings->get_code_hashes();
+		$is_css_changed  = $this->get_string_arg( Cpt_Settings::HASH_CSS, $old_code_hashes ) !==
+							$new_code_hashes[ Cpt_Settings::HASH_CSS ];
+		$is_js_changed   = $this->get_string_arg( Cpt_Settings::HASH_JS, $old_code_hashes ) !==
+							$new_code_hashes[ Cpt_Settings::HASH_JS ];
+		$is_html_changed = $this->get_string_arg( Cpt_Settings::HASH_HTML, $old_code_hashes ) !==
+							$new_code_hashes[ Cpt_Settings::HASH_HTML ];
 
 		$response = array(
 			'codeHashes' => $new_code_hashes,
 		);
 
 		if ( true === $is_css_changed &&
-			false === $cpt_data->is_with_shadow_dom() ) {
-			$response['css'] = $this->get_css_code( $cpt_data );
+			false === $cpt_settings->is_with_shadow_dom() ) {
+			$response['css'] = $this->get_css_code( $cpt_settings );
 		}
 
 		if ( true === $is_js_changed ) {
 			// js code isn't put inside the shadow root (it works on the global level),
 			// so it's always available.
-			$response['js'] = $cpt_data->get_js_code();
+			$response['js'] = $cpt_settings->get_js_code();
 		}
 
 		if ( true === $is_html_changed &&
@@ -163,11 +163,7 @@ class Live_Reloader implements Hooks_Interface {
 				$shortcode_arguments['object-id'] = $this->request_post_id;
 			}
 
-			ob_start();
-			$shortcode->render( $shortcode_arguments );
-			$html = (string) ob_get_clean();
-
-			$response['html'] = $html;
+			$response['html'] = $renderer->render_shortcode( $shortcode_arguments );
 		}
 
 		return $response;
@@ -176,9 +172,9 @@ class Live_Reloader implements Hooks_Interface {
 	/**
 	 * @param array<string,mixed> $code_hashes
 	 */
-	protected function is_page_reload_required( Cpt_Data $cpt_data, array $code_hashes, bool $is_gutenberg_block ): bool {
-		$is_html_changed = $this->get_string_arg( Cpt_Data::HASH_HTML, $code_hashes ) !==
-							$cpt_data->get_code_hashes()[ Cpt_Data::HASH_HTML ];
+	protected function is_page_reload_required( Cpt_Settings $cpt_settings, array $code_hashes, bool $is_gutenberg_block ): bool {
+		$is_html_changed = $this->get_string_arg( Cpt_Settings::HASH_HTML, $code_hashes ) !==
+							$cpt_settings->get_code_hashes()[ Cpt_Settings::HASH_HTML ];
 
 		// 1. HTML changed for gutenberg blocks or on non-post related pages
 		if ( true === $is_html_changed &&
@@ -186,13 +182,13 @@ class Live_Reloader implements Hooks_Interface {
 			return true;
 		}
 
-		$is_declarative_shadow_dom = Cpt_Data::WEB_COMPONENT_SHADOW_DOM_DECLARATIVE === $cpt_data->web_component;
+		$is_declarative_shadow_dom = Cpt_Settings::WEB_COMPONENT_SHADOW_DOM_DECLARATIVE === $cpt_settings->web_component;
 
 		// Declarative Shadow DOM currently is only processed during DOMContentLoaded event,
 		// so if it's added later dynamically, it's just hidden. Confirmed by local tests and also by others:
 		// see https://stackoverflow.com/questions/67932949/html-template-shadow-dom-not-rendering-within-handlebars-template.
-		$is_css_changed = $this->get_string_arg( Cpt_Data::HASH_CSS, $code_hashes ) !==
-													$cpt_data->get_code_hashes()[ Cpt_Data::HASH_CSS ];
+		$is_css_changed = $this->get_string_arg( Cpt_Settings::HASH_CSS, $code_hashes ) !==
+							$cpt_settings->get_code_hashes()[ Cpt_Settings::HASH_CSS ];
 
 		// 2. Html or CSS changed for elements with the Declarative Shadow DOM.
 		return true === $is_declarative_shadow_dom &&
@@ -202,16 +198,16 @@ class Live_Reloader implements Hooks_Interface {
 	/**
 	 * @param array<string,string> $code_hashes
 	 */
-	protected function is_html_force_change_required( Cpt_Data $cpt_data, array $code_hashes ): bool {
+	protected function is_html_force_change_required( Cpt_Settings $cpt_settings, array $code_hashes ): bool {
 		// 1. JS change required HTML update (so web component will be created and processed by the new JS).
-		$is_js_changed = $this->get_string_arg( Cpt_Data::HASH_JS, $code_hashes ) !==
-								$cpt_data->get_code_hashes()[ Cpt_Data::HASH_JS ];
+		$is_js_changed = $this->get_string_arg( Cpt_Settings::HASH_JS, $code_hashes ) !==
+						$cpt_settings->get_code_hashes()[ Cpt_Settings::HASH_JS ];
 
 		// 2. CSS changes when JS shadow root is enabled require HTML update (as CSS is inside HTML in that case).
 		// (Declarative shadow root requires full page reloading, so that in the other place).
-		$is_css_in_js_shadow_dom_changed = Cpt_Data::WEB_COMPONENT_SHADOW_DOM === $cpt_data->web_component &&
-								$this->get_string_arg( Cpt_Data::HASH_CSS, $code_hashes ) !==
-								$cpt_data->get_code_hashes()[ Cpt_Data::HASH_CSS ];
+		$is_css_in_js_shadow_dom_changed = Cpt_Settings::WEB_COMPONENT_SHADOW_DOM === $cpt_settings->web_component &&
+											$this->get_string_arg( Cpt_Settings::HASH_CSS, $code_hashes ) !==
+											$cpt_settings->get_code_hashes()[ Cpt_Settings::HASH_CSS ];
 
 		return true === $is_js_changed ||
 				true === $is_css_in_js_shadow_dom_changed;
@@ -219,7 +215,7 @@ class Live_Reloader implements Hooks_Interface {
 
 	/**
 	 * @param array<string,mixed> $request_args
-	 * @param array<string,Cpt_Data> $changed_instances
+	 * @param array<string,Cpt_Settings> $changed_instances
 	 *
 	 * @return array<string,mixed>
 	 * @throws Exception
@@ -247,11 +243,11 @@ class Live_Reloader implements Hooks_Interface {
 			 */
 			$code_hashes = $this->get_array_arg( 'code_hashes', $item_data );
 
-			$is_view_item = 0 === strpos( $unique_id, View_Data::UNIQUE_ID_PREFIX );
+			$is_view_item = 0 === strpos( $unique_id, Layout_Settings::UNIQUE_ID_PREFIX );
 
 			$cpt_data = true === $is_view_item ?
-				$this->views_data_storage->get( $unique_id ) :
-				$this->cards_data_storage->get( $unique_id );
+				$this->layouts_settings_storage->get( $unique_id ) :
+				$this->post_selections_settings_storage->get( $unique_id );
 
 			if ( false === $cpt_data->isLoaded() ||
 				$code_hashes === $cpt_data->get_code_hashes() ) {
@@ -259,7 +255,7 @@ class Live_Reloader implements Hooks_Interface {
 			}
 
 			if ( true === $this->is_html_force_change_required( $cpt_data, $code_hashes ) ) {
-				$code_hashes[ Cpt_Data::HASH_HTML ] = '';
+				$code_hashes[ Cpt_Settings::HASH_HTML ] = '';
 			}
 
 			/**
@@ -317,14 +313,14 @@ class Live_Reloader implements Hooks_Interface {
 				continue;
 			}
 
-			$is_view_item = 0 === strpos( $unique_id, View_Data::UNIQUE_ID_PREFIX );
+			$is_view_item = 0 === strpos( $unique_id, Layout_Settings::UNIQUE_ID_PREFIX );
 
 			$cpt_data = true === $is_view_item ?
-				$this->views_data_storage->get( $unique_id ) :
-				$this->cards_data_storage->get( $unique_id );
+				$this->layouts_settings_storage->get( $unique_id ) :
+				$this->post_selections_settings_storage->get( $unique_id );
 
-			$is_html_changed = $this->get_string_arg( Cpt_Data::HASH_HTML, $code_hashes ) !==
-										$cpt_data->get_code_hashes()[ Cpt_Data::HASH_HTML ] ||
+			$is_html_changed = $this->get_string_arg( Cpt_Settings::HASH_HTML, $code_hashes ) !==
+								$cpt_data->get_code_hashes()[ Cpt_Settings::HASH_HTML ] ||
 			true === $this->is_html_force_change_required( $cpt_data, $code_hashes );
 
 			if ( false === $cpt_data->isLoaded() ||
@@ -366,7 +362,7 @@ class Live_Reloader implements Hooks_Interface {
 				continue;
 			}
 
-			$card_data = $this->cards_data_storage->get( $unique_id );
+			$card_data = $this->post_selections_settings_storage->get( $unique_id );
 
 			if ( false === $card_data->isLoaded() ) {
 				continue;
@@ -383,7 +379,7 @@ class Live_Reloader implements Hooks_Interface {
 			$is_gutenberg_block = $this->get_bool_arg( 'is_gutenberg_block', $item_data );
 
 			// force HTML update, as children have been changed.
-			$code_hashes[ Cpt_Data::HASH_HTML ] = '';
+			$code_hashes[ Cpt_Settings::HASH_HTML ] = '';
 
 			$is_page_reload_required = $this->is_page_reload_required( $card_data, $code_hashes, $is_gutenberg_block );
 
@@ -455,8 +451,8 @@ class Live_Reloader implements Hooks_Interface {
 	 * @throws Exception
 	 */
 	// @phpstan-ignore-next-line
-	public function get_live_reloader_data( WP_REST_Request $request ): array {
-		$request_args = $request->get_json_params();
+	public function get_live_reloader_data( WP_REST_Request $wprest_request ): array {
+		$request_args = $wprest_request->get_json_params();
 
 		$page_changed_args = $this->maybe_get_page_changed_response( $request_args );
 
@@ -469,23 +465,22 @@ class Live_Reloader implements Hooks_Interface {
 
 	public function register_rest_routes(): void {
 		register_rest_route(
+			// todo replace to 'advanced-views' (here and in JS).
 			'acf_views/v1',
 			'/live-reloader',
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'get_live_reloader_data' ),
-				'permission_callback' => function (): bool {
-					return Avf_User::can_manage();
-				},
+				'permission_callback' => fn(): bool => Avf_User::can_manage(),
 			)
 		);
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+		self::add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
 	}
 }

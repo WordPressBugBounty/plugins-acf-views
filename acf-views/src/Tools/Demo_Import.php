@@ -6,68 +6,69 @@ namespace Org\Wplake\Advanced_Views\Tools;
 
 defined( 'ABSPATH' ) || exit;
 
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 use Exception;
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
+use Org\Wplake\Advanced_Views\Post_Selections\Cpt\Post_Selections_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Fields\Post\Post_Fields;
-use Org\Wplake\Advanced_Views\Groups\Card_Data;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
 use Org\Wplake\Advanced_Views\Groups\Demo_Group;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
 
-final class Demo_Import implements Hooks_Interface {
+final class Demo_Import extends Hookable implements Hooks_Interface {
 
 	private int $samsung_id;
 	private int $xiaomi_id;
 	private int $nokia_id;
-	private ?View_Data $phone_view_data;
-	private ?Card_Data $phones_card_data;
+	private ?Layout_Settings $layout_settings;
+	private ?Post_Selection_Settings $post_selection_settings;
 	private int $samsung_article_id;
 	private int $phones_article_id;
 	private int $group_id;
 
 	private string $error;
 	private bool $is_processed;
-	private Views_Cpt_Save_Actions $views_cpt_save_actions;
+	private Layouts_Cpt_Save_Actions $layouts_cpt_save_actions;
 	private Settings $settings;
 	private bool $is_import_request;
-	private Item_Data $item;
-	private Cards_Cpt_Save_Actions $cards_cpt_save_actions;
-	private Cards_Data_Storage $cards_data_storage;
-	private Views_Data_Storage $views_data_storage;
+	private Item_Settings $item_settings;
+	private Post_Selections_Cpt_Save_Actions $post_selections_cpt_save_actions;
+	private Post_Selections_Settings_Storage $post_selections_settings_storage;
+	private Layouts_Settings_Storage $layouts_settings_storage;
 
 	public function __construct(
-		Cards_Cpt_Save_Actions $cards_cpt_save_actions,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		Cards_Data_Storage $cards_data_storage,
-		Views_Data_Storage $views_data_storage,
+		Post_Selections_Cpt_Save_Actions $post_selections_cpt_save_actions,
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Post_Selections_Settings_Storage $post_selections_settings_storage,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Settings $settings,
-		Item_Data $item
+		Item_Settings $item_settings
 	) {
-		$this->views_cpt_save_actions = $views_cpt_save_actions;
-		$this->cards_cpt_save_actions = $cards_cpt_save_actions;
+		$this->layouts_cpt_save_actions         = $layouts_cpt_save_actions;
+		$this->post_selections_cpt_save_actions = $post_selections_cpt_save_actions;
 
-		$this->settings           = $settings;
-		$this->item               = $item->getDeepClone();
-		$this->cards_data_storage = $cards_data_storage;
-		$this->views_data_storage = $views_data_storage;
+		$this->settings                         = $settings;
+		$this->item_settings                    = $item_settings->getDeepClone();
+		$this->post_selections_settings_storage = $post_selections_settings_storage;
+		$this->layouts_settings_storage         = $layouts_settings_storage;
 
-		$this->samsung_id         = 0;
-		$this->xiaomi_id          = 0;
-		$this->nokia_id           = 0;
-		$this->phone_view_data    = null;
-		$this->phones_card_data   = null;
-		$this->samsung_article_id = 0;
-		$this->phones_article_id  = 0;
-		$this->group_id           = 0;
+		$this->samsung_id              = 0;
+		$this->xiaomi_id               = 0;
+		$this->nokia_id                = 0;
+		$this->layout_settings         = null;
+		$this->post_selection_settings = null;
+		$this->samsung_article_id      = 0;
+		$this->phones_article_id       = 0;
+		$this->group_id                = 0;
 
 		$this->error             = '';
 		$this->is_processed      = false;
@@ -138,33 +139,33 @@ final class Demo_Import implements Hooks_Interface {
 	}
 
 	protected function create_acf_view(): void {
-		$this->phone_view_data = $this->views_data_storage->create_new(
+		$this->layout_settings = $this->layouts_settings_storage->create_new(
 			'publish',
 			__( '"Phone" Demo View', 'acf-views' )
 		);
 
-		if ( null === $this->phone_view_data ) {
+		if ( null === $this->layout_settings ) {
 			$this->add_error( __( 'Failed to create a View', 'acf-views' ) );
 
 			return;
 		}
 
-		$this->views_data_storage->save( $this->phone_view_data );
+		$this->layouts_settings_storage->save( $this->layout_settings );
 	}
 
 	protected function create_acf_card(): void {
-		$this->phones_card_data = $this->cards_data_storage->create_new(
+		$this->post_selection_settings = $this->post_selections_settings_storage->create_new(
 			'publish',
 			__( '"Phones" Demo Card', 'acf-views' )
 		);
 
-		if ( null === $this->phones_card_data ) {
+		if ( null === $this->post_selection_settings ) {
 			$this->add_error( __( 'Failed to create a Card', 'acf-views' ) );
 
 			return;
 		}
 
-		$this->cards_data_storage->save( $this->phones_card_data );
+		$this->post_selections_settings_storage->save( $this->post_selection_settings );
 	}
 
 	/**
@@ -183,8 +184,8 @@ final class Demo_Import implements Hooks_Interface {
 
 		if ( key_exists( 'location', $group_json ) &&
 			is_array( $group_json['location'] ) ) {
-			if ( isset( $group_json['location'][0][0] ) &&
-				is_array( $group_json['location'][0] ) &&
+			if ( is_array( $group_json['location'][0] ) &&
+				isset( $group_json['location'][0][0] ) &&
 				is_array( $group_json['location'][0][0] ) ) {
 				$group_json['location'][0][0]['value'] = $this->samsung_id;
 			}
@@ -207,7 +208,9 @@ final class Demo_Import implements Hooks_Interface {
 		if ( key_exists( 'fields', $group_json ) &&
 			is_array( $group_json['fields'] ) ) {
 			foreach ( $group_json['fields'] as &$field ) {
-				$field['key'] = uniqid( 'field_' );
+				if ( is_array( $field ) ) {
+					$field['key'] = uniqid( 'field_' );
+				}
 			}
 		}
 
@@ -231,7 +234,7 @@ final class Demo_Import implements Hooks_Interface {
 	 * @throws Exception
 	 */
 	protected function fill_phone_acf_view( array $group_data ): void {
-		$view = $this->phone_view_data;
+		$view = $this->layout_settings;
 
 		if ( null === $view ) {
 			return;
@@ -246,9 +249,9 @@ final class Demo_Import implements Hooks_Interface {
 			$group_data['key'] :
 			'';
 
-		$title_link_item             = $this->item->getDeepClone();
+		$title_link_item             = $this->item_settings->getDeepClone();
 		$title_link_item->group      = Post_Fields::GROUP_NAME;
-		$title_link_item->field->key = Field_Data::create_field_key(
+		$title_link_item->field->key = Field_Settings::create_field_key(
 			Post_Fields::GROUP_NAME,
 			Post_Fields::FIELD_TITLE_LINK
 		);
@@ -264,10 +267,10 @@ final class Demo_Import implements Hooks_Interface {
 			$group_data['fields'][0]['key'] :
 			'';
 
-		$brand_item               = $this->item->getDeepClone();
+		$brand_item               = $this->item_settings->getDeepClone();
 		$brand_item->group        = $group_key;
 		$brand_item->field->label = __( 'Brand:', 'acf-views' );
-		$brand_item->field->key   = Field_Data::create_field_key( $group_key, $field_key );
+		$brand_item->field->key   = Field_Settings::create_field_key( $group_key, $field_key );
 		$brand_item->field->id    = 'brand';
 		$view->items[]            = $brand_item;
 
@@ -280,10 +283,10 @@ final class Demo_Import implements Hooks_Interface {
 			$group_data['fields'][1]['key'] :
 			'';
 
-		$model_item               = $this->item->getDeepClone();
+		$model_item               = $this->item_settings->getDeepClone();
 		$model_item->group        = $group_key;
 		$model_item->field->label = __( 'Model:', 'acf-views' );
-		$model_item->field->key   = Field_Data::create_field_key( $group_key, $field_key );
+		$model_item->field->key   = Field_Settings::create_field_key( $group_key, $field_key );
 		$model_item->field->id    = 'model';
 		$view->items[]            = $model_item;
 
@@ -296,10 +299,10 @@ final class Demo_Import implements Hooks_Interface {
 			$group_data['fields'][2]['key'] :
 			'';
 
-		$price_item               = $this->item->getDeepClone();
+		$price_item               = $this->item_settings->getDeepClone();
 		$price_item->group        = $group_key;
 		$price_item->field->label = __( 'Price:', 'acf-views' );
-		$price_item->field->key   = Field_Data::create_field_key( $group_key, $field_key );
+		$price_item->field->key   = Field_Settings::create_field_key( $group_key, $field_key );
 		$price_item->field->id    = 'price';
 		$view->items[]            = $price_item;
 
@@ -312,11 +315,11 @@ final class Demo_Import implements Hooks_Interface {
 			$group_data['fields'][3]['key'] :
 			'';
 
-		$website_item                    = $this->item->getDeepClone();
+		$website_item                    = $this->item_settings->getDeepClone();
 		$website_item->group             = $group_key;
 		$website_item->field->label      = __( 'Website:', 'acf-views' );
 		$website_item->field->link_label = __( 'Visit', 'acf-views' );
-		$website_item->field->key        = Field_Data::create_field_key( $group_key, $field_key );
+		$website_item->field->key        = Field_Settings::create_field_key( $group_key, $field_key );
 		$website_item->field->id         = 'website';
 		$view->items[]                   = $website_item;
 
@@ -328,12 +331,12 @@ final class Demo_Import implements Hooks_Interface {
 										"#view__label {\n width: 100px;\n font-weight: bold;\n padding-right: 10px;\n}\n\n";
 
 		// it'll also save the data above.
-		$this->views_cpt_save_actions->perform_save_actions( $view->get_post_id() );
+		$this->layouts_cpt_save_actions->perform_save_actions( $view->get_post_id() );
 	}
 
 	protected function fill_phone_acf_card(): void {
-		$card_data = $this->phones_card_data;
-		$view_data = $this->phone_view_data;
+		$card_data = $this->post_selection_settings;
+		$view_data = $this->layout_settings;
 
 		if ( null === $card_data ||
 			null === $view_data ) {
@@ -353,7 +356,7 @@ final class Demo_Import implements Hooks_Interface {
 								"#card .acf-view {\n flex-basis:33%;\n flex-shrink:0;\n padding:10px 20px;\n}\n\n";
 
 		// it'll also save the data above.
-		$this->cards_cpt_save_actions->perform_save_actions( $card_data->get_post_id() );
+		$this->post_selections_cpt_save_actions->perform_save_actions( $card_data->get_post_id() );
 	}
 
 	/**
@@ -363,8 +366,8 @@ final class Demo_Import implements Hooks_Interface {
 	 */
 	protected function fill_pages( array $group_data ): void {
 		if ( ! function_exists( 'update_field' ) ||
-			null === $this->phone_view_data ||
-			null === $this->phones_card_data ) {
+			null === $this->layout_settings ||
+			null === $this->post_selection_settings ) {
 			return;
 		}
 
@@ -422,7 +425,7 @@ final class Demo_Import implements Hooks_Interface {
 				'<!-- wp:heading --><h2>%s</h2><!-- /wp:heading -->',
 				__( '"Phone" View to show fields of this page', 'acf-views' )
 			);
-			$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->phone_view_data->get_unique_id(
+			$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->layout_settings->get_unique_id(
 				true
 			) . '"]<!-- /wp:shortcode -->';
 
@@ -443,7 +446,7 @@ final class Demo_Import implements Hooks_Interface {
 			'<!-- wp:heading --><h2>%s</h2><!-- /wp:heading -->',
 			__( "'Phone' View with the object-id argument to show Samsung Phone's fields", 'acf-views' )
 		);
-		$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->phone_view_data->get_unique_id(
+		$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->layout_settings->get_unique_id(
 			true
 		) . '" object-id="' . $this->samsung_id . '"]<!-- /wp:shortcode -->';
 		wp_update_post(
@@ -462,7 +465,7 @@ final class Demo_Import implements Hooks_Interface {
 			'<!-- wp:heading --><h2>%s</h2><!-- /wp:heading -->',
 			__( '"Phones" Card to show the phones', 'acf-views' )
 		);
-		$post_content .= '<!-- wp:shortcode -->[acf_cards card-id="' . $this->phones_card_data->get_unique_id(
+		$post_content .= '<!-- wp:shortcode -->[acf_cards card-id="' . $this->post_selection_settings->get_unique_id(
 			true
 		) . '"]<!-- /wp:shortcode -->';
 		wp_update_post(
@@ -474,9 +477,9 @@ final class Demo_Import implements Hooks_Interface {
 	}
 
 	protected function save_ids(): void {
-		$phone_view_id = null !== $this->phone_view_data ? $this->phone_view_data->get_post_id() :
+		$phone_view_id = null !== $this->layout_settings ? $this->layout_settings->get_post_id() :
 			- 1;
-		$phone_card_id = null !== $this->phones_card_data ? $this->phones_card_data->get_post_id() :
+		$phone_card_id = null !== $this->post_selection_settings ? $this->post_selection_settings->get_post_id() :
 			- 1;
 
 		$this->settings->set_demo_import(
@@ -522,13 +525,13 @@ final class Demo_Import implements Hooks_Interface {
 			(int) $ids['phoneViewId'] :
 			- 1;
 		$phone_view_unique_id  = get_post( $phone_view_id )->post_name ?? '';
-		$this->phone_view_data = $this->views_data_storage->get( $phone_view_unique_id );
+		$this->layout_settings = $this->layouts_settings_storage->get( $phone_view_unique_id );
 
-		$phones_card_id         = is_numeric( $ids['phonesCardId'] ) ?
+		$phones_card_id                = is_numeric( $ids['phonesCardId'] ) ?
 			(int) $ids['phonesCardId'] :
 			- 1;
-		$phone_card_unique_id   = get_post( $phones_card_id )->post_name ?? '';
-		$this->phones_card_data = $this->cards_data_storage->get( $phone_card_unique_id );
+		$phone_card_unique_id          = get_post( $phones_card_id )->post_name ?? '';
+		$this->post_selection_settings = $this->post_selections_settings_storage->get( $phone_card_unique_id );
 
 		$this->samsung_article_id = is_numeric( $ids['samsungArticleId'] ) ?
 			(int) $ids['samsungArticleId'] :
@@ -594,12 +597,12 @@ final class Demo_Import implements Hooks_Interface {
 
 		// force to bypass a trash.
 
-		if ( null !== $this->phone_view_data ) {
-			$this->views_data_storage->delete_and_bypass_trash( $this->phone_view_data );
+		if ( null !== $this->layout_settings ) {
+			$this->layouts_settings_storage->delete_and_bypass_trash( $this->layout_settings );
 		}
 
-		if ( null !== $this->phones_card_data ) {
-			$this->cards_data_storage->delete_and_bypass_trash( $this->phones_card_data );
+		if ( null !== $this->post_selection_settings ) {
+			$this->post_selections_settings_storage->delete_and_bypass_trash( $this->post_selection_settings );
 		}
 
 		wp_delete_post( $this->samsung_id, true );
@@ -612,14 +615,14 @@ final class Demo_Import implements Hooks_Interface {
 		$this->settings->set_demo_import( array() );
 		$this->settings->save();
 
-		$this->samsung_id         = 0;
-		$this->xiaomi_id          = 0;
-		$this->nokia_id           = 0;
-		$this->phone_view_data    = null;
-		$this->phones_card_data   = null;
-		$this->samsung_article_id = 0;
-		$this->phones_article_id  = 0;
-		$this->group_id           = 0;
+		$this->samsung_id              = 0;
+		$this->xiaomi_id               = 0;
+		$this->nokia_id                = 0;
+		$this->layout_settings         = null;
+		$this->post_selection_settings = null;
+		$this->samsung_article_id      = 0;
+		$this->phones_article_id       = 0;
+		$this->group_id                = 0;
 	}
 
 	public function is_has_error(): bool {
@@ -667,19 +670,19 @@ final class Demo_Import implements Hooks_Interface {
 	}
 
 	public function get_phone_acf_view_link(): string {
-		if ( null === $this->phone_view_data ) {
+		if ( null === $this->layout_settings ) {
 			return '';
 		}
 
-		return $this->phone_view_data->get_edit_post_link();
+		return $this->layout_settings->get_edit_post_link();
 	}
 
 	public function get_phones_acf_card_link(): string {
-		if ( null === $this->phones_card_data ) {
+		if ( null === $this->post_selection_settings ) {
 			return '';
 		}
 
-		return $this->phones_card_data->get_edit_post_link();
+		return $this->post_selection_settings->get_edit_post_link();
 	}
 
 	public function maybe_process_form(): void {
@@ -707,11 +710,11 @@ final class Demo_Import implements Hooks_Interface {
 		$this->delete();
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'wp_loaded', array( $this, 'maybe_process_form' ) );
+		self::add_action( 'wp_loaded', array( $this, 'maybe_process_form' ) );
 	}
 }

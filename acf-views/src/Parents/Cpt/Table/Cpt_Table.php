@@ -5,25 +5,28 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Parents\Cpt\Table;
 
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Groups\Card_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Data_Storage;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
+use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Settings_Storage;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Pub\Public_Cpt;
 use WP_List_Table;
 use WP_Post;
 use WP_Post_Type;
 use WP_Query;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-abstract class Cpt_Table implements Hooks_Interface {
+abstract class Cpt_Table extends Hookable implements Hooks_Interface {
+	const COLUMN_PREFIX = Hard_Layout_Cpt::NAME . '_';
 
-	private Cpt_Data_Storage $cpt_data_storage;
+	private Cpt_Settings_Storage $cpt_settings_storage;
 	private string $cpt_name;
 	/**
 	 * @var Tab_Data[]
@@ -37,12 +40,14 @@ abstract class Cpt_Table implements Hooks_Interface {
 	private ?int $current_page_number;
 	private ?string $current_search_value;
 	private ?int $pagination_per_page;
+	protected Public_Cpt $public_plugin_cpt;
 
-	public function __construct( Cpt_Data_Storage $cpt_data_storage, string $name ) {
-		$this->cpt_data_storage  = $cpt_data_storage;
-		$this->cpt_name          = $name;
-		$this->tabs              = array();
-		$this->add_tab_callbacks = array();
+	public function __construct( Cpt_Settings_Storage $cpt_settings_storage, Public_Cpt $public_cpt ) {
+		$this->cpt_settings_storage = $cpt_settings_storage;
+		$this->public_plugin_cpt    = $public_cpt;
+		$this->cpt_name             = $public_cpt->cpt_name();
+		$this->tabs                 = array();
+		$this->add_tab_callbacks    = array();
 
 		$this->current_tab          = null;
 		$this->current_page_number  = null;
@@ -50,7 +55,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 		$this->pagination_per_page  = null;
 	}
 
-	abstract protected function print_column( string $column_name, Cpt_Data $cpt_data ): void;
+	abstract protected function print_column( string $short_column_name, Cpt_Settings $cpt_settings ): void;
 
 	protected function get_action_clone(): string {
 		return $this->cpt_name . '_clone';
@@ -72,11 +77,11 @@ abstract class Cpt_Table implements Hooks_Interface {
 			return;
 		}
 
-		$origin_cpt_data = $this->cpt_data_storage->get( $post->post_name );
+		$origin_cpt_data = $this->cpt_settings_storage->get( $post->post_name );
 		$title           = $origin_cpt_data->title . ' ' . __( 'Clone', 'acf-views' );
 
 		// 1. make the new instance
-		$cpt_data = $this->cpt_data_storage->create_new( 'draft', $title, (int) $post->post_author );
+		$cpt_data = $this->cpt_settings_storage->create_new( 'draft', $title, (int) $post->post_author );
 
 		if ( null === $cpt_data ) {
 			return;
@@ -92,7 +97,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 		$cpt_data->title     = $title;
 
 		// 4. save
-		$this->cpt_data_storage->save( $cpt_data );
+		$this->cpt_settings_storage->save( $cpt_data );
 
 		wp_safe_redirect(
 			$this->get_tab_url(
@@ -117,7 +122,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 			'</p></div>';
 	}
 
-	protected function print_post_type_description( WP_Post_Type $post_type ): void {
+	protected function print_post_type_description( WP_Post_Type $wp_post_type ): void {
 		$current_tab_data = $this->get_current_tab_data();
 
 		if ( null !== $current_tab_data &&
@@ -129,10 +134,10 @@ abstract class Cpt_Table implements Hooks_Interface {
 			return;
 		}
 
-		if ( '' !== $post_type->description ) {
+		if ( '' !== $wp_post_type->description ) {
 			// don't use esc_html as it contains links.
 			// @phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			printf( '<p>%s</p>', $post_type->description );
+			printf( '<p>%s</p>', $wp_post_type->description );
 		}
 	}
 
@@ -186,7 +191,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 
 	protected function print_search_box_description( bool $is_custom_tab_active ): void {
 		$label = false === $is_custom_tab_active ?
-			__( 'Search for name, description, labels or view-id.', 'acf-views' ) :
+			__( 'Search for name, description, labels or id.', 'acf-views' ) :
 			__( 'Search for name.', 'acf-views' );
 
 		// only primary search is available for custom items.
@@ -195,6 +200,13 @@ abstract class Cpt_Table implements Hooks_Interface {
 			esc_html( $label )
 		);
 	}
+
+	/**
+	 * @param array<string,string> $columns
+	 *
+	 * @return array<string,string>
+	 */
+	abstract public function get_columns( array $columns ): array;
 
 	/**
 	 * @param array<string, string|int> $extra_args
@@ -231,37 +243,37 @@ abstract class Cpt_Table implements Hooks_Interface {
 		return array_merge( array_slice( $items, 0, $pos ), $new_items, array_slice( $items, $pos ) );
 	}
 
-	public function add_post_name_to_search( WP_Query $query ): void {
-		$post_type = $query->query_vars['post_type'] ?? '';
+	public function add_post_name_to_search( WP_Query $wp_query ): void {
+		$post_type = $wp_query->query_vars['post_type'] ?? '';
 
 		if ( ! is_admin() ||
-			! in_array( $post_type, array( Views_Cpt::NAME, Cards_Cpt::NAME ), true ) ||
-			! $query->is_main_query() ||
-			! $query->is_search() ) {
+			! in_array( $post_type, array( Hard_Layout_Cpt::cpt_name(), Hard_Post_Selection_Cpt::cpt_name() ), true ) ||
+			! $wp_query->is_main_query() ||
+			! $wp_query->is_search() ) {
 			return;
 		}
 
-		$search = $query->query_vars['s'];
+		$search = $wp_query->query_vars['s'];
 
 		if ( 13 !== strlen( $search ) ||
 			false === preg_match( '/^[a-z0-9]+$/', $search ) ) {
 			return;
 		}
 
-		$prefix = Views_Cpt::NAME === $post_type ?
-			View_Data::UNIQUE_ID_PREFIX :
-			Card_Data::UNIQUE_ID_PREFIX;
+		$prefix = Hard_Layout_Cpt::cpt_name() === $post_type ?
+			Layout_Settings::UNIQUE_ID_PREFIX :
+			Post_Selection_Settings::UNIQUE_ID_PREFIX;
 
-		$query->set( 's', '' );
-		$query->set( 'name', $prefix . $search );
+		$wp_query->set( 's', '' );
+		$wp_query->set( 'name', $prefix . $search );
 	}
 
 	public function make_table_actions(): void {
 		$this->maybe_clone_item();
 
-		if ( true === $this->cpt_data_storage->get_file_system()->is_active() ) {
-			$this->cpt_data_storage->delete_db_only_items();
-			$this->cpt_data_storage->rewrite_links_md_for_all_items();
+		if ( true === $this->cpt_settings_storage->get_file_system()->is_active() ) {
+			$this->cpt_settings_storage->delete_db_only_items();
+			$this->cpt_settings_storage->rewrite_links_md_for_all_items();
 		}
 	}
 
@@ -274,8 +286,8 @@ abstract class Cpt_Table implements Hooks_Interface {
 	 *
 	 * @return array<string,string>
 	 */
-	public function get_row_actions( array $actions, WP_Post $view ): array {
-		if ( $this->cpt_name !== $view->post_type ) {
+	public function get_row_actions( array $actions, WP_Post $wp_post ): array {
+		if ( $this->cpt_name !== $wp_post->post_type ) {
 			return $actions;
 		}
 
@@ -292,7 +304,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 		$clone_link = $this->get_tab_url(
 			'',
 			array(
-				$this->get_action_clone() => $view->ID,
+				$this->get_action_clone() => $wp_post->ID,
 				'_wpnonce'                => wp_create_nonce( 'bulk-posts' ),
 			)
 		);
@@ -329,7 +341,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 		// do not replace if tab is active, but no items are available (to display the not found message).
 		if ( null !== $current_tab_data &&
 			count( $current_tab_data->get_items() ) > 0 ) {
-			add_action( 'admin_footer', array( $this, 'replace_table_items_with_custom' ) );
+			self::add_action( 'admin_footer', array( $this, 'replace_table_items_with_custom' ) );
 		}
 
 		$is_custom_tab_active = null !== $current_tab_data;
@@ -432,7 +444,7 @@ abstract class Cpt_Table implements Hooks_Interface {
 
 	public function printTableColumn( string $column_name, int $post_id ): void {
 		$unique_id = get_post( $post_id )->post_name ?? '';
-		$cpt_data  = $this->cpt_data_storage->get( $unique_id );
+		$cpt_data  = $this->cpt_settings_storage->get( $unique_id );
 
 		$this->print_column( $column_name, $cpt_data );
 	}
@@ -452,8 +464,8 @@ abstract class Cpt_Table implements Hooks_Interface {
 		return $current_tab_data->get_bulk_actions();
 	}
 
-	public function hide_excerpt_from_extended_list_view( string $excerpt, WP_Post $post ): string {
-		if ( $this->cpt_name !== $post->post_type ) {
+	public function hide_excerpt_from_extended_list_view( string $excerpt, WP_Post $wp_post ): string {
+		if ( $this->cpt_name !== $wp_post->post_type ) {
 			return $excerpt;
 		}
 
@@ -478,8 +490,8 @@ abstract class Cpt_Table implements Hooks_Interface {
 		return $this->cpt_name;
 	}
 
-	public function add_tab( Tab_Data $cpt_table_tab_data ): void {
-		$this->tabs[] = $cpt_table_tab_data;
+	public function add_tab( Tab_Data $tab_data ): void {
+		$this->tabs[] = $tab_data;
 	}
 
 	public function get_current_tab(): string {
@@ -550,28 +562,33 @@ abstract class Cpt_Table implements Hooks_Interface {
 		$this->add_tab_callbacks[] = $new_tab_callback;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		if ( true === $current_screen->is_admin_cpt_related( $this->cpt_name, Current_Screen::CPT_LIST ) ) {
-			add_action( 'admin_init', array( $this, 'make_table_actions' ) );
-			add_action( 'admin_notices', array( $this, 'show_action_result_message' ) );
-			add_filter( 'admin_body_class', array( $this, 'add_acf_class_to_body' ) );
-			add_filter( sprintf( 'views_edit-%s', $this->cpt_name ), array( $this, 'modify_table_header' ) );
+		self::add_filter(
+			sprintf( 'manage_%s_posts_columns', $this->get_cpt_name() ),
+			array( $this, 'get_columns' ),
+		);
+
+		if ( true === $route_detector->is_cpt_admin_route( $this->cpt_name, Route_Detector::CPT_LIST ) ) {
+			self::add_action( 'admin_init', array( $this, 'make_table_actions' ) );
+			self::add_action( 'admin_notices', array( $this, 'show_action_result_message' ) );
+			self::add_filter( 'admin_body_class', array( $this, 'add_acf_class_to_body' ) );
+			self::add_filter( sprintf( 'views_edit-%s', $this->cpt_name ), array( $this, 'modify_table_header' ) );
 		}
 
-		add_action(
+		self::add_action(
 			sprintf( 'manage_%s_posts_custom_column', $this->cpt_name ),
 			array( $this, 'printTableColumn' ),
 			10,
 			2
 		);
-		add_action( 'pre_get_posts', array( $this, 'add_post_name_to_search' ) );
+		self::add_action( 'pre_get_posts', array( $this, 'add_post_name_to_search' ) );
 
-		add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
-		add_filter( sprintf( 'bulk_actions-edit-%s', $this->cpt_name ), array( $this, 'get_bulk_table_actions' ) );
-		add_filter( 'get_the_excerpt', array( $this, 'hide_excerpt_from_extended_list_view' ), 10, 2 );
+		self::add_filter( 'post_row_actions', array( $this, 'get_row_actions' ), 10, 2 );
+		self::add_filter( sprintf( 'bulk_actions-edit-%s', $this->cpt_name ), array( $this, 'get_bulk_table_actions' ) );
+		self::add_filter( 'get_the_excerpt', array( $this, 'hide_excerpt_from_extended_list_view' ), 10, 2 );
 	}
 }

@@ -5,7 +5,7 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Data_Vendors;
 
 use DateTime;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Data_Vendors\Acf\Acf_Data_Vendor;
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Data_Vendor_Integration_Interface;
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Data_Vendor_Interface;
@@ -15,22 +15,24 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box\Meta_Box_Data_Vendor;
 use Org\Wplake\Advanced_Views\Data_Vendors\Pods\Pods_Data_Vendor;
 use Org\Wplake\Advanced_Views\Data_Vendors\Woo\Woo_Data_Vendor;
 use Org\Wplake\Advanced_Views\Data_Vendors\Wp\Wp_Data_Vendor;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\Field_Meta;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Source;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Source;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -80,19 +82,19 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	}
 
 	protected function load_integration_instance(
-		Current_Screen $current_screen,
-		Data_Vendor_Integration_Interface $integration_instance,
-		Views_Data_Storage $views_data_storage
+		Route_Detector $route_detector,
+		Data_Vendor_Integration_Interface $data_vendor_integration,
+		Layouts_Settings_Storage $layouts_settings_storage
 	): void {
 		// functions below only for the admin part.
-		if ( false === $current_screen->is_admin() ) {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		$integration_instance->add_tab_to_meta_group();
-		$integration_instance->add_column_to_list_table();
-		$integration_instance->validate_related_views_on_group_change();
-		$integration_instance->maybe_create_view_for_group();
+		$data_vendor_integration->add_tab_to_meta_group();
+		$data_vendor_integration->add_column_to_list_table();
+		$data_vendor_integration->validate_related_views_on_group_change();
+		$data_vendor_integration->maybe_create_view_for_group();
 	}
 
 	/**
@@ -184,8 +186,8 @@ class Data_Vendors extends Action implements Hooks_Interface {
 			$vendor_field_key_conditional_rules = $data_vendor->get_field_key_conditional_rules( $is_sub_fields );
 
 			foreach ( $vendor_field_key_conditional_rules as $vendor_field => $vendor_field_conditions ) {
-				$field_key_conditions[ $vendor_field ] = $field_key_conditions[ $vendor_field ] ?? array();
-				$field_key_conditions[ $vendor_field ] = array_merge(
+				$field_key_conditions[ $vendor_field ] ??= array();
+				$field_key_conditions[ $vendor_field ]   = array_merge(
 					$field_key_conditions[ $vendor_field ],
 					$vendor_field_conditions
 				);
@@ -230,7 +232,7 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	public function get_field_meta( string $vendor_name, string $field_id ): Field_Meta_Interface {
 		$vendor = $this->data_vendors[ $vendor_name ] ?? null;
 
-		$this->field_meta_cache[ $vendor_name ] = $this->field_meta_cache[ $vendor_name ] ?? array();
+		$this->field_meta_cache[ $vendor_name ] ??= array();
 
 		if ( false === key_exists( $field_id, $this->field_meta_cache[ $vendor_name ] ) ) {
 			$field_meta = new Field_Meta( $vendor_name, $field_id );
@@ -253,10 +255,10 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	 * @return mixed
 	 */
 	public function get_field_value(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
-		?Item_Data $item_data = null,
+		?Item_Settings $item_settings = null,
 		bool $is_formatted = false,
 		?array $local_data = null
 	) {
@@ -267,10 +269,10 @@ class Data_Vendors extends Action implements Hooks_Interface {
 		}
 
 		return $this->data_vendors[ $vendor_name ]->get_field_value(
-			$field_data,
+			$field_settings,
 			$field_meta,
 			$source,
-			$item_data,
+			$item_settings,
 			$is_formatted,
 			$local_data
 		);
@@ -291,27 +293,27 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	/**
 	 * @return string[]
 	 */
-	public function get_field_front_assets( string $vendor_name, Field_Data $field_data ): array {
+	public function get_field_front_assets( string $vendor_name, Field_Settings $field_settings ): array {
 		if ( ! key_exists( $vendor_name, $this->data_vendors ) ) {
 			return array();
 		}
 
-		$field_front_assets = $this->data_vendors[ $vendor_name ]->get_field_front_assets( $field_data );
+		$field_front_assets = $this->data_vendors[ $vendor_name ]->get_field_front_assets( $field_settings );
 
 		// avoid duplicates (can be in case of the inheritance chain).
 		return array_unique( $field_front_assets );
 	}
 
 	/**
-	 * @return array{0:Field_Data[],1:Field_Data[]}
+	 * @return array{0:Field_Settings[],1:Field_Settings[]}
 	 */
-	public function get_fields_by_front_asset( string $asset_name, View_Data $view_data ): array {
+	public function get_fields_by_front_asset( string $asset_name, Layout_Settings $layout_settings ): array {
 		$fields = array(
 			array(),
 			array(),
 		);
 
-		foreach ( $view_data->items as $item ) {
+		foreach ( $layout_settings->items as $item ) {
 			foreach ( $item->repeater_fields as $repeater_field ) {
 				$vendor_name = $repeater_field->get_vendor_name();
 
@@ -339,20 +341,20 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	 */
 	public function get_all_conditional_fields(): array {
 		return array(
-			Field_Data::FIELD_LINK_LABEL,
-			Field_Data::FIELD_IS_LINK_TARGET_BLANK,
-			Field_Data::FIELD_ACF_VIEW_ID,
-			Field_Data::FIELD_SLIDER_TYPE,
-			Field_Data::FIELD_MAP_MARKER_ICON,
-			Field_Data::FIELD_MAP_MARKER_ICON_TITLE,
-			Field_Data::FIELD_MAP_ADDRESS_FORMAT,
-			Field_Data::FIELD_IS_MAP_WITH_ADDRESS,
-			Field_Data::FIELD_IS_MAP_WITHOUT_GOOGLE_MAP,
-			Field_Data::FIELD_IMAGE_SIZE,
-			Field_Data::FIELD_LIGHTBOX_TYPE,
-			Field_Data::FIELD_GALLERY_WITH_LIGHT_BOX,
-			Field_Data::FIELD_GALLERY_TYPE,
-			Field_Data::FIELD_OPTIONS_DELIMITER,
+			Field_Settings::FIELD_LINK_LABEL,
+			Field_Settings::FIELD_IS_LINK_TARGET_BLANK,
+			Field_Settings::FIELD_ACF_VIEW_ID,
+			Field_Settings::FIELD_SLIDER_TYPE,
+			Field_Settings::FIELD_MAP_MARKER_ICON,
+			Field_Settings::FIELD_MAP_MARKER_ICON_TITLE,
+			Field_Settings::FIELD_MAP_ADDRESS_FORMAT,
+			Field_Settings::FIELD_IS_MAP_WITH_ADDRESS,
+			Field_Settings::FIELD_IS_MAP_WITHOUT_GOOGLE_MAP,
+			Field_Settings::FIELD_IMAGE_SIZE,
+			Field_Settings::FIELD_LIGHTBOX_TYPE,
+			Field_Settings::FIELD_GALLERY_WITH_LIGHT_BOX,
+			Field_Settings::FIELD_GALLERY_TYPE,
+			Field_Settings::FIELD_OPTIONS_DELIMITER,
 		);
 	}
 
@@ -371,7 +373,7 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	public function convert_date_to_string_for_db_comparison(
 		string $vendor,
 		DateTime $date_time,
-		Field_Meta_Interface $field_meta_interface
+		Field_Meta_Interface $field_meta
 	): string {
 		if ( false === key_exists( $vendor, $this->data_vendors ) ) {
 			return '';
@@ -379,44 +381,46 @@ class Data_Vendors extends Action implements Hooks_Interface {
 
 		return $this->data_vendors[ $vendor ]->convert_date_to_string_for_db_comparison(
 			$date_time,
-			$field_meta_interface
+			$field_meta
 		);
 	}
 
 	public function make_integration_instances(
-		Current_Screen $current_screen,
-		Item_Data $item_data,
-		Views_Data_Storage $views_data_storage,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Repeater_Field_Data $repeater_field_data,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Route_Detector $route_detector,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Repeater_Field_Settings $repeater_field_settings,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	): void {
 		// 1. must on or later 'plugins_load', when meta plugins are loaded
 		// 2. must be on or later 'after_setup_theme', when FS only Views and Cards are available
-		add_action(
-			'after_setup_theme',
+		$layouts_settings_storage->add_on_loaded_callback(
 			function () use (
-				$current_screen,
-				$item_data,
-				$views_data_storage,
-				$views_cpt_save_actions,
-				$view_factory,
-				$repeater_field_data,
-				$view_shortcode,
-				$settings
-			) {
+				$route_detector,
+				$item_settings,
+				$layouts_settings_storage,
+				$layouts_cpt_save_actions,
+				$layout_factory,
+				$repeater_field_settings,
+				$layout_shortcode,
+				$settings,
+				$plugin_cpt
+			): void {
 				foreach ( $this->data_vendors as $vendor ) {
 					$integration_instance = $vendor->make_integration_instance(
-						$item_data,
-						$views_data_storage,
+						$item_settings,
+						$layouts_settings_storage,
 						$this,
-						$views_cpt_save_actions,
-						$view_factory,
-						$repeater_field_data,
-						$view_shortcode,
-						$settings
+						$layouts_cpt_save_actions,
+						$layout_factory,
+						$repeater_field_settings,
+						$layout_shortcode,
+						$settings,
+						$plugin_cpt
 					);
 
 					// integration instance is optional (e.g. Woo and WP don't have).
@@ -424,7 +428,7 @@ class Data_Vendors extends Action implements Hooks_Interface {
 						continue;
 					}
 
-					$this->load_integration_instance( $current_screen, $integration_instance, $views_data_storage );
+					$this->load_integration_instance( $route_detector, $integration_instance, $layouts_settings_storage );
 				}
 			}
 		);
@@ -435,7 +439,7 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	 */
 	public function get_group_link_by_group_id( string $group_id, string $vendor_name = '' ): ?array {
 		if ( '' === $vendor_name ) {
-			$vendor_name                    = Field_Data::get_vendor_name_by_key( $group_id . '|fake-field-id' );
+			$vendor_name                    = Field_Settings::get_vendor_name_by_key( $group_id . '|fake-field-id' );
 			$group_id_without_vendor_prefix = explode( ':', $group_id )[1] ?? $group_id;
 		} else {
 			$group_id_without_vendor_prefix = $group_id;
@@ -462,7 +466,7 @@ class Data_Vendors extends Action implements Hooks_Interface {
 	 * @param array<string, string> $import_files name => content
 	 */
 	public function import_related_group_files( array $import_files ): Related_Groups_Import_Result {
-		$import_result = new Related_Groups_Import_Result();
+		$related_groups_import_result = new Related_Groups_Import_Result();
 
 		foreach ( $import_files as $file_name => $file_content ) {
 			if ( false === strpos( $file_name, '.json' ) ) {
@@ -483,33 +487,29 @@ class Data_Vendors extends Action implements Hooks_Interface {
 
 			$vendor = $this->get_data_vendors()[ $file_vendor ];
 
-			/**
-			 * @var array<string,mixed> $meta_data
-			 */
-			$meta_data = $this->get_array_arg( 'meta', $import_data );
+			$meta_data = arr( $import_data, 'meta' );
 			// compatibility with the old export format, which didn't have meta at all.
-			$groups_data = true === key_exists( 'groups', $import_data ) ?
-				$this->get_array_arg( 'groups', $import_data ) :
-				$import_data;
+			$groups_data = arr( $import_data, 'groups' );
 
 			foreach ( $groups_data as $group_data ) {
+				$group_data        = arr( $group_data );
 				$imported_group_id = $vendor->import_group( $group_data, $meta_data );
 
 				if ( null === $imported_group_id ) {
 					continue;
 				}
 
-				$import_result->add_group( $vendor->get_name(), $imported_group_id );
+				$related_groups_import_result->add_group( $vendor->get_name(), $imported_group_id );
 			}
 		}
 
-		return $import_result;
+		return $related_groups_import_result;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
+	public function set_hooks( Route_Detector $route_detector ): void {
 		// 1. with the higher priority than the default one, to make sure all vendor codes are loaded.
 		// 2. still small, to be earlier than the rest of AVF code listening to this hook
-		add_action(
+		self::add_action(
 			'plugins_loaded',
 			array( $this, 'load_available_vendors' ),
 			self::PLUGINS_LOADED_HOOK_PRIORITY

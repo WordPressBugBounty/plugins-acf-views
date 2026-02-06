@@ -4,30 +4,26 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views;
 
+use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Pub\Public_Cpt;
 use Org\Wplake\Advanced_Views\Tools\Demo_Import;
 use WP_Filesystem_Base;
 
 defined( 'ABSPATH' ) || exit;
 
 class Html {
-	private ?WP_Filesystem_Base $wp_filesystem;
+	private ?WP_Filesystem_Base $wp_filesystem_base;
 
 	public function __construct() {
-		$this->wp_filesystem = null;
+		$this->wp_filesystem_base = null;
 	}
 
 	protected function get_wp_filesystem(): WP_Filesystem_Base {
-		if ( null === $this->wp_filesystem ) {
-			global $wp_filesystem;
-
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-
-			WP_Filesystem();
-
-			$this->wp_filesystem = $wp_filesystem;
+		if ( null === $this->wp_filesystem_base ) {
+			$this->wp_filesystem_base = WP_Filesystem_Factory::get_wp_filesystem();
 		}
 
-		return $this->wp_filesystem;
+		return $this->wp_filesystem_base;
 	}
 
 	/**
@@ -50,7 +46,7 @@ class Html {
 	public function print_postbox_shortcode(
 		string $unique_id,
 		bool $is_short,
-		string $shortcode_name,
+		Public_Cpt $public_cpt,
 		string $entry_name,
 		bool $is_single,
 		bool $is_internal_usage_only = false
@@ -61,20 +57,15 @@ class Html {
 			return;
 		}
 
-		$id_argument = true === $is_single ?
-			'card-id' :
-			'view-id';
-
 		$this->print(
 			'postbox/shortcodes',
 			array(
-				'isShort'       => $is_short,
-				'idArgument'    => $id_argument,
-				'shortcodeName' => $shortcode_name,
-				'entryName'     => $entry_name,
-				'viewId'        => $unique_id,
-				'isSingle'      => $is_single,
-				'typeName'      => $is_single ? 'Card' : 'View',
+				'isShort'    => $is_short,
+				'idArgument' => 'id',
+				'publicCpt'  => $public_cpt,
+				'entryName'  => $entry_name,
+				'viewId'     => $unique_id,
+				'isSingle'   => $is_single,
 			)
 		);
 	}

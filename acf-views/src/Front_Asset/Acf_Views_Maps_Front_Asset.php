@@ -5,9 +5,9 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Front_Asset;
 
 use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\File_System;
 use Org\Wplake\Advanced_Views\Plugin;
 
@@ -33,7 +33,7 @@ class Acf_Views_Maps_Front_Asset extends View_Front_Asset {
 		$this->maps = array();
 	}
 
-	protected function is_google_map_selector_inner( Field_Data $field_data ): bool {
+	protected function is_google_map_selector_inner( Field_Settings $field_settings ): bool {
 		return false;
 	}
 
@@ -74,18 +74,18 @@ class Acf_Views_Maps_Front_Asset extends View_Front_Asset {
 		return $css_code;
 	}
 
-	public function maybe_activate( Cpt_Data $cpt_data ): void {
-		if ( ! ( $cpt_data instanceof View_Data ) ) {
+	public function maybe_activate( Cpt_Settings $cpt_settings ): void {
+		if ( ! ( $cpt_settings instanceof Layout_Settings ) ) {
 			return;
 		}
 
-		list( $target_fields, $target_sub_fields ) = $this->get_data_vendors()->get_fields_by_front_asset(
+		[$target_fields, $target_sub_fields] = $this->get_data_vendors()->get_fields_by_front_asset(
 			static::NAME,
-			$cpt_data
+			$cpt_settings
 		);
 
 		/**
-		 * @var Field_Data[] $target_fields
+		 * @var Field_Settings[] $target_fields
 		 */
 		$target_fields = array_merge( $target_fields, $target_sub_fields );
 
@@ -102,7 +102,7 @@ class Acf_Views_Maps_Front_Asset extends View_Front_Asset {
 
 			$is_with_google_map = true;
 			$is_inner_target    = $this->is_google_map_selector_inner( $map_field );
-			$this->maps[]       = $cpt_data->get_item_selector( $map_field, 'map', $is_inner_target );
+			$this->maps[]       = $cpt_settings->get_item_selector( $map_field, 'map', $is_inner_target );
 		}
 
 		// only google map requires it.

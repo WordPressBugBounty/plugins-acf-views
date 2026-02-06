@@ -4,23 +4,27 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views;
 
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Dashboard\Dashboard;
-use Org\Wplake\Advanced_Views\Groups\Card_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\int;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
-class Plugin implements Hooks_Interface {
+class Plugin extends Hookable implements Hooks_Interface {
 	const DOCS_URL          = 'https://docs.advanced-views.com/';
 	const PRO_VERSION_URL   = 'https://advanced-views.com/pro/';
 	const PRO_PRICING_URL   = 'https://advanced-views.com/pro/#tiers';
 	const BASIC_VERSION_URL = 'https://advanced-views.com';
 	const SURVEY_URL        = 'https://forms.gle/Wjb16B4mzgLEQvru6';
 	const CONFLICTS_URL     = 'https://docs.advanced-views.com/troubleshooting/compatibility#conflicts';
+	const PRODUCT_SLUG      = 'acf-views';
 
 	private string $slug       = 'acf-views/acf-views.php';
 	private string $short_slug = 'acf-views';
@@ -48,14 +52,9 @@ class Plugin implements Hooks_Interface {
 	}
 
 	public static function get_theme_text_domain(): string {
-		/**
-		 * @var string|false $theme_text_domain
-		 */
 		$theme_text_domain = wp_get_theme()->get( 'TextDomain' );
 
-		return is_string( $theme_text_domain ) ?
-			$theme_text_domain :
-			'';
+		return string( $theme_text_domain );
 	}
 
 	public static function get_label_translation( string $label, string $text_domain = '' ): string {
@@ -90,8 +89,8 @@ class Plugin implements Hooks_Interface {
 			return $field;
 		}
 
-		$type           = $field['type'] ?? '';
-		$field['label'] = $field['label'] ?? '';
+		$type             = $field['type'] ?? '';
+		$field['label'] ??= '';
 
 		$instructions = key_exists( 'instructions', $field ) &&
 						is_string( $field['instructions'] ) ?
@@ -101,7 +100,9 @@ class Plugin implements Hooks_Interface {
 		$field['instructions'] = $instructions;
 
 		if ( 'tab' === $type ) {
-			$field['class'] = ( $field['class'] ?? '' ) . ' acf-views-tab__pro';
+			$field['class'] = string( $field, 'class' );
+
+			$field['class'] .= ' acf-views-tab__pro';
 		} else {
 			// labels do not support HTML, so we can't use a link.
 			$field['label'] = sprintf(
@@ -175,8 +176,25 @@ class Plugin implements Hooks_Interface {
 		return $this->plugin_url;
 	}
 
-	protected function get_plugin_path(): string {
-		return $this->plugin_path;
+	/**
+	 * @param callable(): void $callback
+	 */
+	public static function on_translations_ready( callable $callback ): void {
+		add_action( 'init', $callback );
+	}
+
+	public static function get_current_admin_url(): string {
+		$uri = Query_Arguments::get_string_for_non_action( 'REQUEST_URI', 'server' );
+		$uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
+
+		if ( null === $uri ) {
+			return '';
+		}
+
+		return remove_query_arg(
+			array( '_wpnonce' ),
+			admin_url( $uri )
+		);
 	}
 
 	public function is_pro_field_locked(): bool {
@@ -209,6 +227,10 @@ class Plugin implements Hooks_Interface {
 
 	public function get_assets_path( string $file ): string {
 		return $this->plugin_path . 'src/Assets/' . $file;
+	}
+
+	public function get_plugin_path( string $inner_path ): string {
+		return $this->plugin_path . $inner_path;
 	}
 
 	public function get_acf_internal_assets_url( string $file ): string {
@@ -277,7 +299,7 @@ class Plugin implements Hooks_Interface {
 				continue;
 			}
 
-			$this->options->set_transient(
+			$this->options::set_transient(
 				Options::TRANSIENT_DEACTIVATED_OTHER_INSTANCES,
 				$deactivated_notice_id,
 				1 * HOUR_IN_SECONDS
@@ -293,10 +315,8 @@ class Plugin implements Hooks_Interface {
 
 	// notice when either Basic or Pro was automatically deactivated.
 	public function show_plugin_deactivated_notice(): void {
-		$deactivate_notice_id = $this->options->get_transient( Options::TRANSIENT_DEACTIVATED_OTHER_INSTANCES );
-		$deactivate_notice_id = is_numeric( $deactivate_notice_id ) ?
-			(int) $deactivate_notice_id :
-			0;
+		$deactivate_notice_id = $this->options::get_transient( Options::TRANSIENT_DEACTIVATED_OTHER_INSTANCES );
+		$deactivate_notice_id = int( $deactivate_notice_id );
 
 		// not set = false = 0.
 		if ( ! in_array( $deactivate_notice_id, array( 1, 2 ), true ) ) {
@@ -314,7 +334,7 @@ class Plugin implements Hooks_Interface {
 				__( 'Advanced Views Pro', 'acf-views' )
 		);
 
-		$this->options->delete_transient( Options::TRANSIENT_DEACTIVATED_OTHER_INSTANCES );
+		$this->options::delete_transient( Options::TRANSIENT_DEACTIVATED_OTHER_INSTANCES );
 
 		printf(
 			'<div class="notice notice-warning">' .
@@ -345,28 +365,28 @@ class Plugin implements Hooks_Interface {
 		$field_name = $field['key'] ?? '';
 
 		switch ( $field_name ) {
-			case View_Data::getAcfFieldName( View_Data::FIELD_TEMPLATE_ENGINE ):
-			case Card_Data::getAcfFieldName( Card_Data::FIELD_TEMPLATE_ENGINE ):
+			case Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_TEMPLATE_ENGINE ):
+			case Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_TEMPLATE_ENGINE ):
 				$field['value'] = $this->settings->get_template_engine();
 				break;
-			case View_Data::getAcfFieldName( View_Data::FIELD_WEB_COMPONENT ):
-			case Card_Data::getAcfFieldName( Card_Data::FIELD_WEB_COMPONENT ):
+			case Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_WEB_COMPONENT ):
+			case Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_WEB_COMPONENT ):
 				$web_components_type = $this->settings->get_web_components_type();
 
 				if ( '' !== $web_components_type ) {
 					$field['value'] = $web_components_type;
 				}
 				break;
-			case View_Data::getAcfFieldName( View_Data::FIELD_CLASSES_GENERATION ):
-			case Card_Data::getAcfFieldName( Card_Data::FIELD_CLASSES_GENERATION ):
+			case Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_CLASSES_GENERATION ):
+			case Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_CLASSES_GENERATION ):
 				$field['value'] = $this->settings->get_classes_generation();
 				break;
-			case View_Data::getAcfFieldName( View_Data::FIELD_SASS_CODE ):
-			case Card_Data::getAcfFieldName( Card_Data::FIELD_SASS_CODE ):
+			case Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_SASS_CODE ):
+			case Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_SASS_CODE ):
 				$field['value'] = $this->settings->get_sass_template();
 				break;
-			case View_Data::getAcfFieldName( View_Data::FIELD_TS_CODE ):
-			case Card_Data::getAcfFieldName( Card_Data::FIELD_TS_CODE ):
+			case Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_TS_CODE ):
+			case Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_TS_CODE ):
 				$field['value'] = $this->settings->get_ts_template();
 				break;
 		}
@@ -385,9 +405,7 @@ class Plugin implements Hooks_Interface {
 								$this->is_pro_field_locked();
 
 		if ( $is_pro_field ) {
-			if ( ! key_exists( 'class', $wrapper ) ) {
-				$wrapper['class'] = '';
-			}
+			$wrapper['class'] = string( $wrapper, 'class' );
 
 			$wrapper['class'] .= ' acf-views-pro';
 		}
@@ -397,9 +415,13 @@ class Plugin implements Hooks_Interface {
 
 	public function get_admin_url(
 		string $page = '',
-		string $cpt_name = Views_Cpt::NAME,
+		?string $cpt_name = null,
 		string $base = 'edit.php'
 	): string {
+		$cpt_name = is_null( $cpt_name ) ?
+			Hard_Layout_Cpt::cpt_name() :
+			$cpt_name;
+
 		$page_arg = '' !== $page ?
 			'&page=' . $page :
 			'';
@@ -420,21 +442,21 @@ class Plugin implements Hooks_Interface {
 				defined( 'WPCOM_CORE_ATOMIC_PLUGINS' );
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'maybe_show_compatibility_warnings' ) );
-		add_action( 'activated_plugin', array( $this, 'deactivate_other_instances' ) );
-		add_action( 'pre_current_active_plugins', array( $this, 'show_plugin_deactivated_notice' ) );
+		self::add_action( 'admin_notices', array( $this, 'maybe_show_compatibility_warnings' ) );
+		self::add_action( 'activated_plugin', array( $this, 'deactivate_other_instances' ) );
+		self::add_action( 'pre_current_active_plugins', array( $this, 'show_plugin_deactivated_notice' ) );
 
-		add_filter( 'acf/prepare_field', array( $this, 'amend_field_settings' ) );
-		add_filter( 'acf/field_wrapper_attributes', array( $this, 'add_class_to_admin_pro_field_classes' ), 10, 2 );
+		self::add_filter( 'acf/prepare_field', array( $this, 'amend_field_settings' ) );
+		self::add_filter( 'acf/field_wrapper_attributes', array( $this, 'add_class_to_admin_pro_field_classes' ), 10, 2 );
 
-		if ( true === $current_screen->is_admin_cpt_related( Views_Cpt::NAME, Current_Screen::CPT_ADD ) ||
-			true === $current_screen->is_admin_cpt_related( Cards_Cpt::NAME, Current_Screen::CPT_ADD ) ) {
-			add_filter( 'acf/prepare_field', array( $this, 'set_global_defaults_for_field' ) );
+		if ( true === $route_detector->is_cpt_admin_route( Hard_Layout_Cpt::cpt_name(), Route_Detector::CPT_ADD ) ||
+			true === $route_detector->is_cpt_admin_route( Hard_Post_Selection_Cpt::cpt_name(), Route_Detector::CPT_ADD ) ) {
+			self::add_filter( 'acf/prepare_field', array( $this, 'set_global_defaults_for_field' ) );
 		}
 	}
 }

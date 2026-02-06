@@ -5,20 +5,22 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Parents\Cpt;
 
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Data_Storage;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
+use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Settings_Storage;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-abstract class Cpt implements Hooks_Interface {
-	const NAME = '';
+abstract class Cpt extends Hookable implements Hooks_Interface {
+	private Cpt_Settings_Storage $cpt_settings_storage;
+	protected Plugin_Cpt $plugin_cpt;
 
-	private Cpt_Data_Storage $cpt_data_storage;
-
-	public function __construct( Cpt_Data_Storage $cpt_data_storage ) {
-		$this->cpt_data_storage = $cpt_data_storage;
+	public function __construct( Plugin_Cpt $plugin_cpt, Cpt_Settings_Storage $cpt_settings_storage ) {
+		$this->plugin_cpt           = $plugin_cpt;
+		$this->cpt_settings_storage = $cpt_settings_storage;
 	}
 
 	abstract public function add_cpt(): void;
@@ -30,13 +32,25 @@ abstract class Cpt implements Hooks_Interface {
 	 */
 	abstract public function replace_post_updated_message( array $messages ): array;
 
-	abstract public function get_title_placeholder( string $title ): string;
+	public function get_title_placeholder( string $title ): string {
+		$screen = get_current_screen()->post_type ?? '';
+
+		if ( $this->get_cpt_name() !== $screen ) {
+			return $title;
+		}
+
+		return sprintf(
+		// translators: %s - singular name of the CPT.
+			__( 'Name your %s here (required)', 'acf-views' ),
+			$this->plugin_cpt->labels()->singular_name()
+		);
+	}
 
 	public function print_survey_link( string $html ): string {
 		$current_screen = get_current_screen();
 
 		if ( null === $current_screen ||
-			static::NAME !== $current_screen->post_type ) {
+			$this->get_cpt_name() !== $current_screen->post_type ) {
 			return $html;
 		}
 
@@ -63,16 +77,78 @@ abstract class Cpt implements Hooks_Interface {
 		);
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		add_action( 'init', array( $this, 'add_cpt' ) );
+	public function set_hooks( Route_Detector $route_detector ): void {
+		self::add_action( 'init', array( $this, 'add_cpt' ) );
 
-		if ( false === $current_screen->is_admin() ) {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_filter( 'admin_footer_text', array( $this, 'print_survey_link' ) );
-		add_filter( 'post_updated_messages', array( $this, 'replace_post_updated_message' ) );
-		add_filter( 'enter_title_here', array( $this, 'get_title_placeholder' ) );
+		self::add_filter( 'admin_footer_text', array( $this, 'print_survey_link' ) );
+		self::add_filter( 'post_updated_messages', array( $this, 'replace_post_updated_message' ) );
+		self::add_filter( 'enter_title_here', array( $this, 'get_title_placeholder' ) );
+	}
+
+	protected function get_cpt_name(): string {
+		return $this->plugin_cpt->cpt_name();
+	}
+
+	/**
+	 * @return array<string,string>
+	 */
+	protected function get_labels(): array {
+
+		$labels        = $this->plugin_cpt->labels();
+		$plural_name   = $labels->plural_name();
+		$singular_name = $labels->singular_name();
+
+		// translators: %1$s - plural name of the CPT, %2$s - link opening tag, %3$s - link closing tag.
+		$not_found_label = __( 'No %1$s yet. %2$s Add New %1$s %3$s', 'acf-views' );
+
+		return array(
+			'name'               => $plural_name,
+			'singular_name'      => $singular_name,
+			'menu_name'          => __( 'Advanced Views', 'acf-views' ),
+			'parent_item_colon'  => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( 'Parent %s', 'acf-views' ),
+				$singular_name
+			),
+			'all_items'          => $plural_name,
+			'view_item'          => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( 'Browse %s', 'acf-views' ),
+				$singular_name
+			),
+			'add_new_item'       => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( 'Add New %s', 'acf-views' ),
+				$singular_name
+			),
+			'add_new'            => __( 'Add New', 'acf-views' ),
+			'item_updated'       => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( '%s updated', 'acf-views' ),
+				$singular_name
+			),
+			'edit_item'          => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( 'Edit %s', 'acf-views' ),
+				$singular_name
+			),
+			'update_item'        => sprintf(
+			// translators: %s - singular name of the CPT.
+				__( 'Update %s', 'acf-views' ),
+				$singular_name
+			),
+			'search_items'       => sprintf(
+			// translators: %s - plural name of the CPT.
+				__( 'Search %s', 'acf-views' ),
+				$plural_name
+			),
+			'not_found'          => $this->inject_add_new_item_link( $not_found_label ),
+			'not_found_in_trash' => __( 'Not Found In Trash', 'acf-views' ),
+		);
 	}
 
 	protected function get_storage_label(): string {
@@ -81,7 +157,7 @@ abstract class Cpt implements Hooks_Interface {
 			'acf-views'
 		);
 		$description .= ' ';
-		$description .= true === $this->cpt_data_storage->get_file_system()->is_active() ?
+		$description .= true === $this->cpt_settings_storage->get_file_system()->is_active() ?
 			__( 'enabled', 'acf-views' )
 			: __( 'disabled', 'acf-views' );
 		$description .= '.';
@@ -90,7 +166,7 @@ abstract class Cpt implements Hooks_Interface {
 	}
 
 	protected function inject_add_new_item_link( string $label_template ): string {
-		$relative_url = sprintf( 'post-new.php?post_type=%s', static::NAME );
+		$relative_url = sprintf( 'post-new.php?post_type=%s', $this->get_cpt_name() );
 		$absolute_url = admin_url( $relative_url );
 
 		$opening_tag = sprintf(
@@ -99,7 +175,10 @@ abstract class Cpt implements Hooks_Interface {
 		);
 		$closing_tag = '</a>';
 
-		return sprintf( $label_template, $opening_tag, $closing_tag );
+		$labels        = $this->plugin_cpt->labels();
+		$singular_name = $labels->singular_name();
+
+		return sprintf( $label_template, $singular_name, $opening_tag, $closing_tag );
 	}
 
 	/**
@@ -148,9 +227,9 @@ abstract class Cpt implements Hooks_Interface {
 		$cpt_args = array_merge( $default_args, $args );
 
 		// @phpstan-ignore-next-line
-		register_post_type( static::NAME, $cpt_args );
+		register_post_type( $this->get_cpt_name(), $cpt_args );
 
 		// since WP 6.6 we can disable it straightly.
-		post_type_supports( self::NAME, 'autosave' );
+		post_type_supports( $this->get_cpt_name(), 'autosave' );
 	}
 }

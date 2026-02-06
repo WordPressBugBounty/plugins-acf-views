@@ -4,14 +4,15 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Template_Engines;
 
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
+use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
 use Org\Wplake\Advanced_Views\Plugin;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
 use WP_Filesystem_Base;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,7 +26,7 @@ class Template_Engines extends Action implements Hooks_Interface {
 	 * @var array<string, Template_Engine_Interface|null>
 	 */
 	private array $template_engines;
-	private ?WP_Filesystem_Base $wp_filesystem;
+	private ?WP_Filesystem_Base $wp_filesystem_base;
 	private Plugin $plugin;
 	private Settings $settings;
 	/**
@@ -40,7 +41,7 @@ class Template_Engines extends Action implements Hooks_Interface {
 		$this->plugin              = $plugin;
 		$this->settings            = $settings;
 		$this->template_engines    = array();
-		$this->wp_filesystem       = null;
+		$this->wp_filesystem_base  = null;
 		$this->template_generators = array();
 	}
 
@@ -113,17 +114,11 @@ class Template_Engines extends Action implements Hooks_Interface {
 
 	// public for tests only.
 	public function get_wp_filesystem(): WP_Filesystem_Base {
-		if ( null === $this->wp_filesystem ) {
-			global $wp_filesystem;
-
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-
-			WP_Filesystem();
-
-			$this->wp_filesystem = $wp_filesystem;
+		if ( null === $this->wp_filesystem_base ) {
+			$this->wp_filesystem_base = WP_Filesystem_Factory::get_wp_filesystem();
 		}
 
-		return $this->wp_filesystem;
+		return $this->wp_filesystem_base;
 	}
 
 	public function show_templates_dir_is_not_writable_warning(): void {
@@ -131,7 +126,7 @@ class Template_Engines extends Action implements Hooks_Interface {
 
 		// show only on the list pages of Views & Cards.
 		if ( null === $screen ||
-			! in_array( $screen->post_type, array( Views_Cpt::NAME, Cards_Cpt::NAME ), true ) ||
+			! in_array( $screen->post_type, array( Hard_Layout_Cpt::cpt_name(), Hard_Post_Selection_Cpt::cpt_name() ), true ) ||
 			'edit' !== $screen->base ) {
 			return;
 		}
@@ -221,11 +216,11 @@ class Template_Engines extends Action implements Hooks_Interface {
 		return $this->template_generators[ $template_engine ];
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'show_templates_dir_is_not_writable_warning' ) );
+		self::add_action( 'admin_notices', array( $this, 'show_templates_dir_is_not_writable_warning' ) );
 	}
 }

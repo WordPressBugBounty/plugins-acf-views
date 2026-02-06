@@ -4,14 +4,15 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Acf;
 
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Plugin;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
 
-class Acf_Internal_Features implements Hooks_Interface {
+class Acf_Internal_Features extends Hookable implements Hooks_Interface {
 	private Plugin $plugin;
 
 	public function __construct( Plugin $plugin ) {
@@ -62,22 +63,22 @@ class Acf_Internal_Features implements Hooks_Interface {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'register_assets' ) );
-		add_action( 'acf/include_field_types', array( $this, 'include_field_types' ), 5 );
-		add_action( 'acf/input/admin_enqueue_scripts', array( $this, 'input_admin_enqueue_scripts' ) );
+		self::add_action( 'init', array( $this, 'register_assets' ) );
+		self::add_action( 'acf/include_field_types', array( $this, 'include_field_types' ), 5 );
+		self::add_action( 'acf/input/admin_enqueue_scripts', array( $this, 'input_admin_enqueue_scripts' ) );
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ||
-			( false === $current_screen->is_admin_cpt_related( Views_Cpt::NAME ) &&
-				false === $current_screen->is_admin_cpt_related( Cards_Cpt::NAME ) &&
-				false === $current_screen->is_ajax() ) ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ||
+			( false === $route_detector->is_cpt_admin_route( Hard_Layout_Cpt::cpt_name() ) &&
+				false === $route_detector->is_cpt_admin_route( Hard_Post_Selection_Cpt::cpt_name() ) &&
+				! wp_doing_ajax() ) ) {
 			return;
 		}
 
 		// only since 'plugins_loaded' we can judge if ACF is loaded or not
 		// '-1' so it's after AcfDependency->maybeIncludeAcfPlugin().
-		add_action(
+		self::add_action(
 			'plugins_loaded',
 			array( $this, 'maybe_include_features' ),
 			Data_Vendors::PLUGINS_LOADED_HOOK_PRIORITY - 1

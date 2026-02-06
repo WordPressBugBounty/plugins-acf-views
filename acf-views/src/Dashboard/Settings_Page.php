@@ -5,60 +5,57 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Dashboard;
 
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
 use Exception;
-use Org\Wplake\Advanced_Views\Automatic_Reports;
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Automated_Reports;
+use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Groups\Git_Repository;
-use Org\Wplake\Advanced_Views\Groups\Settings_Data;
+use Org\Wplake\Advanced_Views\Groups\Plugin_Settings;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
-use Org\Wplake\Advanced_Views\Parents\Group;
+use Org\Wplake\Advanced_Views\Groups\Parents\Group;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use WP_Post;
-use WP_Query;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
 
 defined( 'ABSPATH' ) || exit;
 
 final class Settings_Page extends Action implements Hooks_Interface {
 
-	const SLUG = 'acf-views-settings';
+	const SLUG = 'avf-settings';
 	/**
 	 * @var array<string,mixed>
 	 */
 	private array $values;
-	private Settings_Data $settings_data;
+	private Plugin_Settings $plugin_settings;
 	private Settings $settings;
-	private Views_Data_Storage $views_data_storage;
-	private Cards_Data_Storage $cards_data_storage;
+	private Layouts_Settings_Storage $layouts_settings_storage;
+	private Post_Selections_Settings_Storage $post_selections_settings_storage;
 	private string $saved_message;
 	private Git_Repository $git_repository;
-	private Automatic_Reports $automatic_reports;
+	private Automated_Reports $automated_reports;
 
 	public function __construct(
 		Logger $logger,
-		Settings_Data $settings_data,
+		Plugin_Settings $plugin_settings,
 		Settings $settings,
-		Views_Data_Storage $views_data_storage,
-		Cards_Data_Storage $cards_data_storage,
+		Layouts_Settings_Storage $layouts_settings_storage,
+		Post_Selections_Settings_Storage $post_selections_settings_storage,
 		Git_Repository $git_repository,
-		Automatic_Reports $automatic_reports
+		Automated_Reports $automated_reports
 	) {
 		parent::__construct( $logger );
 
-		$this->values             = array();
-		$this->settings_data      = $settings_data;
-		$this->settings           = $settings;
-		$this->views_data_storage = $views_data_storage;
-		$this->cards_data_storage = $cards_data_storage;
-		$this->saved_message      = '';
-		$this->git_repository     = $git_repository->getDeepClone();
-		$this->automatic_reports  = $automatic_reports;
+		$this->values                           = array();
+		$this->plugin_settings                  = $plugin_settings;
+		$this->settings                         = $settings;
+		$this->layouts_settings_storage         = $layouts_settings_storage;
+		$this->post_selections_settings_storage = $post_selections_settings_storage;
+		$this->saved_message                    = '';
+		$this->git_repository                   = $git_repository->getDeepClone();
+		$this->automated_reports                = $automated_reports;
 	}
 
 	/**
@@ -67,14 +64,16 @@ final class Settings_Page extends Action implements Hooks_Interface {
 	protected function is_my_source( $post_id ): bool {
 		$screen = get_current_screen();
 
+		$settings_screen = sprintf( '%s_page_%s', Hard_Layout_Cpt::cpt_name(), self::SLUG );
+
 		return null !== $screen &&
-				'acf_views_page_acf-views-settings' === $screen->id &&
+				$settings_screen === $screen->id &&
 				'options' === $post_id;
 	}
 
 	protected function activate_fs_storage(): void {
-		$wp_filesystem      = $this->views_data_storage->get_file_system()->get_wp_filesystem();
-		$target_base_folder = $this->views_data_storage->get_file_system()->get_target_base_folder();
+		$wp_filesystem      = $this->layouts_settings_storage->get_file_system()->get_wp_filesystem();
+		$target_base_folder = $this->layouts_settings_storage->get_file_system()->get_target_base_folder();
 
 		if ( false === $wp_filesystem->mkdir( $target_base_folder, 0755 ) ) {
 			$this->saved_message = __(
@@ -86,20 +85,20 @@ final class Settings_Page extends Action implements Hooks_Interface {
 		}
 
 		// set, as the folder was just created.
-		$this->views_data_storage->get_file_system()->set_base_folder();
-		$this->cards_data_storage->get_file_system()->set_base_folder();
+		$this->layouts_settings_storage->get_file_system()->set_base_folder();
+		$this->post_selections_settings_storage->get_file_system()->set_base_folder();
 
-		$this->views_data_storage->activate_file_system_storage();
-		$this->cards_data_storage->activate_file_system_storage();
+		$this->layouts_settings_storage->activate_file_system_storage();
+		$this->post_selections_settings_storage->activate_file_system_storage();
 	}
 
 	protected function deactivate_fs_storage(): void {
-		$theme_templates_folder = $this->views_data_storage->get_file_system()->get_base_folder();
+		$theme_templates_folder = $this->layouts_settings_storage->get_file_system()->get_base_folder();
 
-		$this->views_data_storage->deactivate_file_system_storage();
-		$this->cards_data_storage->deactivate_file_system_storage();
+		$this->layouts_settings_storage->deactivate_file_system_storage();
+		$this->post_selections_settings_storage->deactivate_file_system_storage();
 
-		$is_removed = $this->views_data_storage->get_file_system()
+		$is_removed = $this->layouts_settings_storage->get_file_system()
 												->get_wp_filesystem()
 												->rmdir(
 													$theme_templates_folder,
@@ -134,7 +133,7 @@ final class Settings_Page extends Action implements Hooks_Interface {
 				'slug'            => self::SLUG,
 				'page_title'      => __( 'Settings', 'acf-views' ),
 				'menu_title'      => __( 'Settings', 'acf-views' ),
-				'parent_slug'     => sprintf( 'edit.php?post_type=%s', Views_Cpt::NAME ),
+				'parent_slug'     => sprintf( 'edit.php?post_type=%s', Hard_Layout_Cpt::cpt_name() ),
 				'position'        => 2,
 				'update_button'   => __( 'Save changes', 'acf-views' ),
 				'updated_message' => $updated_message,
@@ -150,7 +149,7 @@ final class Settings_Page extends Action implements Hooks_Interface {
 			return;
 		}
 
-		add_filter(
+		self::add_filter(
 			'acf/pre_update_value',
 			function ( $is_updated, $value, $post_id, array $field ): bool {
 				// extra check, as probably it's about another post.
@@ -162,7 +161,7 @@ final class Settings_Page extends Action implements Hooks_Interface {
 
 				// convert repeater format. don't check simply 'is_array(value)' as not every array is a repeater
 				// also check to make sure it's array (can be empty string).
-				if ( Settings_Data::getAcfFieldName( Settings_Data::FIELD_GIT_REPOSITORIES ) === $field_name &&
+				if ( Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_GIT_REPOSITORIES ) === $field_name &&
 					true === is_array( $value ) ) {
 					$value = Group::convertRepeaterFieldValues( $field_name, $value );
 				}
@@ -182,7 +181,7 @@ final class Settings_Page extends Action implements Hooks_Interface {
 			return;
 		}
 
-		add_filter(
+		self::add_filter(
 			'acf/pre_load_value',
 			function ( $value, $post_id, $field ) {
 				// extra check, as probably it's about another post.
@@ -194,14 +193,14 @@ final class Settings_Page extends Action implements Hooks_Interface {
 				$value      = '';
 
 				switch ( $field_name ) {
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_DEV_MODE ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_IS_DEV_MODE ):
 						$value = $this->settings->is_dev_mode();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_FILE_SYSTEM_STORAGE ):
-						$value = '' !== $this->views_data_storage->get_file_system()->get_base_folder();
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_IS_FILE_SYSTEM_STORAGE ):
+						$value = '' !== $this->layouts_settings_storage->get_file_system()->get_base_folder();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_GIT_REPOSITORIES ):
-						$this->settings_data->git_repositories = array();
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_GIT_REPOSITORIES ):
+						$this->plugin_settings->git_repositories = array();
 
 						foreach ( $this->settings->get_git_repositories() as $git_repository_data ) {
 							$git_repository = $this->git_repository->getDeepClone();
@@ -210,43 +209,43 @@ final class Settings_Page extends Action implements Hooks_Interface {
 							$git_repository->access_token = $git_repository_data['accessToken'];
 							$git_repository->name         = $git_repository_data['name'];
 
-							$this->settings_data->git_repositories[] = $git_repository;
+							$this->plugin_settings->git_repositories[] = $git_repository;
 						}
 
-						$git_repositories_field_name = Settings_Data::getAcfFieldName( Settings_Data::FIELD_GIT_REPOSITORIES );
-						$value                       = $this->settings_data->getFieldValues()[ $git_repositories_field_name ] ?? array();
+						$git_repositories_field_name = Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_GIT_REPOSITORIES );
+						$value                       = $this->plugin_settings->getFieldValues()[ $git_repositories_field_name ] ?? array();
 
 						$value = true === is_array( $value ) ?
 							Group::convertRepeaterFieldValues( $field_name, $value, false ) :
 							array();
 
-						$this->settings_data->git_repositories = array();
+						$this->plugin_settings->git_repositories = array();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_AUTOMATIC_REPORTS_DISABLED ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_IS_AUTOMATIC_REPORTS_DISABLED ):
 						$value = $this->settings->is_automatic_reports_disabled();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_TEMPLATE_ENGINE ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_TEMPLATE_ENGINE ):
 						$value = $this->settings->get_template_engine();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_WEB_COMPONENTS_TYPE ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_WEB_COMPONENTS_TYPE ):
 						$value = $this->settings->get_web_components_type();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_CLASSES_GENERATION ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_CLASSES_GENERATION ):
 						$value = $this->settings->get_classes_generation();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_IS_CPT_ADMIN_OPTIMIZATION_ENABLED ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_IS_CPT_ADMIN_OPTIMIZATION_ENABLED ):
 						$value = $this->settings->is_cpt_admin_optimization_enabled();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_SASS_TEMPLATE ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_SASS_TEMPLATE ):
 						$value = $this->settings->get_sass_template();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_TS_TEMPLATE ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_TS_TEMPLATE ):
 						$value = $this->settings->get_ts_template();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_LIVE_RELOAD_INTERVAL_SECONDS ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_LIVE_RELOAD_INTERVAL_SECONDS ):
 						$value = $this->settings->get_live_reload_interval_seconds();
 						break;
-					case Settings_Data::getAcfFieldName( Settings_Data::FIELD_LIVE_RELOAD_INACTIVE_DELAY_SECONDS ):
+					case Plugin_Settings::getAcfFieldName( Plugin_Settings::FIELD_LIVE_RELOAD_INACTIVE_DELAY_SECONDS ):
 						$value = $this->settings->get_live_reload_inactive_delay_seconds();
 						break;
 				}
@@ -269,21 +268,21 @@ final class Settings_Page extends Action implements Hooks_Interface {
 			return;
 		}
 
-		$this->settings_data->load( false, '', $this->values );
+		$this->plugin_settings->load( false, '', $this->values );
 
-		$this->settings->set_is_dev_mode( $this->settings_data->is_dev_mode );
-		$this->settings->set_live_reload_interval_seconds( $this->settings_data->live_reload_interval_seconds );
-		$this->settings->set_live_reload_inactive_delay_seconds( $this->settings_data->live_reload_inactive_delay_seconds );
-		$this->settings->set_template_engine( $this->settings_data->template_engine );
-		$this->settings->set_web_components_type( $this->settings_data->web_components_type );
-		$this->settings->set_classes_generation( $this->settings_data->classes_generation );
-		$this->settings->set_is_cpt_admin_optimization_enabled( $this->settings_data->is_cpt_admin_optimization_enabled );
-		$this->settings->set_sass_template( $this->settings_data->sass_template );
-		$this->settings->set_ts_template( $this->settings_data->ts_template );
+		$this->settings->set_is_dev_mode( $this->plugin_settings->is_dev_mode );
+		$this->settings->set_live_reload_interval_seconds( $this->plugin_settings->live_reload_interval_seconds );
+		$this->settings->set_live_reload_inactive_delay_seconds( $this->plugin_settings->live_reload_inactive_delay_seconds );
+		$this->settings->set_template_engine( $this->plugin_settings->template_engine );
+		$this->settings->set_web_components_type( $this->plugin_settings->web_components_type );
+		$this->settings->set_classes_generation( $this->plugin_settings->classes_generation );
+		$this->settings->set_is_cpt_admin_optimization_enabled( $this->plugin_settings->is_cpt_admin_optimization_enabled );
+		$this->settings->set_sass_template( $this->plugin_settings->sass_template );
+		$this->settings->set_ts_template( $this->plugin_settings->ts_template );
 
 		$git_repositories = array();
 
-		foreach ( $this->settings_data->git_repositories as $git_repository ) {
+		foreach ( $this->plugin_settings->git_repositories as $git_repository ) {
 			$git_repositories[] = array(
 				'id'          => $git_repository->id,
 				'accessToken' => $git_repository->access_token,
@@ -294,22 +293,22 @@ final class Settings_Page extends Action implements Hooks_Interface {
 		$this->settings->set_git_repositories( $git_repositories );
 
 		$is_do_not_track_request_needed = false === $this->settings->is_automatic_reports_disabled() &&
-										true === $this->settings_data->is_automatic_reports_disabled;
+											true === $this->plugin_settings->is_automatic_reports_disabled;
 
-		$this->settings->set_is_automatic_reports_disabled( $this->settings_data->is_automatic_reports_disabled );
+		$this->settings->set_is_automatic_reports_disabled( $this->plugin_settings->is_automatic_reports_disabled );
 
 		// send only after the setting is updated.
 		if ( true === $is_do_not_track_request_needed ) {
-			$this->automatic_reports->send_do_not_track_request();
+			$this->automated_reports->send_do_not_track_request();
 		}
 
-		if ( true === $this->settings_data->is_file_system_storage &&
-			false === $this->views_data_storage->get_file_system()->is_active() ) {
+		if ( true === $this->plugin_settings->is_file_system_storage &&
+			false === $this->layouts_settings_storage->get_file_system()->is_active() ) {
 			$this->activate_fs_storage();
 		}
 
-		if ( false === $this->settings_data->is_file_system_storage &&
-			true === $this->views_data_storage->get_file_system()->is_active() ) {
+		if ( false === $this->plugin_settings->is_file_system_storage &&
+			true === $this->layouts_settings_storage->get_file_system()->is_active() ) {
 			$this->deactivate_fs_storage();
 		}
 
@@ -330,17 +329,17 @@ final class Settings_Page extends Action implements Hooks_Interface {
 		exit;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
 		// init, not acf/init, as the method uses 'get_edit_post_link' which will be available only since this hook
 		// (because we sign up the CPTs in this hook).
-		add_action( 'init', array( $this, 'add_page' ) );
-		add_action( 'acf/save_post', array( $this, 'maybe_catch_values' ) );
+		self::add_action( 'init', array( $this, 'add_page' ) );
+		self::add_action( 'acf/save_post', array( $this, 'maybe_catch_values' ) );
 		// priority 20, as it's after the ACF's save_post hook.
-		add_action( 'acf/save_post', array( $this, 'maybe_process' ), 20 );
-		add_action( 'acf/input/admin_head', array( $this, 'maybe_inject_values' ) );
+		self::add_action( 'acf/save_post', array( $this, 'maybe_process' ), 20 );
+		self::add_action( 'acf/input/admin_head', array( $this, 'maybe_inject_values' ) );
 	}
 }

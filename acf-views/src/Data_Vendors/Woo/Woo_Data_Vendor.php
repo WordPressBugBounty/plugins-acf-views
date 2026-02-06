@@ -23,17 +23,18 @@ use Org\Wplake\Advanced_Views\Data_Vendors\Woo\Fields\Woo_Stock_Quantity_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Woo\Fields\Woo_Stock_Status_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Woo\Fields\Woo_Weight_Field;
 use Org\Wplake\Advanced_Views\Data_Vendors\Woo\Fields\Woo_Width_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
-use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
+use Org\Wplake\Advanced_Views\Groups\Repeater_Field_Settings;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
-use Org\Wplake\Advanced_Views\Views\Field_Meta;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Source;
-use Org\Wplake\Advanced_Views\Views\View_Factory;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Layouts\Cpt\Layouts_Cpt_Save_Actions;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Source;
+use Org\Wplake\Advanced_Views\Layouts\Layout_Factory;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -141,14 +142,15 @@ class Woo_Data_Vendor extends Data_Vendor {
 	}
 
 	public function make_integration_instance(
-		Item_Data $item_data,
-		Views_Data_Storage $views_data_storage,
+		Item_Settings $item_settings,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Data_Vendors $data_vendors,
-		Views_Cpt_Save_Actions $views_cpt_save_actions,
-		View_Factory $view_factory,
-		Repeater_Field_Data $repeater_field_data,
-		View_Shortcode $view_shortcode,
-		Settings $settings
+		Layouts_Cpt_Save_Actions $layouts_cpt_save_actions,
+		Layout_Factory $layout_factory,
+		Repeater_Field_Settings $repeater_field_settings,
+		Layout_Shortcode $layout_shortcode,
+		Settings $settings,
+		Plugin_Cpt $plugin_cpt
 	): ?Data_Vendor_Integration_Interface {
 		return null;
 	}
@@ -203,7 +205,7 @@ class Woo_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<string,mixed> $data
+	 * @param mixed[] $data
 	 */
 	public function fill_field_meta( Field_Meta_Interface $field_meta, array $data = array() ): void {
 		if ( ! in_array( $field_meta->get_field_id(), $this->get_supported_field_types(), true ) ) {
@@ -228,10 +230,10 @@ class Woo_Data_Vendor extends Data_Vendor {
 	 * @return mixed
 	 */
 	public function get_field_value(
-		Field_Data $field_data,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta,
 		Source $source,
-		?Item_Data $item_data = null,
+		?Item_Settings $item_settings = null,
 		bool $is_formatted = false,
 		?array $local_data = null
 	) {
@@ -261,7 +263,7 @@ class Woo_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @return array<string, mixed>|null
+	 * @return mixed[]|null
 	 */
 	public function get_group_export_data( string $group_id ): ?array {
 		// the feature is not supported.
@@ -269,8 +271,8 @@ class Woo_Data_Vendor extends Data_Vendor {
 	}
 
 	/**
-	 * @param array<int|string, mixed> $group_data
-	 * @param array<string, mixed> $meta_data
+	 * @param mixed[] $group_data
+	 * @param mixed[] $meta_data
 	 */
 	public function import_group( array $group_data, array $meta_data ): ?string {
 		// the feature is not supported.

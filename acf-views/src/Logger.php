@@ -5,37 +5,34 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views;
 
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
+use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use WP_Filesystem_Base;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-class Logger implements Hooks_Interface {
+class Logger extends Hookable implements Hooks_Interface {
 	const MAX_MESSAGES = 500;
 
 	private string $log_file;
 	private string $error_file;
 	private Settings $settings;
-	private ?WP_Filesystem_Base $wp_filesystem;
+	private ?WP_Filesystem_Base $wp_filesystem_base;
 
 	public function __construct( string $folder, Settings $settings ) {
-		$this->log_file      = $folder . '/log.txt';
-		$this->error_file    = $folder . '/error_log.txt';
-		$this->settings      = $settings;
-		$this->wp_filesystem = null;
+		$this->log_file           = $folder . '/log.txt';
+		$this->error_file         = $folder . '/error_log.txt';
+		$this->settings           = $settings;
+		$this->wp_filesystem_base = null;
 	}
 
 	protected function get_wp_filesystem(): WP_Filesystem_Base {
-		if ( null === $this->wp_filesystem ) {
-			global $wp_filesystem;
-
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-
-			WP_Filesystem();
-
-			$this->wp_filesystem = $wp_filesystem;
+		if ( null === $this->wp_filesystem_base ) {
+			$this->wp_filesystem_base = WP_Filesystem_Factory::get_wp_filesystem();
 		}
 
-		return $this->wp_filesystem;
+		return $this->wp_filesystem_base;
 	}
 
 	// separate method for tests.
@@ -331,7 +328,7 @@ class Logger implements Hooks_Interface {
 		);
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
+	public function set_hooks( Route_Detector $route_detector ): void {
 		// @phpcs:ignore WordPress.PHP.DevelopmentFunctions
 		set_error_handler( array( $this, 'maybe_log_php_error' ) );
 

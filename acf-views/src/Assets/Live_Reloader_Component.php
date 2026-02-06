@@ -5,17 +5,18 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Assets;
 
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
 use Org\Wplake\Advanced_Views\Plugin;
 use Org\Wplake\Advanced_Views\Settings;
 use WP_Post;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-class Live_Reloader_Component implements Hooks_Interface {
+class Live_Reloader_Component extends Hookable implements Hooks_Interface {
 	const QUERY_ARG = 'avf_live-reload';
 
 	private bool $is_active;
@@ -68,12 +69,12 @@ class Live_Reloader_Component implements Hooks_Interface {
 	/**
 	 * @param array<string,mixed> $shortcode_arguments
 	 */
-	public function get_reloading_component( Cpt_Data $cpt_data, array $shortcode_arguments, bool $is_gutenberg_block ): string {
+	public function get_reloading_component( Cpt_Settings $cpt_settings, array $shortcode_arguments, bool $is_gutenberg_block ): string {
 		if ( false === $this->is_active ) {
 			return '';
 		}
 
-		$unique_id = $cpt_data->get_unique_id();
+		$unique_id = $cpt_settings->get_unique_id();
 
 		if ( '' !== $this->parent_card_id ) {
 			// we need to keep View reloaders unique inside the Card (to avoid unnecessary duplications).
@@ -92,7 +93,7 @@ class Live_Reloader_Component implements Hooks_Interface {
 				(string) wp_json_encode(
 					array(
 						'uniqueId'           => $unique_id,
-						'codeHashes'         => $cpt_data->get_code_hashes(),
+						'codeHashes'         => $cpt_settings->get_code_hashes(),
 						'parentCardId'       => $this->parent_card_id,
 						'shortcodeArguments' => $shortcode_arguments,
 						'isGutenbergBlock'   => true === $is_gutenberg_block,
@@ -161,12 +162,12 @@ class Live_Reloader_Component implements Hooks_Interface {
 		return remove_query_arg( self::QUERY_ARG, );
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( true === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( true === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'set_is_active' ) );
-		add_action( 'wp_footer', array( $this, 'maybe_enqueue_reloading_js' ) );
+		self::add_action( 'init', array( $this, 'set_is_active' ) );
+		self::add_action( 'wp_footer', array( $this, 'maybe_enqueue_reloading_js' ) );
 	}
 }

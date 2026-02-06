@@ -4,13 +4,14 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage;
 
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
+use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
 use WP_Filesystem_Base;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,7 +30,13 @@ class File_System extends Action implements Hooks_Interface {
 	private bool $is_read_item_folders;
 	private string $base_folder;
 	private string $items_folder_name;
-	private ?WP_Filesystem_Base $wp_filesystem;
+	private ?WP_Filesystem_Base $wp_filesystem_base;
+
+	/**
+	 * @var array<callable(): void>
+	 */
+	private array $on_loaded_callbacks;
+	private bool $is_loaded;
 
 	public function __construct( Logger $logger, string $items_folder_name, string $external_base_folder = '' ) {
 		parent::__construct( $logger );
@@ -38,7 +45,9 @@ class File_System extends Action implements Hooks_Interface {
 		$this->item_folders         = array();
 		$this->base_folder          = $external_base_folder;
 		$this->is_read_item_folders = false;
-		$this->wp_filesystem        = null;
+		$this->wp_filesystem_base   = null;
+		$this->on_loaded_callbacks  = array();
+		$this->is_loaded            = false;
 	}
 
 	protected function read_item_folders(): void {
@@ -87,15 +96,13 @@ class File_System extends Action implements Hooks_Interface {
 
 		$json = json_decode( $file_content, true );
 
-		return null !== $json ?
-			$json :
-			array();
+		return $json ?? array();
 	}
 
 	protected function show_folder_is_not_writable_warning(): void {
-		add_action(
+		self::add_action(
 			'admin_notices',
-			function () {
+			function (): void {
 				// it's going to be checked in both CPTs, but we need only one notice.
 				if ( true === self::$is_fs_not_writable_notice_shown ) {
 					return;
@@ -151,9 +158,7 @@ class File_System extends Action implements Hooks_Interface {
 		$title = strtolower( $title );
 		$title = preg_replace( '/[^a-z0-9]/', '-', $title );
 
-		return null !== $title ?
-			$title :
-			'';
+		return $title ?? '';
 	}
 
 	public function get_item_folder_by_short_unique_id( string $item_id ): string {
@@ -328,7 +333,7 @@ class File_System extends Action implements Hooks_Interface {
 		return $this->base_folder;
 	}
 
-	public function set_base_folder( ?Current_Screen $current_screen = null ): void {
+	public function set_base_folder( ?Route_Detector $route_detector = null ): void {
 		$target_templates_folder = $this->get_target_base_folder();
 		$wp_filesystem           = $this->get_wp_filesystem();
 
@@ -341,10 +346,10 @@ class File_System extends Action implements Hooks_Interface {
 		}
 
 		// null if called from the SettingsPage.
-		if ( null !== $current_screen ) {
+		if ( null !== $route_detector ) {
 			// check only for the list screens (for better performance).
-			if ( true === $current_screen->is_admin_cpt_related( Views_Cpt::NAME, Current_Screen::CPT_LIST ) ||
-				true === $current_screen->is_admin_cpt_related( Cards_Cpt::NAME, Current_Screen::CPT_LIST ) ) {
+			if ( true === $route_detector->is_cpt_admin_route( Hard_Layout_Cpt::cpt_name(), Route_Detector::CPT_LIST ) ||
+				true === $route_detector->is_cpt_admin_route( Hard_Post_Selection_Cpt::cpt_name(), Route_Detector::CPT_LIST ) ) {
 				if ( false === $this->is_base_folder_writable() ) {
 					$this->show_folder_is_not_writable_warning();
 
@@ -386,29 +391,42 @@ class File_System extends Action implements Hooks_Interface {
 	}
 
 	public function get_wp_filesystem(): WP_Filesystem_Base {
-		if ( null === $this->wp_filesystem ) {
-			global $wp_filesystem;
-
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-
-			WP_Filesystem();
-
-			$this->wp_filesystem = $wp_filesystem;
+		if ( null === $this->wp_filesystem_base ) {
+			$this->wp_filesystem_base = WP_Filesystem_Factory::get_wp_filesystem();
 		}
 
-		return $this->wp_filesystem;
+		return $this->wp_filesystem_base;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
+	public function set_hooks( Route_Detector $route_detector ): void {
 		// set only if it isn't an external folder.
 		if ( '' === $this->base_folder ) {
 			// theme is loaded since this hook.
-			add_action(
+			self::add_action(
 				'after_setup_theme',
-				function () use ( $current_screen ) {
-					$this->set_base_folder( $current_screen );
+				function () use ( $route_detector ): void {
+					$this->set_base_folder( $route_detector );
+
+					$this->is_loaded = true;
+
+					foreach ( $this->on_loaded_callbacks as $callback ) {
+						$callback();
+					}
+
+					$this->on_loaded_callbacks = array();
 				}
 			);
+		}
+	}
+
+	/**
+	 * @param callable(): void $callback
+	 */
+	public function add_on_loaded_callback( callable $callback ): void {
+		if ( $this->is_loaded ) {
+			$callback();
+		} else {
+			$this->on_loaded_callbacks[] = $callback;
 		}
 	}
 }

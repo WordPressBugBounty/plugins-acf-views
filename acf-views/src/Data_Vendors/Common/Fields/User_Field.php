@@ -4,10 +4,10 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields;
 
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,8 +41,8 @@ class User_Field extends List_Field {
 		);
 	}
 
-	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_data ): void {
-		$this->link_field->print_markup( $item_id, $markup_data );
+	protected function print_item_markup( string $field_id, string $item_id, Markup_Field_Data $markup_field_data ): void {
+		$this->link_field->print_markup( $item_id, $markup_field_data );
 	}
 
 	/**
@@ -70,13 +70,13 @@ class User_Field extends List_Field {
 	 */
 	public function get_conditional_fields( Field_Meta_Interface $field_meta ): array {
 		$conditional_fields = array(
-			Field_Data::FIELD_LINK_LABEL,
-			Field_Data::FIELD_IS_LINK_TARGET_BLANK,
-			Field_Data::FIELD_ACF_VIEW_ID,
+			Field_Settings::FIELD_LINK_LABEL,
+			Field_Settings::FIELD_IS_LINK_TARGET_BLANK,
+			Field_Settings::FIELD_ACF_VIEW_ID,
 		);
 
 		if ( $field_meta->is_multiple() ) {
-			$conditional_fields[] = Field_Data::FIELD_SLIDER_TYPE;
+			$conditional_fields[] = Field_Settings::FIELD_SLIDER_TYPE;
 		}
 
 		return array_merge( parent::get_conditional_fields( $field_meta ), $conditional_fields );

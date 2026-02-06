@@ -6,12 +6,12 @@ namespace Org\Wplake\Advanced_Views\Data_Vendors\Common;
 
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\Markup_Field_Interface;
 use Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields\Pro_Stub_Field;
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\Item_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Item_Settings;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
-use Org\Wplake\Advanced_Views\Parents\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,7 +39,7 @@ abstract class Data_Vendor extends Action implements Data_Vendor_Interface {
 			$this->get_name() :
 			'';
 
-		return Field_Data::create_field_key( $group_id, $field_id, $sub_field_id, $source );
+		return Field_Settings::create_field_key( $group_id, $field_id, $sub_field_id, $source );
 	}
 
 	// for back compatibility only.
@@ -80,7 +80,7 @@ abstract class Data_Vendor extends Action implements Data_Vendor_Interface {
 			$this->get_name() :
 			'';
 
-		return Item_Data::create_group_key( $group_id, $source );
+		return Item_Settings::create_group_key( $group_id, $source );
 	}
 
 	/**
@@ -147,7 +147,7 @@ abstract class Data_Vendor extends Action implements Data_Vendor_Interface {
 			}
 
 			foreach ( $conditional_instance_field_keys as $conditional_instance_field_key ) {
-				$field_key_conditional_rules[ $conditional_instance_field_key ]   = $field_key_conditional_rules[ $conditional_instance_field_key ] ?? array();
+				$field_key_conditional_rules[ $conditional_instance_field_key ] ??= array();
 				$field_key_conditional_rules[ $conditional_instance_field_key ][] = $field_key;
 			}
 		}
@@ -165,12 +165,12 @@ abstract class Data_Vendor extends Action implements Data_Vendor_Interface {
 	/**
 	 * @return string[]
 	 */
-	public function get_field_front_assets( Field_Data $field_data ): array {
-		$field_type     = $field_data->get_field_meta()->get_type();
+	public function get_field_front_assets( Field_Settings $field_settings ): array {
+		$field_type     = $field_settings->get_field_meta()->get_type();
 		$field_instance = $this->field_types[ $field_type ] ?? null;
 
 		return null !== $field_instance ?
-			$field_instance->get_front_assets( $field_data ) :
+			$field_instance->get_front_assets( $field_settings ) :
 			array();
 	}
 
@@ -192,7 +192,7 @@ abstract class Data_Vendor extends Action implements Data_Vendor_Interface {
 	}
 
 	/**
-	 * @param array<string, mixed> $groups_data
+	 * @param mixed[] $groups_data
 	 *
 	 * @return array<string, mixed>
 	 */

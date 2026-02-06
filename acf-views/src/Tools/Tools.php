@@ -6,34 +6,40 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Tools;
 
 use Exception;
-use Org\Wplake\Advanced_Views\Cards\Cpt\Cards_Cpt;
-use Org\Wplake\Advanced_Views\Cards\Data_Storage\Cards_Data_Storage;
-use Org\Wplake\Advanced_Views\Current_Screen;
-use Org\Wplake\Advanced_Views\Groups\Card_Data;
-use Org\Wplake\Advanced_Views\Groups\Tools_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
+use Org\Wplake\Advanced_Views\Compatibility\Migration\Version_Migrator;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
+use Org\Wplake\Advanced_Views\Settings;
+use Org\Wplake\Advanced_Views\Utils\Cache_Flusher;
+use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
+use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
+use Org\Wplake\Advanced_Views\Groups\Tools_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Parents\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
 use Org\Wplake\Advanced_Views\Plugin;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
-use Org\Wplake\Advanced_Views\Views\Data_Storage\Views_Data_Storage;
+use Org\Wplake\Advanced_Views\Layouts\Data_Storage\Layouts_Settings_Storage;
 use WP_Filesystem_Base;
 use WP_Post;
 use WP_Query;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Tools implements Hooks_Interface {
+final class Tools extends Hookable implements Hooks_Interface {
 
-	const SLUG = 'acf-views-tools';
+	const SLUG = 'avf-tools';
 	/**
 	 * @var array<string,mixed>
 	 */
 	private array $values;
-	private Tools_Data $tools_data;
-	private Cards_Data_Storage $cards_data_storage;
-	private Views_Data_Storage $views_data_storage;
+	private Tools_Settings $tools_settings;
+	private Post_Selections_Settings_Storage $post_selections_settings_storage;
+	private Layouts_Settings_Storage $layouts_settings_storage;
 	private Plugin $plugin;
 	private Logger $logger;
 	private Debug_Dump_Creator $debug_dump_creator;
@@ -43,47 +49,60 @@ final class Tools implements Hooks_Interface {
 	private array $export_data;
 	private bool $is_import_successful;
 	private string $import_result_message;
-	private ?WP_Filesystem_Base $wp_filesystem;
+	private ?WP_Filesystem_Base $wp_filesystem_base;
+	private Plugin_Cpt $layouts_cpt;
+	private Plugin_Cpt $post_selections_cpt;
+	private Settings $settings;
+	private Cache_Flusher $cache_flusher;
 
 	public function __construct(
-		Tools_Data $tools_data,
-		Cards_Data_Storage $cards_data_storage,
-		Views_Data_Storage $views_data_storage,
+		Tools_Settings $tools_settings,
+		Post_Selections_Settings_Storage $post_selections_settings_storage,
+		Layouts_Settings_Storage $layouts_settings_storage,
 		Plugin $plugin,
 		Logger $logger,
-		Debug_Dump_Creator $debug_dump_creator
+		Debug_Dump_Creator $debug_dump_creator,
+		Plugin_Cpt $layouts_cpt,
+		Plugin_Cpt $post_selections_cpt,
+		Settings $settings,
+		Cache_Flusher $cache_flusher
 	) {
-		$this->tools_data            = $tools_data;
-		$this->cards_data_storage    = $cards_data_storage;
-		$this->views_data_storage    = $views_data_storage;
-		$this->plugin                = $plugin;
-		$this->logger                = $logger;
-		$this->debug_dump_creator    = $debug_dump_creator;
+		$this->tools_settings                   = $tools_settings;
+		$this->post_selections_settings_storage = $post_selections_settings_storage;
+		$this->layouts_settings_storage         = $layouts_settings_storage;
+		$this->plugin                           = $plugin;
+		$this->logger                           = $logger;
+		$this->debug_dump_creator               = $debug_dump_creator;
+		$this->layouts_cpt                      = $layouts_cpt;
+		$this->post_selections_cpt              = $post_selections_cpt;
+		$this->settings                         = $settings;
+		$this->cache_flusher                    = $cache_flusher;
+
 		$this->values                = array();
 		$this->export_data           = array();
 		$this->is_import_successful  = false;
 		$this->import_result_message = '';
-		$this->wp_filesystem         = null;
+		$this->wp_filesystem_base    = null;
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
-		if ( false === $current_screen->is_admin() ) {
+	public function set_hooks( Route_Detector $route_detector ): void {
+		if ( false === $route_detector->is_admin_route() ) {
 			return;
 		}
 
 		// init, not acf/init, as the method uses 'get_edit_post_link' which will be available only since this hook
 		// (because we sign up the CPTs in this hook).
-		add_action( 'init', array( $this, 'add_page' ) );
-		add_action( 'acf/input/admin_head', array( $this, 'maybe_inject_values' ) );
-		add_action( 'acf/save_post', array( $this, 'maybe_catch_values' ) );
+		self::add_action( 'init', array( $this, 'add_page' ) );
+		self::add_action( 'acf/input/admin_head', array( $this, 'maybe_inject_values' ) );
+		self::add_action( 'acf/save_post', array( $this, 'maybe_catch_values' ) );
 		// priority 20, as it's after the ACF's save_post hook.
-		add_action( 'acf/save_post', array( $this, 'maybe_process' ), 20 );
+		self::add_action( 'acf/save_post', array( $this, 'maybe_process' ), 20 );
 		// priority 30, after the process action.
-		add_action( 'acf/save_post', array( $this, 'maybe_echo_export_file' ), 30 );
+		self::add_action( 'acf/save_post', array( $this, 'maybe_echo_export_file' ), 30 );
 	}
 
 	public function maybe_inject_values(): void {
-		add_filter(
+		self::add_filter(
 			'acf/pre_load_value',
 			function ( $value, $post_id, $field ) {
 				// extra check, as probably it's about another post.
@@ -95,10 +114,10 @@ final class Tools implements Hooks_Interface {
 				$value      = '';
 
 				switch ( $field_name ) {
-					case Tools_Data::getAcfFieldName( Tools_Data::FIELD_LOGS ):
+					case Tools_Settings::getAcfFieldName( Tools_Settings::FIELD_LOGS ):
 						$value = $this->logger->get_logs();
 						break;
-					case Tools_Data::getAcfFieldName( Tools_Data::FIELD_ERROR_LOGS ):
+					case Tools_Settings::getAcfFieldName( Tools_Settings::FIELD_ERROR_LOGS ):
 						$value = $this->logger->get_error_logs();
 						break;
 				}
@@ -122,16 +141,12 @@ final class Tools implements Hooks_Interface {
 		$ids               = array_keys( $this->export_data );
 		$view_ids          = array_filter(
 			$ids,
-			function ( $id ) {
-				return false !== strpos( $id, View_Data::UNIQUE_ID_PREFIX );
-			}
+			fn( $id ) => false !== strpos( $id, Layout_Settings::UNIQUE_ID_PREFIX )
 		);
 		$count_of_view_ids = count( $view_ids );
 		$card_ids          = array_filter(
 			$ids,
-			function ( $id ) {
-				return false !== strpos( $id, Card_Data::UNIQUE_ID_PREFIX );
-			}
+			fn( $id ) => false !== strpos( $id, Post_Selection_Settings::UNIQUE_ID_PREFIX )
 		);
 		$count_of_card_ids = count( $card_ids );
 
@@ -192,13 +207,16 @@ final class Tools implements Hooks_Interface {
 			$views_count = Query_Arguments::get_int_for_non_action( '_views' );
 			$cards_count = Query_Arguments::get_int_for_non_action( '_cards' );
 
+			$layout_labels         = $this->layouts_cpt->labels();
+			$post_selection_labels = $this->post_selections_cpt->labels();
+
 			$updated_message = sprintf(
 			// translators: Success! There were x View(s) and y Card(s) exported.
 				__( 'Success! There were %1$d %2$s and %3$d %4$s exported.', 'acf-views' ),
 				$views_count,
-				_n( 'View', 'Views', $views_count ),
+				$layout_labels->item_s_name( $views_count ),
 				$cards_count,
-				_n( 'Card', 'Cards', $cards_count )
+				$post_selection_labels->item_s_name( $cards_count )
 			);
 		}
 
@@ -206,7 +224,7 @@ final class Tools implements Hooks_Interface {
 			$result_message = Query_Arguments::get_string_for_non_action( 'resultMessage' );
 			$result_message = esc_html( $result_message );
 
-			$success_view_ids = explode( ';', $result_message )[0] ?? '';
+			$success_view_ids = explode( ';', $result_message )[0];
 			$success_view_ids = '' !== $success_view_ids ?
 				explode( ',', $success_view_ids ) :
 				array();
@@ -239,7 +257,7 @@ final class Tools implements Hooks_Interface {
 				'slug'            => self::SLUG,
 				'page_title'      => __( 'Tools', 'acf-views' ),
 				'menu_title'      => __( 'Tools', 'acf-views' ),
-				'parent_slug'     => sprintf( 'edit.php?post_type=%s', Views_Cpt::NAME ),
+				'parent_slug'     => sprintf( 'edit.php?post_type=%s', Hard_Layout_Cpt::cpt_name() ),
 				'position'        => 2,
 				'update_button'   => __( 'Process', 'acf-views' ),
 				'updated_message' => $updated_message,
@@ -255,7 +273,7 @@ final class Tools implements Hooks_Interface {
 			return;
 		}
 
-		add_filter(
+		self::add_filter(
 			'acf/pre_update_value',
 			function ( $is_updated, $value, $post_id, array $field ): bool {
 				// extra check, as probably it's about another post.
@@ -286,15 +304,17 @@ final class Tools implements Hooks_Interface {
 			return;
 		}
 
-		$this->tools_data->load( false, '', $this->values );
+		$this->tools_settings->load( false, '', $this->values );
 
 		$actions = array(
-			'export'                     => $this->tools_data->is_export_all_views ||
-							$this->tools_data->is_export_all_cards ||
-							array() !== $this->tools_data->export_views ||
-							array() !== $this->tools_data->export_cards,
-			'import'                     => 0 !== $this->tools_data->import_file,
-			'generate_installation_dump' => $this->tools_data->is_generate_installation_dump,
+			'export'                     => $this->tools_settings->is_export_all_views ||
+							$this->tools_settings->is_export_all_cards ||
+							array() !== $this->tools_settings->export_views ||
+							array() !== $this->tools_settings->export_cards,
+			'import'                     => 0 !== $this->tools_settings->import_file,
+			'generate_installation_dump' => $this->tools_settings->is_generate_installation_dump,
+			'version_upgrade'            => '' !== $this->tools_settings->upgrade_from_version,
+			'flush_caches'               => $this->tools_settings->should_flush_caches,
 		);
 
 		$current_action = array_search( true, $actions, true );
@@ -309,21 +329,40 @@ final class Tools implements Hooks_Interface {
 			case 'generate_installation_dump':
 				$this->debug_dump_creator->echo_dump_file();
 				break;
+			case 'version_upgrade':
+				$from_version    = $this->tools_settings->upgrade_from_version;
+				$current_version = $this->plugin->get_version();
+
+				if ( ! Version_Migrator::is_valid_version( $from_version ) ||
+					// allow entering only previous plugin versions.
+				Version_Migrator::is_version_lower( $current_version, $from_version ) ) {
+					$invalid_version_message = __( 'You entered the invalid version number', 'acf-views' );
+
+					wp_die(
+						sprintf(
+							'%s (%s)',
+							esc_html( $invalid_version_message ),
+							esc_html( $from_version )
+						)
+					);
+				}
+
+				$this->settings->set_version( $from_version );
+				$this->settings->save();
+
+				break;
+			case 'flush_caches':
+				$this->cache_flusher->flush_caches();
+				break;
 		}
 	}
 
 	protected function get_wp_filesystem(): WP_Filesystem_Base {
-		if ( null === $this->wp_filesystem ) {
-			global $wp_filesystem;
-
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-
-			WP_Filesystem();
-
-			$this->wp_filesystem = $wp_filesystem;
+		if ( null === $this->wp_filesystem_base ) {
+			$this->wp_filesystem_base = WP_Filesystem_Factory::get_wp_filesystem();
 		}
 
-		return $this->wp_filesystem;
+		return $this->wp_filesystem_base;
 	}
 
 	/**
@@ -332,8 +371,10 @@ final class Tools implements Hooks_Interface {
 	protected function is_my_source( $post_id ): bool {
 		$screen = get_current_screen();
 
+		$tools_screen = sprintf( '%s_page_%s', Hard_Layout_Cpt::cpt_name(), self::SLUG );
+
 		return null !== $screen &&
-				'acf_views_page_acf-views-tools' === $screen->id &&
+				$tools_screen === $screen->id &&
 				'options' === $post_id;
 	}
 
@@ -353,35 +394,35 @@ final class Tools implements Hooks_Interface {
 			$query_args['post_name__in'] = $slugs;
 		}
 
-		$query = new WP_Query( $query_args );
+		$wp_query = new WP_Query( $query_args );
 
 		/**
 		 * @var WP_Post[]
 		 */
-		return $query->get_posts();
+		return $wp_query->get_posts();
 	}
 
 	protected function export(): void {
-		$is_views_in_export = $this->tools_data->is_export_all_views ||
-								array() !== $this->tools_data->export_views;
-		$is_cards_in_export = $this->tools_data->is_export_all_cards ||
-								array() !== $this->tools_data->export_cards;
+		$is_views_in_export = $this->tools_settings->is_export_all_views ||
+								array() !== $this->tools_settings->export_views;
+		$is_cards_in_export = $this->tools_settings->is_export_all_cards ||
+								array() !== $this->tools_settings->export_cards;
 
 		$view_posts = $is_views_in_export ?
-			$this->get_posts( Views_Cpt::NAME, $this->tools_data->export_views ) :
+			$this->get_posts( Hard_Layout_Cpt::cpt_name(), $this->tools_settings->export_views ) :
 			array();
 		$card_posts = $is_cards_in_export ?
-			$this->get_posts( Cards_Cpt::NAME, $this->tools_data->export_cards ) :
+			$this->get_posts( Hard_Post_Selection_Cpt::cpt_name(), $this->tools_settings->export_cards ) :
 			array();
 
 		foreach ( $view_posts as $view_post ) {
-			$view_data = $this->views_data_storage->get( $view_post->post_name );
+			$view_data = $this->layouts_settings_storage->get( $view_post->post_name );
 			// we don't need to save defaults.
 			$this->export_data[ $view_post->post_name ] = $view_data->getFieldValues( '', true );
 		}
 
 		foreach ( $card_posts as $card_post ) {
-			$card_data      = $this->cards_data_storage->get( $card_post->post_name );
+			$card_data      = $this->post_selections_settings_storage->get( $card_post->post_name );
 			$card_unique_id = $card_data->get_unique_id();
 			// we don't need to save defaults.
 			$this->export_data[ $card_unique_id ] = $card_data->getFieldValues( '', true );
@@ -426,37 +467,44 @@ final class Tools implements Hooks_Interface {
 			);
 		}
 
+		$layout_labels         = $this->layouts_cpt->labels();
+		$post_selection_labels = $this->post_selections_cpt->labels();
+
 		if ( array() === $fail_view_unique_ids &&
 			array() === $fail_card_unique_ids ) {
 			$this->is_import_successful = true;
 
 			$import_result_message .= sprintf(
-			// translators: Successfully imported x View(s) and y Card(s).
+			// translators: Successfully imported x Layout(s) and y Post Selection(s).
 				__( 'Successfully imported %1$d %2$s and %3$d %4$s.', 'acf-views' ),
 				count( $success_view_ids ),
-				_n( 'View', 'Views', count( $success_view_ids ) ),
+				$layout_labels->item_s_name( count( $success_view_ids ) ),
 				count( $success_card_ids ),
-				_n( 'Card', 'Cards', count( $success_card_ids ) )
+				$post_selection_labels->item_s_name( count( $success_card_ids ) )
 			);
 
 			$import_result_message .= '<br>';
 		} else {
 			$import_result_message .= sprintf(
-			// translators: Something went wrong. Imported x from y View(s) and x from y Cards.
+			// translators: Something went wrong. Imported x from y Layout(s) and x from y Post Selections.
 				__( 'Something went wrong. Imported %1$d from %2$d %3$s and %4$d from %5$d %6$s.', 'acf-views' ),
 				count( $success_view_ids ),
 				count( $success_view_ids ) + count( $fail_view_unique_ids ),
-				_n( 'View', 'Views', count( $success_view_ids ) ),
+				$layout_labels->item_s_name( count( $success_view_ids ) ),
 				count( $success_card_ids ),
 				count( $success_card_ids ) + count( $fail_card_unique_ids ),
-				_n( 'Card', 'Cards', count( $success_card_ids ) )
+				$post_selection_labels->item_s_name( count( $success_card_ids ) )
 			);
 
 			$import_result_message .= '<br>';
 		}
 
 		if ( array() !== $views_info ) {
-			$views_label            = __( 'Imported Views', 'acf-views' );
+			$views_label = sprintf(
+					// translators: %s - plural name of the CPT.
+				__( 'Imported %s', 'acf-views' ),
+				$layout_labels->plural_name()
+			);
 			$import_result_message .= sprintf(
 				'<br>%s:<br><br> %s.',
 				$views_label,
@@ -466,7 +514,11 @@ final class Tools implements Hooks_Interface {
 		}
 
 		if ( array() !== $cards_info ) {
-			$cards_label            = __( 'Imported Cards', 'acf-views' );
+			$cards_label = sprintf(
+			// translators: %s - plural name of the CPT.
+				__( 'Imported %s', 'acf-views' ),
+				$post_selection_labels->plural_name()
+			);
 			$import_result_message .= sprintf(
 				'<br>%s:<br><br> %s.',
 				$cards_label,
@@ -476,7 +528,11 @@ final class Tools implements Hooks_Interface {
 		}
 
 		if ( array() !== $fail_view_unique_ids ) {
-			$views_label            = __( 'Wrong Views', 'acf-views' );
+			$views_label = sprintf(
+			// translators: %s - plural name of the CPT.
+				__( 'Wrong %s', 'acf-views' ),
+				$layout_labels->plural_name()
+			);
 			$import_result_message .= sprintf(
 				'%s: %s.',
 				$views_label,
@@ -486,7 +542,11 @@ final class Tools implements Hooks_Interface {
 		}
 
 		if ( array() !== $fail_card_unique_ids ) {
-			$cards_label            = __( 'Wrong Cards', 'acf-views' );
+			$cards_label = sprintf(
+			// translators: %s - plural name of the CPT.
+				__( 'Wrong %s', 'acf-views' ),
+				$post_selection_labels->plural_name()
+			);
 			$import_result_message .= sprintf(
 				'%s: %s.',
 				$cards_label,
@@ -514,15 +574,15 @@ final class Tools implements Hooks_Interface {
 				continue;
 			}
 
-			$post_type    = false !== strpos( $unique_id, View_Data::UNIQUE_ID_PREFIX ) ?
-				Views_Cpt::NAME :
-				Cards_Cpt::NAME;
-			$data_storage = Views_Cpt::NAME === $post_type ?
-				$this->views_data_storage :
-				$this->cards_data_storage;
-			$title_field  = Views_Cpt::NAME === $post_type ?
-				View_Data::getAcfFieldName( View_Data::FIELD_TITLE ) :
-				Card_Data::getAcfFieldName( Card_Data::FIELD_TITLE );
+			$post_type    = false !== strpos( $unique_id, Layout_Settings::UNIQUE_ID_PREFIX ) ?
+				Hard_Layout_Cpt::cpt_name() :
+				Hard_Post_Selection_Cpt::cpt_name();
+			$data_storage = Hard_Layout_Cpt::cpt_name() === $post_type ?
+				$this->layouts_settings_storage :
+				$this->post_selections_settings_storage;
+			$title_field  = Hard_Layout_Cpt::cpt_name() === $post_type ?
+				Layout_Settings::getAcfFieldName( Layout_Settings::FIELD_TITLE ) :
+				Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_TITLE );
 			$title        = $details[ $title_field ] ?? '';
 			$title        = is_string( $title ) ?
 				$title :
@@ -537,7 +597,7 @@ final class Tools implements Hooks_Interface {
 				$cpt_data;
 
 			if ( null === $cpt_data ) {
-				if ( Views_Cpt::NAME === $post_type ) {
+				if ( Hard_Layout_Cpt::cpt_name() === $post_type ) {
 					$fail_view_unique_ids[] = $unique_id;
 				} else {
 					$fail_card_unique_ids[] = $unique_id;
@@ -553,7 +613,7 @@ final class Tools implements Hooks_Interface {
 
 			// there is no sense to call the 'performSaveActions' method.
 
-			if ( Views_Cpt::NAME === $post_type ) {
+			if ( Hard_Layout_Cpt::cpt_name() === $post_type ) {
 				$success_view_ids[] = $cpt_data->get_post_id();
 			} else {
 				$success_card_ids[] = $cpt_data->get_post_id();
@@ -571,7 +631,7 @@ final class Tools implements Hooks_Interface {
 	}
 
 	protected function import(): void {
-		$path_to_file = (string) get_attached_file( $this->tools_data->import_file );
+		$path_to_file = (string) get_attached_file( $this->tools_settings->import_file );
 
 		$wp_filesystem = $this->get_wp_filesystem();
 
@@ -600,7 +660,7 @@ final class Tools implements Hooks_Interface {
 
 		$this->import_or_update_items( $json_data );
 
-		wp_delete_attachment( $this->tools_data->import_file, true );
+		wp_delete_attachment( $this->tools_settings->import_file, true );
 
 		$url = $this->plugin->get_admin_url( self::SLUG ) .
 				sprintf(

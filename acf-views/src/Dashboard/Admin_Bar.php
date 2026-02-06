@@ -6,32 +6,34 @@ namespace Org\Wplake\Advanced_Views\Dashboard;
 
 use Org\Wplake\Advanced_Views\Assets\Live_Reloader_Component;
 use Org\Wplake\Advanced_Views\Avf_User;
-use Org\Wplake\Advanced_Views\Shortcode\Card_Shortcode;
-use Org\Wplake\Advanced_Views\Current_Screen;
+use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Shortcode\Post_Selection_Shortcode;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Settings;
-use Org\Wplake\Advanced_Views\Views\Cpt\Views_Cpt;
-use Org\Wplake\Advanced_Views\Shortcode\View_Shortcode;
+use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use WP_Admin_Bar;
+use Org\Wplake\Advanced_Views\Parents\Hookable;
 
 defined( 'ABSPATH' ) || exit;
 
-class Admin_Bar implements Hooks_Interface {
-	private View_Shortcode $view_shortcode;
-	private Card_Shortcode $card_shortcode;
+class Admin_Bar extends Hookable implements Hooks_Interface {
+	private Layout_Shortcode $layout_shortcode;
+	private Post_Selection_Shortcode $post_selection_shortcode;
 	private Live_Reloader_Component $live_reloader_component;
 	private Settings $settings;
 
 	public function __construct(
-		View_Shortcode $view_shortcode,
-		Card_Shortcode $card_shortcode,
+		Layout_Shortcode $layout_shortcode,
+		Post_Selection_Shortcode $post_selection_shortcode,
 		Live_Reloader_Component $live_reloader_component,
 		Settings $settings
 	) {
-		$this->view_shortcode          = $view_shortcode;
-		$this->card_shortcode          = $card_shortcode;
-		$this->live_reloader_component = $live_reloader_component;
-		$this->settings                = $settings;
+		$this->layout_shortcode         = $layout_shortcode;
+		$this->post_selection_shortcode = $post_selection_shortcode;
+		$this->live_reloader_component  = $live_reloader_component;
+		$this->settings                 = $settings;
 	}
 
 	public function add_admin_bar_menu( WP_Admin_Bar $wp_admin_bar ): void {
@@ -39,8 +41,8 @@ class Admin_Bar implements Hooks_Interface {
 			return;
 		}
 
-		$total_items_count = $this->view_shortcode->get_rendered_items_count() +
-							$this->card_shortcode->get_rendered_items_count();
+		$total_items_count = $this->layout_shortcode->get_rendered_items_count() +
+							$this->post_selection_shortcode->get_rendered_items_count();
 
 		$title = __( 'Advanced Views', 'acf-views' );
 
@@ -62,19 +64,19 @@ class Admin_Bar implements Hooks_Interface {
 
 		$items = array(
 			array(
-				'id'    => 'acf-views',
+				'id'    => Plugin::PRODUCT_SLUG,
 				'title' => $title,
-				'href'  => admin_url( sprintf( 'edit.php?post_type=%s', Views_Cpt::NAME ) ),
+				'href'  => admin_url( sprintf( 'edit.php?post_type=%s', Hard_Layout_Cpt::cpt_name() ) ),
 			),
 			array(
-				'parent' => 'acf-views',
-				'id'     => 'acf-views__dev-mode',
+				'parent' => Plugin::PRODUCT_SLUG,
+				'id'     => sprintf( '%s__dev-mode', Plugin::PRODUCT_SLUG ),
 				'title'  => $dev_mode_label,
 				'href'   => $this->settings->get_page_dev_mode_manage_link( false === $is_page_dev_mode_active ),
 			),
 			array(
-				'parent' => 'acf-views',
-				'id'     => 'acf-views__live-reload',
+				'parent' => Plugin::PRODUCT_SLUG,
+				'id'     => sprintf( '%s__live-reload', Plugin::PRODUCT_SLUG ),
 				'title'  => $live_reload_mode_label,
 				'href'   => $this->live_reloader_component->get_manage_link( false === $is_live_reload_mode_active ),
 			),
@@ -85,12 +87,12 @@ class Admin_Bar implements Hooks_Interface {
 		}
 	}
 
-	public function set_hooks( Current_Screen $current_screen ): void {
+	public function set_hooks( Route_Detector $route_detector ): void {
 		// we need to show this only on frontend.
-		if ( true === $current_screen->is_admin() ) {
+		if ( true === $route_detector->is_admin_route() ) {
 			return;
 		}
 
-		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 81 );
+		self::add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_menu' ), 81 );
 	}
 }

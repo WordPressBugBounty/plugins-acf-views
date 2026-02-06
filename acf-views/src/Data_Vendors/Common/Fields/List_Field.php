@@ -4,11 +4,11 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Common\Fields;
 
-use Org\Wplake\Advanced_Views\Groups\Field_Data;
-use Org\Wplake\Advanced_Views\Groups\View_Data;
-use Org\Wplake\Advanced_Views\Views\Field_Meta_Interface;
-use Org\Wplake\Advanced_Views\Views\Fields\Markup_Field_Data;
-use Org\Wplake\Advanced_Views\Views\Fields\Variable_Field_Data;
+use Org\Wplake\Advanced_Views\Groups\Field_Settings;
+use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Layouts\Field_Meta_Interface;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Markup_Field_Data;
+use Org\Wplake\Advanced_Views\Layouts\Fields\Variable_Field_Data;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -197,11 +197,11 @@ abstract class List_Field extends Markup_Field {
 	}
 
 	public function is_with_field_wrapper(
-		View_Data $view_data,
-		Field_Data $field,
+		Layout_Settings $layout_settings,
+		Field_Settings $field_settings,
 		Field_Meta_Interface $field_meta
 	): bool {
-		return $view_data->is_with_unnecessary_wrappers ||
+		return $layout_settings->is_with_unnecessary_wrappers ||
 				$field_meta->is_multiple();
 	}
 
@@ -211,7 +211,7 @@ abstract class List_Field extends Markup_Field {
 	public function get_conditional_fields( Field_Meta_Interface $field_meta ): array {
 		$conditional_fields = $field_meta->is_multiple() ?
 			array(
-				Field_Data::FIELD_OPTIONS_DELIMITER,
+				Field_Settings::FIELD_OPTIONS_DELIMITER,
 			) :
 			array();
 

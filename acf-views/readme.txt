@@ -4,7 +4,7 @@ Tags: WooCommerce, ACF, Meta Box, Posts, Query
 Requires at least: 5.5
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 3.7.20
+Stable tag: 3.8.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,13 +78,14 @@ High-quality results without the time-consuming steps.
 
 == Screenshots ==
 
-1. Views list management via the familiar interface.
+1. Layouts list managed using the familiar interface.
 2. Get a basic setup in seconds with Demo import.
-3. Assign multiple fields within your View.
-4. The generated template can easily be customized.
-5. Display a set of posts with a Card.
+3. Assign multiple fields to Layouts.
+4. The default template can easily be customized.
+5. Query items with Post Selections and display using the selected Layout.
 6. Posts can be filtered, sorted and styled.
 7. Import and Export Tool helps with site migration.
+8. Tools for Import and Export.
 
 == Installation ==
 
@@ -136,6 +137,13 @@ Yes, we maintain an [official Git repository](https://github.com/wplake/advanced
 You're welcome to open issues or PRs there.
 
 == Changelog ==
+
+= 3.8.2 (2025-11-17) =
+- Enhancement: Migrations - automated flush caches, logging, incomplete upgrade detection
+- Enhancement: Tools - Debugging: added 'Flush caches' & 'Upgrade from version' options
+
+= 3.8.1 (2025-11-14) =
+- Better entity names: View => Layout, Card => Post Selection
 
 = 3.7.20 (2025-09-19) =
 - Level up View & Card management capabilities to 'manage_options' (for security reasons)

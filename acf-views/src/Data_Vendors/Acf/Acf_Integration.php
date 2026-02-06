@@ -4,41 +4,35 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Acf;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Common\Data_Vendor_Integration;
+use Org\Wplake\Advanced_Views\Data_Vendors\Common\Settings_Vendor_Integration;
 use WP_Post;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
-class Acf_Integration extends Data_Vendor_Integration {
+class Acf_Integration extends Settings_Vendor_Integration {
 	protected function get_vendor_post_type(): string {
 		return 'acf-field-group';
 	}
 
 	/**
-	 * @return array<int,array<string,mixed>>
+	 * @return mixed[]
 	 */
-	protected function get_group_fields( WP_Post $group ): array {
+	protected function get_group_fields( WP_Post $wp_post ): array {
 		if ( false === function_exists( 'acf_get_fields' ) ) {
 			return array();
 		}
 
-		return acf_get_fields( $group->ID );
+		return acf_get_fields( $wp_post->ID );
 	}
 
 	/**
-	 * @param array<string,mixed> $field
+	 * @param mixed[] $field
 	 */
 	protected function fill_field_id_and_type( array $field, string &$field_id, string &$field_type ): void {
-		$field_id = $field['key'] ?? '';
-		$field_id = is_string( $field_id ) ||
-					is_numeric( $field_id ) ?
-			$field_id :
-			'';
+		$field_id = string( $field, 'key' );
 
-		$field_type = $field['type'] ?? '';
-		$field_type = is_string( $field_type ) ?
-			$field_type :
-			'';
+		$field_type = string( $field, 'type' );
 	}
 
 	/**
@@ -86,8 +80,8 @@ class Acf_Integration extends Data_Vendor_Integration {
 	}
 
 	public function add_tab_to_meta_group(): void {
-		add_filter( 'acf/field_group/additional_group_settings_tabs', array( $this, 'add_tab' ) );
-		add_action( 'acf/field_group/render_group_settings_tab/advanced_views', array( $this, 'render_tab' ), );
+		self::add_filter( 'acf/field_group/additional_group_settings_tabs', array( $this, 'add_tab' ) );
+		self::add_action( 'acf/field_group/render_group_settings_tab/advanced_views', array( $this, 'render_tab' ), );
 	}
 
 	public function get_vendor_name(): string {

@@ -4,19 +4,18 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage;
 
+defined( 'ABSPATH' ) || exit;
+
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Plugin_Cpt;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data;
-use WP_Error;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use WP_Post;
 use WP_Query;
 
-defined( 'ABSPATH' ) || exit;
-
 class Db_Management extends Action {
 	private File_System $file_system;
-	private string $post_type;
-	private string $unique_id_prefix;
+	private Plugin_Cpt $plugin_cpt;
 	/**
 	 * @var array<string,int> uniqueId => postId
 	 */
@@ -35,15 +34,13 @@ class Db_Management extends Action {
 	public function __construct(
 		Logger $logger,
 		File_System $file_system,
-		string $post_type,
-		string $unique_id_prefix,
+		Plugin_Cpt $plugin_cpt,
 		bool $is_external_storage = false
 	) {
 		parent::__construct( $logger );
 
-		$this->file_system      = $file_system;
-		$this->post_type        = $post_type;
-		$this->unique_id_prefix = $unique_id_prefix;
+		$this->file_system = $file_system;
+		$this->plugin_cpt  = $plugin_cpt;
 
 		$this->post_ids               = array();
 		$this->trashed_post_ids       = array();
@@ -61,9 +58,7 @@ class Db_Management extends Action {
 		if ( true === $this->file_system->is_active() ) {
 			$short_unique_ids = array_keys( $this->file_system->get_item_folders() );
 			$unique_ids       = array_map(
-				function ( string $short_unique_id ) {
-					return $this->unique_id_prefix . $short_unique_id;
-				},
+				fn( string $short_unique_id ) => $this->get_unique_id_prefix() . $short_unique_id,
 				$short_unique_ids
 			);
 
@@ -79,20 +74,7 @@ class Db_Management extends Action {
 		// 2. fill post ids for the items which are present in the DB
 		// (if FS storage is disabled, then it'll be the only source)
 
-		$query = new WP_Query(
-			array(
-				'post_type'      => $this->post_type,
-				// do not consider 'trash', as no FS option is available for them
-				// (and we don't want to show these items in the field select lists)
-				// we act with all the other statuses as with published.
-				'post_status'    => array( 'publish', 'future', 'draft', 'pending', 'private' ),
-				'posts_per_page' => - 1,
-			)
-		);
-		/**
-		 * @var WP_Post[] $posts
-		 */
-		$posts = $query->get_posts();
+		$posts = $this->get_all_posts();
 
 		foreach ( $posts as $post ) {
 			// ignore posts with broken slugs (auto-save or something else).
@@ -106,9 +88,9 @@ class Db_Management extends Action {
 		// 3. trashed posts
 		// store separately, as we don't want these items to be listed in the field select lists
 
-		$query = new WP_Query(
+		$wp_query = new WP_Query(
 			array(
-				'post_type'      => $this->post_type,
+				'post_type'      => $this->get_post_type(),
 				'post_status'    => 'trash',
 				'posts_per_page' => - 1,
 			)
@@ -117,7 +99,7 @@ class Db_Management extends Action {
 		/**
 		 * @var WP_Post[] $posts
 		 */
-		$posts = $query->get_posts();
+		$posts = $wp_query->get_posts();
 
 		foreach ( $posts as $post ) {
 			$this->trashed_post_ids[ $post->post_name ] = $post->ID;
@@ -152,7 +134,7 @@ class Db_Management extends Action {
 		?int $author_id = null
 	): int {
 		$args = array(
-			'post_type'   => $this->post_type,
+			'post_type'   => $this->get_post_type(),
 			'post_name'   => $unique_id,
 			'post_title'  => $title,
 			'post_status' => $post_status,
@@ -164,9 +146,6 @@ class Db_Management extends Action {
 
 		// suppress the renaming, it's going to break everything at this step.
 		$this->is_renaming_suppressed = true;
-		/**
-		 * @var int|WP_Error $post_id
-		 */
 		$post_id                      = wp_insert_post( $args, true );
 		$this->is_renaming_suppressed = false;
 
@@ -198,25 +177,25 @@ class Db_Management extends Action {
 		return $post_id;
 	}
 
-	public function make_post_for_fs_only_item( Cpt_Data $cpt_data ): void {
-		$post_id = $this->make_new_post( $cpt_data->get_unique_id(), 'publish', $cpt_data->title );
+	public function make_post_for_fs_only_item( Cpt_Settings $cpt_settings ): void {
+		$post_id = $this->make_new_post( $cpt_settings->get_unique_id(), 'publish', $cpt_settings->title );
 
 		if ( 0 === $post_id ) {
 			return;
 		}
 
 		// now the cptData has the postId.
-		$cpt_data->setSource( $post_id );
+		$cpt_settings->setSource( $post_id );
 
 		// update the cache.
 		if ( true === $this->is_read_post_ids ) {
-			$this->post_ids[ $cpt_data->get_unique_id() ] = $post_id;
+			$this->post_ids[ $cpt_settings->get_unique_id() ] = $post_id;
 		}
 
 		// update the post fields.
 		$this->update_post_without_renaming(
 			array_merge(
-				$cpt_data->get_exposed_post_fields(),
+				$cpt_settings->get_exposed_post_fields(),
 				array(
 					'ID' => $post_id,
 				)
@@ -251,21 +230,21 @@ class Db_Management extends Action {
 	}
 
 	public function get_unique_id_prefix(): string {
-		return $this->unique_id_prefix;
+		return $this->plugin_cpt->slug_prefix();
 	}
 
 	public function get_post_type(): string {
-		return $this->post_type;
+		return $this->plugin_cpt->cpt_name();
 	}
 
-	public function maybe_assign_unique_id( int $post_id, Cpt_Data $cpt_data ): void {
+	public function maybe_assign_unique_id( int $post_id, Cpt_Settings $cpt_settings ): void {
 		$current_slug = get_post( $post_id )->post_name ?? '';
 
-		if ( 0 === strpos( $current_slug, $this->unique_id_prefix ) ) {
+		if ( 0 === strpos( $current_slug, $this->get_unique_id_prefix() ) ) {
 			return;
 		}
 
-		$unique_id = uniqid( $this->unique_id_prefix );
+		$unique_id = uniqid( $this->get_unique_id_prefix() );
 
 		$this->update_post_without_renaming(
 			array(
@@ -274,8 +253,8 @@ class Db_Management extends Action {
 			)
 		);
 
-		$cpt_data->unique_id = $unique_id;
-		$cpt_data->setSource( $post_id );
+		$cpt_settings->unique_id = $unique_id;
+		$cpt_settings->setSource( $post_id );
 
 		// we always need to update the cache, even the IDs aren't read it
 		// otherwise it'll call read later, and the id will be missing (as the item missing in FS).
@@ -343,10 +322,10 @@ class Db_Management extends Action {
 		);
 	}
 
-	public function delete_and_bypass_trash( Cpt_Data $cpt_data ): void {
+	public function delete_and_bypass_trash( Cpt_Settings $cpt_settings ): void {
 		// 1. remove in DB (if post is present)
-		if ( 0 !== $cpt_data->get_post_id() ) {
-			wp_delete_post( $cpt_data->get_post_id(), true );
+		if ( 0 !== $cpt_settings->get_post_id() ) {
+			wp_delete_post( $cpt_settings->get_post_id(), true );
 		}
 
 		// 2. remove in cache (if present)
@@ -355,7 +334,7 @@ class Db_Management extends Action {
 			return;
 		}
 
-		$unique_id = $cpt_data->get_unique_id();
+		$unique_id = $cpt_settings->get_unique_id();
 
 		if ( key_exists( $unique_id, $this->post_ids ) ) {
 			unset( $this->post_ids[ $unique_id ] );
@@ -371,5 +350,27 @@ class Db_Management extends Action {
 				'unique_id' => $unique_id,
 			)
 		);
+	}
+
+	/**
+	 * @return WP_Post[]
+	 */
+	public function get_all_posts(): array {
+		$wp_query = new WP_Query(
+			array(
+				'post_type'      => $this->get_post_type(),
+				// do not consider 'trash', as no FS option is available for them
+				// (and we don't want to show these items in the field select lists)
+				// we act with all the other statuses as with published.
+				'post_status'    => array( 'publish', 'future', 'draft', 'pending', 'private' ),
+				'posts_per_page' => - 1,
+			)
+		);
+		/**
+		 * @var WP_Post[] $posts
+		 */
+		$posts = $wp_query->get_posts();
+
+		return $posts;
 	}
 }

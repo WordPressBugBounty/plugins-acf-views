@@ -4,25 +4,27 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Data_Vendors\Meta_Box;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Common\Data_Vendor_Integration;
+use Org\Wplake\Advanced_Views\Data_Vendors\Common\Settings_Vendor_Integration;
 use WP_Post;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
-class Meta_Box_Integration extends Data_Vendor_Integration {
+class Meta_Box_Integration extends Settings_Vendor_Integration {
 	protected function get_vendor_post_type(): string {
 		return 'meta-box';
 	}
 
 	/**
-	 * @return array<int,array<string,mixed>>
+	 * @return mixed[]
 	 */
-	protected function get_group_fields( WP_Post $group ): array {
+	protected function get_group_fields( WP_Post $wp_post ): array {
 		if ( false === function_exists( 'rwmb_get_registry' ) ) {
 			return array();
 		}
 
-		$fields = rwmb_get_registry( 'meta_box' )->get_by( array( 'id' => $group->post_name ) );
+		$fields = rwmb_get_registry( 'meta_box' )->get_by( array( 'id' => $wp_post->post_name ) );
 
 		$fields = true === is_array( $fields ) &&
 					count( $fields ) > 0 ?
@@ -35,32 +37,22 @@ class Meta_Box_Integration extends Data_Vendor_Integration {
 			$fields->meta_box :
 			array();
 
-		return true === key_exists( 'fields', $fields ) &&
-				true === is_array( $fields['fields'] ) ?
-			$fields['fields'] :
-			array();
+		return arr( $fields, 'fields' );
 	}
 
 	/**
-	 * @param array<string,mixed> $field
+	 * @param mixed[] $field
 	 */
 	protected function fill_field_id_and_type( array $field, string &$field_id, string &$field_type ): void {
-		$field_id = $field['id'] ?? '';
-		$field_id = is_string( $field_id ) ||
-					is_numeric( $field_id ) ?
-			(string) $field_id :
-			'';
+		$field_id = string( $field, 'id' );
 
-		$field_type = $field['type'] ?? '';
-		$field_type = is_string( $field_type ) ?
-			$field_type :
-			'';
+		$field_type = string( $field, 'type' );
 	}
 
 	public function add_tab_to_meta_group(): void {
-		add_action(
+		self::add_action(
 			'add_meta_boxes',
-			function () {
+			function (): void {
 				add_meta_box(
 					'advanced_views',
 					$this->get_tab_label(),
@@ -72,8 +64,8 @@ class Meta_Box_Integration extends Data_Vendor_Integration {
 		);
 	}
 
-	public function render_meta_box( WP_Post $post ): void {
-		$this->print_related_acf_views( $post );
+	public function render_meta_box( WP_Post $wp_post ): void {
+		$this->print_related_acf_views( $wp_post );
 	}
 
 	public function get_vendor_name(): string {
