@@ -115,7 +115,7 @@ msgstr "Карта отправлена."
 msgid "Card draft updated."
 msgstr "Черновик карты обновлен."
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:246
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:245
 #: src/Layouts/Cpt/Table/Layouts_Cpt_Table.php:133
 #: src/Post_Selections/Cpt/Post_Selections_Cpt_Meta_Boxes.php:77
 #: src/Post_Selections/Cpt/Table/Post_Selections_Cpt_Table.php:114
@@ -308,7 +308,7 @@ msgid "Advanced Views"
 msgstr "Advanced Views"
 
 #: src/Data_Vendors/Common/Settings_Vendor_Integration.php:193
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:231
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:230
 msgid "Add new"
 msgstr "Добавить новое"
 
@@ -1543,7 +1543,7 @@ msgid "Bulk validation - Used to validate the Custom Template field of all exist
 msgstr "Массовая проверка - используется для проверки поля Пользовательского шаблона всех существующих элементов и отображения элементов, которые не прошли проверку."
 
 #: src/Parents/Cpt/Table/Bulk_Validation_Tab.php:125
-#: src/Shortcode/Shortcode.php:214
+#: src/Shortcode/Shortcode.php:224
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -1670,11 +1670,11 @@ msgstr "Вид отправлен."
 msgid "View draft updated."
 msgstr "Черновик вида обновлен."
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:91
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:90
 msgid "No assigned ACF Groups."
 msgstr "Не назначены группы ACF."
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:282
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:281
 msgid "Assigned Groups"
 msgstr "Назначенные группы"
 
@@ -2144,11 +2144,6 @@ msgstr ""
 msgid "Choose a Parent group when setting up Nested repeater or Flexible layout."
 msgstr ""
 
-#. Description of the plugin
-#: acf-views.php
-msgid "Effortlessly display WordPress posts, custom fields, and WooCommerce data."
-msgstr ""
-
 #: src/Parents/Cpt/Cpt.php:71
 msgid "to improve Advanced Views."
 msgstr ""
@@ -2199,7 +2194,7 @@ msgstr ""
 msgid "Turn this on and click 'Process' to download the file. The above logs and other information about your server environment will be included. <br> Send this to Advanced Views Support on request."
 msgstr ""
 
-#: src/Shortcode/Shortcode.php:119
+#: src/Shortcode/Shortcode.php:118
 msgid "AVF shortcode render error:"
 msgstr ""
 
@@ -2228,17 +2223,9 @@ msgstr ""
 #. translators: %s: the name of the CPT.
 #. translators: %s is the plural name of the CPT.
 #: src/Data_Vendors/Common/Settings_Vendor_Integration.php:242
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:190
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:189
 #, php-format
 msgid "Not assigned to any %s."
-msgstr ""
-
-#: src/Groups/translations.php:25
-msgid "Field Layout"
-msgstr ""
-
-#: src/Groups/translations.php:51
-msgid "If filled then data within this field will be displayed using the selected Layout. <a target='_blank' href='https://docs.advanced-views.com/display-acf-fields/relational-group/relationship#display-fields-from-related-post-pro-feature'>Read more</a>"
 msgstr ""
 
 #: src/Groups/translations.php:150
@@ -2386,20 +2373,14 @@ msgid "<a target=\"_blank\" href=\"https://docs.advanced-views.com/getting-start
 msgstr ""
 
 #. translators: %s is the plural name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:132
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:131
 #, php-format
 msgid "No assigned %s."
 msgstr ""
 
 #. translators: %s is the plural name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:298
-#, php-format
-msgid "Assigned %s"
-msgstr ""
-
-#. translators: %s is the plural name of the CPT.
 #. translators: %s - singular name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:317
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:316
 #: src/Layouts/Cpt/Table/Layouts_Cpt_Table.php:137
 #, php-format
 msgid "Assigned to %s"
@@ -2490,7 +2471,7 @@ msgstr ""
 
 #. translators: %s is the singular name of the CPT.
 #. translators: %s - singular name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:253
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:252
 #: src/Post_Selections/Cpt/Post_Selections_Cpt_Meta_Boxes.php:84
 #, php-format
 msgid "Your %s shortcode is available after publishing."
@@ -2771,4 +2752,23 @@ msgstr ""
 
 #: src/Tools/Tools.php:339
 msgid "You entered the invalid version number"
+msgstr ""
+
+#. Description of the plugin
+#: acf-views.php
+msgid "Display content with full control over selection and layout. Lightweight and compatible with any theme or page builder."
+msgstr ""
+
+#: src/Groups/translations.php:25
+msgid "Object Layout"
+msgstr ""
+
+#: src/Groups/translations.php:51
+msgid "By default, an Object field is rendered in the Layout template as an HTML link to the selected object. <br><br> To display fields from within the selected object, assign a separate Layout with the target object fields. <br><br> Example: To display an excerpt from a Post Object, create a separate Layout with the Post Excerpt field and assign it here. <a target='_blank' href='https://docs.advanced-views.com/display-acf-fields/relational-group/relationship#display-fields-from-related-post-pro-feature'>Read more</a>"
+msgstr ""
+
+#. translators: %s is the plural name of the CPT.
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:297
+#, php-format
+msgid "Object %s"
 msgstr ""

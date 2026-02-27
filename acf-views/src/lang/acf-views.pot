@@ -1,15 +1,15 @@
-# Copyright (C) 2025 WPLake
+# Copyright (C) 2026 WPLake
 # This file is distributed under the same license as the Advanced Views Lite plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Advanced Views Lite 3.8.2\n"
+"Project-Id-Version: Advanced Views Lite 3.8.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lite\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-11-18T08:48:57+00:00\n"
+"POT-Creation-Date: 2026-02-27T13:43:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: acf-views\n"
@@ -29,7 +29,7 @@ msgstr ""
 
 #. Description of the plugin
 #: acf-views.php
-msgid "Effortlessly display WordPress posts, custom fields, and WooCommerce data."
+msgid "Display content with full control over selection and layout. Lightweight and compatible with any theme or page builder."
 msgstr ""
 
 #. Author of the plugin
@@ -245,7 +245,7 @@ msgid "Advanced View"
 msgstr ""
 
 #: src/Data_Vendors/Common/Settings_Vendor_Integration.php:193
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:231
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:230
 msgid "Add new"
 msgstr ""
 
@@ -258,7 +258,7 @@ msgstr ""
 #. translators: %s: the name of the CPT.
 #. translators: %s is the plural name of the CPT.
 #: src/Data_Vendors/Common/Settings_Vendor_Integration.php:242
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:190
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:189
 #, php-format
 msgid "Not assigned to any %s."
 msgstr ""
@@ -585,7 +585,7 @@ msgid "Image Size"
 msgstr ""
 
 #: src/Groups/translations.php:25
-msgid "Field Layout"
+msgid "Object Layout"
 msgstr ""
 
 #: src/Groups/translations.php:26
@@ -679,7 +679,7 @@ msgid "Controls the size of the image, it changes the image src"
 msgstr ""
 
 #: src/Groups/translations.php:51
-msgid "If filled then data within this field will be displayed using the selected Layout. <a target='_blank' href='https://docs.advanced-views.com/display-acf-fields/relational-group/relationship#display-fields-from-related-post-pro-feature'>Read more</a>"
+msgid "By default, an Object field is rendered in the Layout template as an HTML link to the selected object. <br><br> To display fields from within the selected object, assign a separate Layout with the target object fields. <br><br> Example: To display an excerpt from a Post Object, create a separate Layout with the Post Excerpt field and assign it here. <a target='_blank' href='https://docs.advanced-views.com/display-acf-fields/relational-group/relationship#display-fields-from-related-post-pro-feature'>Read more</a>"
 msgstr ""
 
 #: src/Groups/translations.php:52
@@ -2165,17 +2165,17 @@ msgstr ""
 msgid "View draft updated."
 msgstr ""
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:91
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:90
 msgid "No assigned ACF Groups."
 msgstr ""
 
 #. translators: %s is the plural name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:132
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:131
 #, php-format
 msgid "No assigned %s."
 msgstr ""
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:246
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:245
 #: src/Layouts/Cpt/Table/Layouts_Cpt_Table.php:133
 #: src/Post_Selections/Cpt/Post_Selections_Cpt_Meta_Boxes.php:77
 #: src/Post_Selections/Cpt/Table/Post_Selections_Cpt_Table.php:114
@@ -2184,25 +2184,25 @@ msgstr ""
 
 #. translators: %s is the singular name of the CPT.
 #. translators: %s - singular name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:253
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:252
 #: src/Post_Selections/Cpt/Post_Selections_Cpt_Meta_Boxes.php:84
 #, php-format
 msgid "Your %s shortcode is available after publishing."
 msgstr ""
 
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:282
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:281
 msgid "Assigned Groups"
 msgstr ""
 
 #. translators: %s is the plural name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:298
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:297
 #, php-format
-msgid "Assigned %s"
+msgid "Object %s"
 msgstr ""
 
 #. translators: %s is the plural name of the CPT.
 #. translators: %s - singular name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:317
+#: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:316
 #: src/Layouts/Cpt/Table/Layouts_Cpt_Table.php:137
 #, php-format
 msgid "Assigned to %s"
@@ -2376,7 +2376,7 @@ msgid "Bulk validation - Used to validate the Custom Template field of all exist
 msgstr ""
 
 #: src/Parents/Cpt/Table/Bulk_Validation_Tab.php:125
-#: src/Shortcode/Shortcode.php:214
+#: src/Shortcode/Shortcode.php:224
 msgid "Edit"
 msgstr ""
 
@@ -2614,7 +2614,7 @@ msgstr ""
 msgid "Card id is wrong"
 msgstr ""
 
-#: src/Shortcode/Shortcode.php:119
+#: src/Shortcode/Shortcode.php:118
 msgid "AVF shortcode render error:"
 msgstr ""
 
