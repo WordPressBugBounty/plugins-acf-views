@@ -3,7 +3,7 @@
  * Plugin Name: Advanced Views Lite
  * Plugin URI: https://advanced-views.com/
  * Description: Display content with full control over selection and layout. Lightweight and compatible with any theme or page builder.
- * Version: 3.8.3
+ * Version: 3.8.5
  * Author: WPLake
  * Author URI: https://advanced-views.com/
  * Text Domain: acf-views
@@ -68,9 +68,10 @@ use Org\Wplake\Advanced_Views\Post_Selections\{Cpt\Post_Selections_Cpt,
 	Cpt\Table\Post_Selections_Pre_Built_Tab,
 	Data_Storage\Post_Selection_Fs_Fields,
 	Data_Storage\Post_Selections_Settings_Storage,
+	Post_Query,
 	Post_Selection_Factory,
-	Post_Selection_Markup,
-	Query_Builder};
+	Post_Selection_Markup};
+use Org\Wplake\Advanced_Views\Post_Selections\Query\Builders\Selection_Query_Builder;
 use Org\Wplake\Advanced_Views\Shortcode\Layout_Shortcode;
 use Org\Wplake\Advanced_Views\Shortcode\Post_Selection_Shortcode;
 use Org\Wplake\Advanced_Views\Shortcode\Shortcode_Block;
@@ -280,7 +281,8 @@ use Org\Wplake\Advanced_Views\Vendors\LightSource\AcfGroups\Creator;
 		}
 
 		protected function post_selections(): void {
-			$query_builder                          = new Query_Builder( $this->data_vendors, $this->logger );
+			$query_builder                          = new Selection_Query_Builder( $this->data_vendors );
+			$post_query                             = new Post_Query( $query_builder, $this->logger );
 			$post_selection_markup                  = new Post_Selection_Markup(
 				$this->front_assets,
 				$this->template_engines,
@@ -288,7 +290,7 @@ use Org\Wplake\Advanced_Views\Vendors\LightSource\AcfGroups\Creator;
 			);
 			$this->post_selection_factory           = new Post_Selection_Factory(
 				$this->front_assets,
-				$query_builder,
+				$post_query,
 				$post_selection_markup,
 				$this->template_engines,
 				$this->post_selections_settings_storage
@@ -511,6 +513,13 @@ use Org\Wplake\Advanced_Views\Vendors\LightSource\AcfGroups\Creator;
 				$this->post_selection_shortcode,
 				$this->live_reloader_component,
 				$this->settings
+			);
+
+			$this->mount_points = new Mount_Points(
+				$this->layouts_settings_storage,
+				$this->post_selections_settings_storage,
+				$this->layout_cpt,
+				$this->post_selection_cpt
 			);
 
 			parent::others();

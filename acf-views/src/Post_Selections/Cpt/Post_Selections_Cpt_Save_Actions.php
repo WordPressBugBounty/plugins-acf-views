@@ -6,28 +6,28 @@ namespace Org\Wplake\Advanced_Views\Post_Selections\Cpt;
 
 defined( 'ABSPATH' ) || exit;
 
-use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
 use Exception;
 use Org\Wplake\Advanced_Views\Assets\Front_Assets;
-use Org\Wplake\Advanced_Views\Post_Selections\Post_Selection_Factory;
-use Org\Wplake\Advanced_Views\Post_Selections\Post_Selection_Markup;
-use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
-use Org\Wplake\Advanced_Views\Post_Selections\Query_Builder;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
 use Org\Wplake\Advanced_Views\Html;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Cpt\Cpt_Save_Actions;
-use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Instance;
 use Org\Wplake\Advanced_Views\Plugin;
-use WP_REST_Request;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
 use Org\Wplake\Advanced_Views\Plugin\Cpt\Pub\Public_Cpt;
+use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Settings_Storage;
+use Org\Wplake\Advanced_Views\Post_Selections\Post_Selection_Factory;
+use Org\Wplake\Advanced_Views\Post_Selections\Post_Selection_Markup;
+use Org\Wplake\Advanced_Views\Post_Selections\Query\Post_Query_Builder;
+use WP_REST_Request;
 
 class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 	const REST_REFRESH_ROUTE = '/card-refresh';
 
 	private Post_Selection_Markup $post_selection_markup;
-	private Query_Builder $query_builder;
+	private Post_Query_Builder $query_builder;
 	private Html $html;
 	private Post_Selections_Cpt_Meta_Boxes $post_selections_cpt_meta_boxes;
 	private Post_Selection_Factory $post_selection_factory;
@@ -35,7 +35,7 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 	 * @var Post_Selection_Settings
 	 */
 	private Post_Selection_Settings $post_selection_settings;
-	private Post_Selections_Settings_Storage $post_selections_settings_storage;
+	private Post_Selections_Settings_Storage $selection_settings_storage;
 
 	public function __construct(
 		Logger $logger,
@@ -44,7 +44,7 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 		Post_Selection_Settings $post_selection_settings,
 		Front_Assets $front_assets,
 		Post_Selection_Markup $post_selection_markup,
-		Query_Builder $query_builder,
+		Post_Query_Builder $query_builder,
 		Html $html,
 		Post_Selections_Cpt_Meta_Boxes $post_selections_cpt_meta_boxes,
 		Post_Selection_Factory $post_selection_factory,
@@ -62,13 +62,13 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 			$public_cpt
 		);
 
-		$this->post_selections_settings_storage = $post_selections_settings_storage;
-		$this->post_selection_settings          = $post_selection_settings;
-		$this->post_selection_markup            = $post_selection_markup;
-		$this->query_builder                    = $query_builder;
-		$this->html                             = $html;
-		$this->post_selections_cpt_meta_boxes   = $post_selections_cpt_meta_boxes;
-		$this->post_selection_factory           = $post_selection_factory;
+		$this->selection_settings_storage     = $post_selections_settings_storage;
+		$this->post_selection_settings        = $post_selection_settings;
+		$this->post_selection_markup          = $post_selection_markup;
+		$this->query_builder                  = $query_builder;
+		$this->html                           = $html;
+		$this->post_selections_cpt_meta_boxes = $post_selections_cpt_meta_boxes;
+		$this->post_selection_factory         = $post_selection_factory;
 	}
 
 	protected function get_cpt_name(): string {
@@ -94,9 +94,12 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 		$cpt_settings->markup = (string) ob_get_clean();
 	}
 
-	protected function update_query_preview( Post_Selection_Settings $post_selection_settings ): void {
+	protected function update_query_preview( Post_Selection_Settings $selection_settings ): void {
 		// @phpcs:ignore
-		$post_selection_settings->query_preview = print_r( $this->query_builder->get_query_args( $post_selection_settings, 1 ), true );
+		$selection_settings->query_preview = print_r(
+			$this->query_builder->build_post_query( $selection_settings ),
+			true
+		);
 	}
 
 	protected function add_layout_css( Post_Selection_Settings $post_selection_settings ): void {
@@ -138,22 +141,22 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 		}
 
 		// skip save, it'll be below.
-		$card_data = parent::perform_save_actions( $post_id, true );
+		$selection_settings = parent::perform_save_actions( $post_id, true );
 
 		// not just on null, but also on the type, for IDE.
-		if ( ! ( $card_data instanceof Post_Selection_Settings ) ) {
+		if ( ! ( $selection_settings instanceof Post_Selection_Settings ) ) {
 			return null;
 		}
 
-		$this->update_query_preview( $card_data );
-		$this->update_markup( $card_data );
-		$this->add_layout_css( $card_data );
+		$this->update_query_preview( $selection_settings );
+		$this->update_markup( $selection_settings );
+		$this->add_layout_css( $selection_settings );
 
 		if ( ! $is_skip_save ) {
-			$this->post_selections_settings_storage->save( $card_data );
+			$this->selection_settings_storage->save( $selection_settings );
 		}
 
-		return $card_data;
+		return $selection_settings;
 	}
 
 	/**
@@ -175,7 +178,7 @@ class Post_Selections_Cpt_Save_Actions extends Cpt_Save_Actions {
 
 		$card_unique_id = get_post( $card_id )->post_name ?? '';
 
-		$card_data = $this->post_selections_settings_storage->get( $card_unique_id );
+		$card_data = $this->selection_settings_storage->get( $card_unique_id );
 		ob_start();
 		// ignore customMarkup (we need the preview).
 		$this->post_selection_markup->print_markup( $card_data, false, true );

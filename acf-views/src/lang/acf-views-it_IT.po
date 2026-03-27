@@ -15,8 +15,8 @@ msgstr ""
 
 #. Plugin Name of the plugin
 #: acf-views.php
-#: src/Plugin.php:205
-#: src/Plugin.php:333
+#: src/Plugin.php:206
+#: src/Plugin.php:334
 msgid "Advanced Views Lite"
 msgstr "Advanced Views Lite"
 
@@ -25,46 +25,46 @@ msgstr "Advanced Views Lite"
 msgid "WPLake"
 msgstr "WPLake"
 
-#: src/Assets/Admin_Assets.php:332
-#: src/Assets/Admin_Assets.php:372
+#: src/Assets/Admin_Assets.php:337
+#: src/Assets/Admin_Assets.php:377
 #: src/Groups/translations.php:124
 #: src/Groups/translations.php:383
 msgid "Default Template"
 msgstr "Template Predefinito"
 
-#: src/Assets/Admin_Assets.php:340
-#: src/Assets/Admin_Assets.php:380
+#: src/Assets/Admin_Assets.php:345
+#: src/Assets/Admin_Assets.php:385
 #: src/Groups/translations.php:125
 #: src/Groups/translations.php:384
 msgid "Custom Template"
 msgstr "Template Personalizzato"
 
-#: src/Assets/Admin_Assets.php:348
-#: src/Assets/Admin_Assets.php:388
+#: src/Assets/Admin_Assets.php:353
+#: src/Assets/Admin_Assets.php:393
 #: src/Groups/translations.php:132
 #: src/Groups/translations.php:388
 msgid "CSS Code"
 msgstr "Codice CSS"
 
-#: src/Assets/Admin_Assets.php:356
-#: src/Assets/Admin_Assets.php:396
+#: src/Assets/Admin_Assets.php:361
+#: src/Assets/Admin_Assets.php:401
 #: src/Groups/translations.php:133
 #: src/Groups/translations.php:389
 msgid "JS Code"
 msgstr "Codice JS"
 
-#: src/Assets/Admin_Assets.php:364
+#: src/Assets/Admin_Assets.php:369
 #: src/Groups/translations.php:130
 #: src/Groups/translations.php:381
 msgid "Custom Data"
 msgstr "Dati Personalizzati"
 
-#: src/Assets/Admin_Assets.php:404
+#: src/Assets/Admin_Assets.php:409
 #: src/Groups/translations.php:380
 msgid "Query Preview"
 msgstr "Anteprima Query"
 
-#: src/Assets/Admin_Assets.php:412
+#: src/Assets/Admin_Assets.php:417
 msgid "Custom data"
 msgstr "Dati Personalizzati"
 
@@ -611,7 +611,7 @@ msgstr "Classi CSS"
 msgid "CSS & JS"
 msgstr "CSS & JS"
 
-#: src/Plugin/Plugin_Loader_Base.php:429
+#: src/Plugin/Plugin_Loader_Base.php:432
 msgid "Layout"
 msgstr "Layout"
 
@@ -620,16 +620,16 @@ msgstr "Layout"
 msgid "Enable Slider"
 msgstr "Abilita Slider"
 
-#: src/Groups/translations.php:394
+#: src/Groups/translations.php:396
 msgid "Meta Filters"
 msgstr "Filtri Meta"
 
-#: src/Groups/translations.php:395
+#: src/Groups/translations.php:394
 msgid "Taxonomy Filters"
 msgstr "Filtri Tassonomia"
 
 #: src/Groups/translations.php:225
-#: src/Groups/translations.php:396
+#: src/Groups/translations.php:395
 #: src/Groups/translations.php:523
 msgid "Rules"
 msgstr "Regole"
@@ -1478,7 +1478,7 @@ msgstr "Copia negli appunti"
 
 #: src/Parents/Cpt/Table/Fs_Only_Tab.php:80
 #: src/Parents/Cpt/Table/Pre_Built_Tab.php:98
-#: src/Plugin.php:171
+#: src/Plugin.php:172
 msgid "Read more"
 msgstr "Leggi di più"
 
@@ -1552,10 +1552,6 @@ msgstr "Modifica"
 msgid "Clone"
 msgstr "Clona"
 
-#: src/Parents/Cpt/Table/Cpt_Table.php:121
-msgid "Item success cloned."
-msgstr "Elemento clonato con successo."
-
 #: src/Parents/Cpt/Table/Cpt_Table.php:195
 msgid "Search for name."
 msgstr "Cerca per nome."
@@ -1609,23 +1605,23 @@ msgstr "Nota: Non disabilitare la funzione di archiviazione FS prima di risolver
 
 #: src/Dashboard/Dashboard.php:232
 #: src/html/postbox/upgrade.php:23
-#: src/Plugin.php:113
+#: src/Plugin.php:114
 msgid "Upgrade to Pro"
 msgstr "Passa alla versione Pro"
 
-#: src/Plugin.php:156
+#: src/Plugin.php:157
 msgid "Compatibility issue detected! \"Advanced Views\" plugin requires \"PHPDoc\" comments in code."
 msgstr "Rilevato problema di compatibilità! Il plugin \"Advanced Views\" richiede commenti \"PHPDoc\" nel codice."
 
-#: src/Plugin.php:160
+#: src/Plugin.php:161
 msgid "Please change the \"opcache.save_comments\" option in your php.ini file to the default value of \"1\" on your hosting."
 msgstr "Si prega di cambiare l'opzione \"opcache.save_comments\" nel file php.ini al valore predefinito di \"1\" sul proprio hosting."
 
-#: src/Plugin.php:328
+#: src/Plugin.php:329
 msgid "'Advanced Views Lite' and 'Advanced Views Pro' should not be active at the same time. We've automatically deactivated"
 msgstr "'Advanced Views Lite' e 'Advanced Views Pro' non dovrebbero essere attivi contemporaneamente. Abbiamo disattivato automaticamente"
 
-#: src/Plugin.php:334
+#: src/Plugin.php:335
 msgid "Advanced Views Pro"
 msgstr "Advanced Views Pro"
 
@@ -1806,10 +1802,6 @@ msgstr "Elimina dati e disattiva"
 msgid "Delete all the plugin data (cannot be undone)"
 msgstr "Elimina tutti i dati del plugin (non può essere annullato)"
 
-#: src/Shortcode/Post_Selection_Shortcode.php:115
-msgid "Card id is wrong"
-msgstr "L'ID della carta è sbagliato"
-
 #: src/Groups/translations.php:139
 #: src/Groups/translations.php:294
 #: src/Groups/translations.php:378
@@ -1834,10 +1826,6 @@ msgstr "Predefiniti"
 #: src/Groups/translations.php:293
 msgid "Web components type"
 msgstr "Tipo di componenti web"
-
-#: src/Shortcode/Layout_Shortcode.php:248
-msgid "View id is wrong"
-msgstr "L'ID della vista è sbagliato"
 
 #: src/Groups/translations.php:138
 #: src/Groups/translations.php:377
@@ -2210,7 +2198,7 @@ msgstr ""
 msgid "Unlock with Pro"
 msgstr ""
 
-#: src/Plugin.php:112
+#: src/Plugin.php:113
 msgid "Unlock Pro"
 msgstr ""
 
@@ -2451,15 +2439,15 @@ msgid_plural "Items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Plugin/Plugin_Loader_Base.php:433
+#: src/Plugin/Plugin_Loader_Base.php:436
 msgid "Layouts"
 msgstr ""
 
-#: src/Plugin/Plugin_Loader_Base.php:453
+#: src/Plugin/Plugin_Loader_Base.php:456
 msgid "Post Selection"
 msgstr ""
 
-#: src/Plugin/Plugin_Loader_Base.php:457
+#: src/Plugin/Plugin_Loader_Base.php:460
 msgid "Post Selections"
 msgstr ""
 
@@ -2771,4 +2759,16 @@ msgstr ""
 #: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:297
 #, php-format
 msgid "Object %s"
+msgstr ""
+
+#: src/Parents/Cpt/Table/Cpt_Table.php:121
+msgid "Item successfully cloned."
+msgstr ""
+
+#: src/Shortcode/Layout_Shortcode.php:254
+msgid "Layout id is wrong"
+msgstr ""
+
+#: src/Shortcode/Post_Selection_Shortcode.php:132
+msgid "Post Selection ID is wrong"
 msgstr ""

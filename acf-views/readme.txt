@@ -4,7 +4,7 @@ Tags: post grid, wp_query, meta fields, custom post types, taxonomy, shortcodes,
 Requires at least: 5.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 3.8.3
+Stable tag: 3.8.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,9 +16,9 @@ Display content with full control over selection and layout. Lightweight and com
 
 ==⭐ Why Choose Advanced Views?==
 
-Advanced Views is a framework that empowers you to craft layouts and selections that you miss, without bloatware or heavy dependencies.
+Advanced Views is a framework that empowers you to create the layouts and selections you need, without bloatware or heavy dependencies.
 
-✅ **Solid by design**: craft modular and reusable layouts. Eliminate replications, style conflicts, and avoid messy code snippets.
+✅ **Solid by design**: craft modular and reusable layouts. Avoid repetition, style conflicts, and messy code snippets.
 ✅ **Content-driven**: pull content dynamically, with granular filtering and sorting options, built on top of the native WordPress Query. Master advanced database queries with post fields, taxonomies, and meta values.
 ✅ **Time-saver**: automate the groundwork and data fetching. Focus on creating while leaving typical routines behind.
 ✅ **Fully customizable**: directly access the template code to create advanced elements, like Grids and Sliders, and harness your theme styles and scripts.
@@ -63,7 +63,7 @@ You can integrate data from any external source, including API-based, directly i
 
 ==🚀 Powerful features==
 
-Whether you’re a developer working on a child theme, a web creator using a page builder, or a tech-savvy website owner, customizing your block-based theme, Advanced Views makes it easier for you with:
+Whether you're a developer working on a child theme, a web creator using a page builder, or a tech-savvy website owner, Advanced Views makes the process easier with:
 
 🔹[Storage options](https://wplake.gitbook.io/advanced-views/templates/file-system-storage): craft Layouts using the on-site editor, or edit them inside your favourite IDE, with git-friendly templates.
 🔹[Multilingual-friendly](https://wplake.gitbook.io/advanced-views/templates/multilingual): translate any text or label in the Layouts using your favourite tool  (like WPML or Polylang)
@@ -81,7 +81,7 @@ Whether you’re a developer working on a child theme, a web creator using a pag
 
 ==🔓 Unlock More with Advanced Views Pro==
 
-Advanced Views Pro takes your content displays to the next level with extended features:
+[Advanced Views Pro](https://advanced-views.com/pro/#pricing) takes your content displays to the next level with extended features:
 
 **Layouts get:**
 
@@ -98,14 +98,15 @@ Advanced Views Pro takes your content displays to the next level with extended f
 
 == Screenshots ==
 
-1. Layouts list managed using the familiar interface.
-2. Get a basic setup in seconds with Demo import.
-3. Assign multiple fields to Layouts.
-4. The default template can easily be customized.
-5. Query items with Post Selections and display using the selected Layout.
-6. Posts can be filtered, sorted and styled.
-7. Import and Export Tool helps with site migration.
-8. Tools for Import and Export.
+1. Workflow overview.
+2. Layouts list managed using the familiar interface.
+3. Get a basic setup in seconds with Demo import.
+4. Assign multiple fields to Layouts.
+5. The default template can easily be customized.
+6. Query items with Post Selections and display using the selected Layout.
+7. Posts can be filtered, sorted and styled.
+8. Settings allow easily adjusting default behavior.
+9. Import and Export Tool helps with site migration.
 
 == Installation ==
 
@@ -137,13 +138,15 @@ Customers with an active Pro license have personal support via our [support form
 
 == Frequently Asked Questions ==
 
-= Can I display fields from user profile, taxonomy term or options page? =
+= What's the difference between a Layout and a Post Selection? =
 
-Advanced Views supports all the field sources provided by your chosen meta vendor.
+A **Layout** defines how a single item is displayed (fields, HTML structure, styling).
+A **Post Selection** queries posts from the database and displays them using the selected Layout.
 
-For example, if you're using ACF (Advanced Custom Fields), you can access fields from option pages, user profiles, terms, comments, and menus.
+= How do I display a Layout or Post Selection on a page? =
 
-You can refer to the [documentation](https://docs.advanced-views.com/getting-started/supported-data-vendors) for the specific list of supported field sources for your meta vendor.
+You can insert them using a shortcode anywhere on your site — including pages, posts, templates, or page builders.
+Advanced Views Pro also allows inserting them as reusable blocks in the Gutenberg editor.
 
 = Can I display fields inside the Gutenberg Query Loop? =
 
@@ -151,12 +154,59 @@ You can use the View shortcode inside the Gutenberg Query Loop element.
 
 Please make sure you've added it via the built-in Shortcode block, as it won't work properly with other block types, like Code or Custom HTML.
 
+= How do I display fields from an Options page? =
+
+Create a Layout with your Options page fields, then set the `object-id` argument in the shortcode.
+
+* If you’re using Advanced Custom Fields Options Pages, use `object-id="options"` for any Options page.
+* If you’re using Meta Box Settings Pages, use the specific ID of your Options page instead.
+
+= Can I customize the output template? =
+
+Yes. Advanced Views generates a starter template for each Layout and Post Selection which you can edit.
+
+The plugin supports template engines like Twig and Blade, giving you full control over the output markup.
+
+= Can I display fields from taxonomy terms or other data sources? =
+
+Yes. Advanced Views can retrieve fields from various data sources supported by your field plugin, such as taxonomy terms or comments.
+
+= Can I display repeater or flexible fields? =
+
+Yes, but this requires **Advanced Views Pro**.
+The Pro version supports complex field types such as repeater, group, and flexible content fields from plugins like Advanced Custom Fields.
+
+= Can I add pagination or load more posts with AJAX? =
+
+Yes. **Advanced Views Pro** includes AJAX pagination options, allowing you to load additional posts without refreshing the page.
+This is useful for blog archives, directories, and large content lists.
+
+= Can I create reusable blocks for the block editor? =
+
+Yes. With **Advanced Views Pro**, you can register your Layouts as reusable blocks for Gutenberg.
+This allows editors to insert dynamic content directly in the block editor.
+
+= Can I create sliders or galleries from queried posts? =
+
+Yes, this is available in **Advanced Views Pro**.
+You can connect your Post Selections to sliders or gallery layouts to display dynamic content such as featured posts, testimonials, or portfolio items.
+
 = Does the plugin have a Git repository? =
 
 Yes, we maintain an [official Git repository](https://github.com/wplake/advanced-views-framework).
 You're welcome to open issues or PRs there.
 
 == Changelog ==
+
+= 3.8.5 (2025-03-27) =
+- Feature adoption: Layout & Post selection - Mount Points (before Pro-only)
+- Feature adoption: Layout - in-template shortcode support
+- Feature adoption: Post Selection - Taxonomy filters
+- Bugfix: minor UI and message bugfixes
+- Readme update
+
+= 3.8.4 (2025-03-10) =
+- Enhance: $_GET support for custom Ajax requests
 
 = 3.8.3 (2025-02-27) =
 - Feature adoption: Custom field layout for object fields (before Pro-only)
