@@ -2354,12 +2354,6 @@ msgstr ""
 msgid "Add a %s and select target fields or import a pre-built component."
 msgstr ""
 
-#. translators: %s - singular name of the CPT.
-#: src/Layouts/Cpt/Layouts_Cpt.php:32
-#, php-format
-msgid "<a target=\"_blank\" href=\"https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches\">Attach the %s</a> to the target place, for example using <a target=\"_blank\" href=\"https://docs.advanced-views.com/shortcode-attributes/view-shortcode\">the shortcode</a>, to display field values of the post, page or CPT item."
-msgstr ""
-
 #. translators: %s is the plural name of the CPT.
 #: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:131
 #, php-format
@@ -2607,11 +2601,6 @@ msgstr ""
 msgid "Add a %s to display a set of posts or import a ready-made component."
 msgstr ""
 
-#. translators: %s - singular name of the CPT.
-#: src/Post_Selections/Cpt/Post_Selections_Cpt.php:45
-msgid "<a target=\"_blank\" href=\"https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches\">Attach it</a> where you want to show the results (e.g. <a target=\"_blank\" href=\"https://docs.advanced-views.com/shortcode-attributes/card-shortcode\">via shortcode</a>)."
-msgstr ""
-
 #: src/Post_Selections/Cpt/Post_Selections_Cpt.php:49
 msgid "The assigned Layout determines which fields are displayed."
 msgstr ""
@@ -2755,6 +2744,12 @@ msgstr ""
 msgid "By default, an Object field is rendered in the Layout template as an HTML link to the selected object. <br><br> To display fields from within the selected object, assign a separate Layout with the target object fields. <br><br> Example: To display an excerpt from a Post Object, create a separate Layout with the Post Excerpt field and assign it here. <a target='_blank' href='https://docs.advanced-views.com/display-acf-fields/relational-group/relationship#display-fields-from-related-post-pro-feature'>Read more</a>"
 msgstr ""
 
+#. translators: %s - singular name of the CPT.
+#: src/Layouts/Cpt/Layouts_Cpt.php:32
+#, php-format
+msgid "<a target=\"_blank\" href=\"https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches\">Attach the %s</a> to the target place, for example using <a target=\"_blank\" href=\"https://docs.advanced-views.com/shortcode-attributes/layout-shortcode\">the shortcode</a>, to display field values of the post, page or CPT item."
+msgstr ""
+
 #. translators: %s is the plural name of the CPT.
 #: src/Layouts/Cpt/Layouts_Cpt_Meta_Boxes.php:297
 #, php-format
@@ -2763,6 +2758,11 @@ msgstr ""
 
 #: src/Parents/Cpt/Table/Cpt_Table.php:121
 msgid "Item successfully cloned."
+msgstr ""
+
+#. translators: %s - singular name of the CPT.
+#: src/Post_Selections/Cpt/Post_Selections_Cpt.php:45
+msgid "<a target=\"_blank\" href=\"https://docs.advanced-views.com/getting-started/introduction/key-aspects#id-2.-integration-approaches\">Attach it</a> where you want to show the results (e.g. <a target=\"_blank\" href=\"https://docs.advanced-views.com/shortcode-attributes/post-selection-shortcode\">via shortcode</a>)."
 msgstr ""
 
 #: src/Shortcode/Layout_Shortcode.php:254
