@@ -8,24 +8,24 @@ defined( 'ABSPATH' ) || exit;
 
 use Exception;
 use Org\Wplake\Advanced_Views\Assets\Front_Assets;
-use Org\Wplake\Advanced_Views\Utils\Route_Detector;
-use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
-use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
 use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
+use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
+use Org\Wplake\Advanced_Views\Groups\Parents\Group;
+use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
 use Org\Wplake\Advanced_Views\Logger;
 use Org\Wplake\Advanced_Views\Parents\Action;
-use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
 use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\Cpt_Settings_Storage;
-use Org\Wplake\Advanced_Views\Groups\Parents\Group;
 use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Parents\Instance;
-use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
-use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
 use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Pub\Public_Cpt;
+use Org\Wplake\Advanced_Views\Utils\Query_Arguments;
+use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Utils\Safe_Array_Arguments;
 use WP_Post;
 use WP_REST_Request;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
-use Org\Wplake\Advanced_Views\Plugin\Cpt\Pub\Public_Cpt;
 
 abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 	const REST_REFRESH_ROUTE = '';
@@ -85,7 +85,6 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 	 *
 	 * @return array<string,mixed>
 	 */
-	// @phpstan-ignore-next-line
 	abstract public function refresh_request( WP_REST_Request $wprest_request ): array;
 
 	/**
@@ -249,7 +248,7 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 
 	protected function save_validation_instance_to_storage( string $unique_id, ?Group $group ): void {
 		// to avoid changing fields for Unlicensed users.
-		if ( true === $this->plugin->is_pro_field_locked() ) {
+		if ( $this->plugin->is_pro_field_locked() ) {
 			$this->cpt_settings->reset_pro_fields( $group );
 		}
 
@@ -293,7 +292,7 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 		$card_php_code_field = Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_EXTRA_QUERY_ARGUMENTS );
 
 		// add <?php to the value dynamically, to avoid issues with security plugins, like Wordfence.
-		if ( true === in_array( $field_name, array( $view_php_code_field, $card_php_code_field ), true ) ) {
+		if ( in_array( $field_name, array( $view_php_code_field, $card_php_code_field ), true ) ) {
 			$value = "<?php\n" . string( $value );
 		}
 
@@ -305,7 +304,7 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 		}
 
 		// the difference that this code is called in different hooks, which require different approach.
-		if ( true === $this->plugin->is_wordpress_com_hosting() ) {
+		if ( $this->plugin->is_wordpress_com_hosting() ) {
 			// convert clone format
 			// also check to make sure it's array (can be empty string).
 			if ( in_array( $field_name, $validation_instance->getCloneFieldNames(), true ) &&
@@ -400,8 +399,8 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 		$card_php_code_field = Post_Selection_Settings::getAcfFieldName( Post_Selection_Settings::FIELD_EXTRA_QUERY_ARGUMENTS );
 
 		// to avoid issues with security plugins, like WordFence.
-		if ( true === in_array( $field_name, array( $view_php_code_field, $card_php_code_field ), true ) &&
-			true === is_string( $value ) ) {
+		if ( in_array( $field_name, array( $view_php_code_field, $card_php_code_field ), true ) &&
+			is_string( $value ) ) {
 			$value = str_replace( '<?php', '', $value );
 		}
 
@@ -530,7 +529,7 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 					return $is_updated;
 				}
 
-				if ( true === $this->plugin->is_wordpress_com_hosting() ) {
+				if ( $this->plugin->is_wordpress_com_hosting() ) {
 					$this->save_meta_field( $value, $field );
 				}
 
@@ -590,11 +589,11 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 
 				$unique_id = get_post( $post_id )->post_name ?? '';
 
-				if ( false === key_exists( $post_id, $values ) ) {
+				if ( ! key_exists( $post_id, $values ) ) {
 					$instance_data = $this->cpt_settings_storage->get( $unique_id );
 
 					// not loaded if it's a new post.
-					$values[ $post_id ] = true === $instance_data->isLoaded() ?
+					$values[ $post_id ] = $instance_data->isLoaded() ?
 						$instance_data->getFieldValues() :
 						array();
 				}
@@ -611,8 +610,8 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 		// note: check on false, as it returns int in case of success.
 		if ( false !== wp_is_post_revision( $wp_post ) ||
 			false !== wp_is_post_autosave( $wp_post ) ||
-			true === in_array( $wp_post->post_status, array( 'auto-draft', 'trash' ), true ) ||
-			true === $this->cpt_settings_storage->get_db_management()->is_renaming_suppressed() ) {
+			in_array( $wp_post->post_status, array( 'auto-draft', 'trash' ), true ) ||
+			$this->cpt_settings_storage->get_db_management()->is_renaming_suppressed() ) {
 			return;
 		}
 
@@ -658,7 +657,7 @@ abstract class Cpt_Save_Actions extends Action implements Hooks_Interface {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'refresh_request' ),
-				'permission_callback' => fn(): bool => true === is_user_logged_in(),
+				'permission_callback' => fn(): bool =>  is_user_logged_in(),
 			)
 		);
 	}

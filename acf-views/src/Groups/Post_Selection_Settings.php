@@ -182,14 +182,6 @@ class Post_Selection_Settings extends Cpt_Settings {
 	public bool $is_ignore_sticky_posts;
 	/**
 	 * @a-type select
-	 * @label Template Engine
-	 * @instructions Choose one of the <a target='_blank' href='https://docs.advanced-views.com/templates/template-engines'>supported template engines</a>, which will be used for this Post Selection.
-	 * @choices {"twig":"Twig","blade":"Blade (requires PHP >= 8.2.0)"}
-	 * @default_value twig
-	 */
-	public string $template_engine;
-	/**
-	 * @a-type select
 	 * @label Web Component Type
 	 * @instructions By default, every Post Selection is a <a target='_blank' href='https://docs.advanced-views.com/templates/css-and-js#web-components-for-js-code'>web component</a>, which allows you to work easily with the element in the JS code field. <br><br> Set it to 'None' if you're going to use the <a target='_blank' href='https://docs.advanced-views.com/templates/wordpress-interactivity-api'>WP Interactivity API</a>.
 	 * @choices {"classic":"Classic (no CSS isolation)","shadow_root_template":"Declarative Shadow DOM (CSS isolated, server-side)","shadow_dom":"JS Shadow DOM (CSS isolated, client-side)","none":"None"}
@@ -217,13 +209,6 @@ class Post_Selection_Settings extends Cpt_Settings {
 	 * @conditional_logic [[{"field": "local_acf_views_acf-card-data__items-source","operator": "==","value": "posts_query"}]]
 	 */
 	public string $query_preview;
-	/**
-	 * @a-type textarea
-	 * @label Custom Data
-	 * @instructions Using the Custom Post Selection Data PHP snippet you can add extra variables to the template, extra arguments to the <a target='_blank' href='https://developer.wordpress.org/reference/classes/wp_query/#parameters'>WP_Query instance</a>, and define the ajax handler. <a target='_blank' href='https://docs.advanced-views.com/query-content/custom-data-pro'>Read more</a> <br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace).
-	 * @a-pro The field must be not required or have default value!
-	 */
-	public string $extra_query_arguments;
 
 	/**
 	 * @a-type tab
@@ -244,6 +229,20 @@ class Post_Selection_Settings extends Cpt_Settings {
 	 * @instructions Write your own template with full control over the HTML markup. <br> Copy the Default Template code and make your changes. <br><br> Check out our Docs to learn more about <a target='_blank' href='https://docs.advanced-views.com/templates/template-engines/twig'>Twig</a> or <a target='_blank' href='https://docs.advanced-views.com/templates/template-engines/blade'>Blade</a> features. <br><br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace). <br><br> Make sure you've retained all the default classes; otherwise, pagination won't work.
 	 */
 	public string $custom_markup;
+	/**
+	 * @a-type select
+	 * @label Template Engine
+	 * @instructions Choose one of the <a target='_blank' href='https://docs.advanced-views.com/templates/template-engines'>supported template engines</a>, which will be used for this Post Selection.
+	 * @choices {"twig":"Twig","blade":"Blade (requires PHP >= 8.2.0)"}
+	 * @default_value twig
+	 */
+	public string $template_engine;
+	/**
+	 * @a-type textarea
+	 * @label PHP Controller
+	 * @instructions By customizing the PHP Controller instance, you can add extra variables to the template, extra arguments to the <a target='_blank' href='https://developer.wordpress.org/reference/classes/wp_query/#parameters'>WP_Query instance</a>, and define the AJAX and REST API handlers. <a target='_blank' href='https://docs.advanced-views.com/query-content/custom-data-pro'>Read more</a> <br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace).
+	 */
+	public string $extra_query_arguments;
 	/**
 	 * @label BEM Unique Name
 	 * @instructions Define a unique <a target='_blank' href='https://getbem.com/introduction/'>BEM name</a> for the element that will be used in the markup, or leave it empty to use the default ('acf-card').
@@ -405,7 +404,7 @@ class Post_Selection_Settings extends Cpt_Settings {
 		// @phpcs:ignore
 		$field_info = parent::getFieldInfo( $fieldName );
 
-		if ( null === $field_info ) {
+		if ( is_null( $field_info ) ) {
 			return null;
 		}
 
@@ -418,7 +417,7 @@ class Post_Selection_Settings extends Cpt_Settings {
 
 declare(strict_types=1);
 
-use Org\Wplake\Advanced_Views\Pro\Bridge\Controllers\Selection\Selection_Controller_Base;
+use Org\Wplake\Advanced_Views\Bridge\Controllers\Selection\Selection_Controller_Base;
 
 return new class extends Selection_Controller_Base {
     /**

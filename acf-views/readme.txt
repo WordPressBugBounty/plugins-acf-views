@@ -2,9 +2,9 @@
 Contributors: wplakeorg
 Tags: post grid, wp_query, meta fields, custom post types, taxonomy, shortcodes, elementor, divi, bricks, layout
 Requires at least: 5.5
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.8.6
+Stable tag: 3.8.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -197,6 +197,16 @@ Yes, we maintain an [official Git repository](https://github.com/wplake/advanced
 You're welcome to open issues or PRs there.
 
 == Changelog ==
+
+= 3.8.7 (2025-05-20) =
+- Feature adoption: PHP Controller (before Custom Data in Pro)
+- Feature adoption: Reusable Components Library
+- Feature adoption: Lightbox
+- Bugfix: Layout with default Blade template repeats in Post Selection
+- Bugfix: Layout - Lightbox - Simple type - duplicate popups if several instances of the same selector is on the same page
+- UX: Layout & Selection settings - put "Template engine" below "Custom Template"
+- UI: Layout - field dropdown font-size adjustment
+- Uphold: tested with WP 7.0
 
 = 3.8.6 (2025-04-03) =
 - Bugfix: Post Selection - sortby

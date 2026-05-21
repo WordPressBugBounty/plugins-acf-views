@@ -26,6 +26,7 @@ use Org\Wplake\Advanced_Views\Post_Selections\Data_Storage\Post_Selections_Setti
 use Org\Wplake\Advanced_Views\Post_Selections\Post_Selection_Factory;
 use Org\Wplake\Advanced_Views\Post_Selections\Query\Context\Query_Context;
 use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -230,13 +231,14 @@ class Admin_Assets extends Hookable implements Hooks_Interface {
 
 		// optionally: convert all non-English pieces in names to English:
 		// this function is part of the Intl extension, and can be missing in some environments.
-		if ( false === function_exists( 'transliterator_transliterate' ) ) {
+		if ( ! function_exists( 'transliterator_transliterate' ) ) {
 			return $field_choices;
 		}
 
 		foreach ( $field_choices as &$value ) {
 			// converts non-english strings, like 'як справи' to 'jak spravi'.
-			$value = transliterator_transliterate( 'Any-Latin; Latin-ASCII;', $value );
+			$transliterated = transliterator_transliterate( 'Any-Latin; Latin-ASCII;', $value );
+			$value          = string( $transliterated );
 		}
 
 		return $field_choices;
@@ -256,7 +258,8 @@ class Admin_Assets extends Hookable implements Hooks_Interface {
 
 		foreach ( $sub_field_choices as &$value ) {
 			// converts non-english strings, like 'як справи' to 'jak spravi'.
-			$value = transliterator_transliterate( 'Any-Latin; Latin-ASCII;', $value );
+			$transliterated_value = transliterator_transliterate( 'Any-Latin; Latin-ASCII;', $value );
+			$value                = string( $transliterated_value );
 		}
 
 		return $sub_field_choices;
@@ -304,7 +307,7 @@ class Admin_Assets extends Hookable implements Hooks_Interface {
 		// if permalink structure isn't set (?id=x), then the first postbox request is required
 		// (otherwise the post status will left 'auto-draft').
 		$is_post_box_request_required = '' === get_option( 'permalink_structure' ) &&
-									true === $is_our_add_screen;
+									$is_our_add_screen;
 
 		return array(
 			'autocompleteVariables'    => $autocomplete_variables,
@@ -312,6 +315,7 @@ class Admin_Assets extends Hookable implements Hooks_Interface {
 			'autocompleteFilters'      => $this->get_autocomplete_filters(),
 			'textareaItemsToRefresh'   => $textarea_items_to_refresh,
 			'refreshRoute'             => $refresh_route,
+			'ajaxUrl'                  => admin_url( 'admin-ajax.php' ),
 			'refreshNonce'             => wp_create_nonce( 'wp_rest' ),
 			'mods'                     => array(
 				'_twig' => array(
@@ -540,7 +544,7 @@ class Admin_Assets extends Hookable implements Hooks_Interface {
 
 	protected function is_target_screen(): bool {
 		// can be missing, when called via Rest API by SiteGround_Optimizer in the 'enqueue_block_assets' hook.
-		$current_screen = true === function_exists( 'get_current_screen' ) ?
+		$current_screen = function_exists( 'get_current_screen' ) ?
 			get_current_screen() :
 			null;
 
