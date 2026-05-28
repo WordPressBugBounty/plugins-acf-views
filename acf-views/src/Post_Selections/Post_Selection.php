@@ -12,11 +12,14 @@ use Org\Wplake\Advanced_Views\Bridge\Controllers\Request_Controller;
 use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Groups\Post_Selection_Settings;
 use Org\Wplake\Advanced_Views\Parents\Instance;
+use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
 use Org\Wplake\Advanced_Views\Post_Selections\Query\Context\Query_Context;
 use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
 use WP_REST_Request;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
 use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\int;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\string;
 
 class Post_Selection extends Instance {
 	private Post_Selection_Settings $settings;
@@ -160,7 +163,7 @@ class Post_Selection extends Instance {
 		$this->pages_amount = int( $posts_data, 'pagesAmount' );
 
 		$post_ids       = arr( $posts_data, 'postIds' );
-		$this->post_ids = array_map( fn( $post_id )=>int( $post_id ), $post_ids );
+		$this->post_ids = array_map( fn( $post_id ) => int( $post_id ), $post_ids );
 
 		ob_start();
 		$this->post_selection_markup->print_markup( $this->settings, $is_load_more );
@@ -221,6 +224,16 @@ class Post_Selection extends Instance {
 	}
 
 	/**
+	 * @return string[]
+	 */
+	protected function get_system_variable_names(): array {
+		return array(
+			'_card', // for back compatibility.
+			Hard_Post_Selection_Cpt::variable_name(),
+		);
+	}
+
+	/**
 	 * @param array<string,mixed> $custom_arguments
 	 *
 	 * @return array<string,mixed>
@@ -228,18 +241,20 @@ class Post_Selection extends Instance {
 	protected function get_template_variables( bool $is_for_validation = false, array $custom_arguments = array() ): array {
 		$twig_variables = $this->get_default_template_variables();
 
-		$card = key_exists( '_card', $twig_variables ) &&
-				is_array( $twig_variables['_card'] ) ?
-			$twig_variables['_card'] :
-			array();
+		foreach ( $this->get_system_variable_names() as $name ) {
+			$system_vars = key_exists( $name, $twig_variables ) &&
+							is_array( $twig_variables[ $name ] ) ?
+				$twig_variables[ $name ] :
+				array();
 
-		$twig_variables['_card'] = array_merge(
-			$card,
-			array(
-				'pagination_type' => $this->get_card_data()->pagination_type,
-				'load_more_label' => $this->get_card_data()->get_load_more_button_label_translation(),
-			)
-		);
+			$twig_variables[ $name ] = array_merge(
+				$system_vars,
+				array(
+					'pagination_type' => $this->get_card_data()->pagination_type,
+					'load_more_label' => $this->get_card_data()->get_load_more_button_label_translation(),
+				)
+			);
+		}
 
 		$short_unique_card_id = $this->get_card_data()->get_unique_id( true );
 
@@ -254,18 +269,26 @@ class Post_Selection extends Instance {
 			$this->get_container()
 		);
 
-		$custom_variables = (array) apply_filters(
-			'acf_views/card/custom_variables',
+		$custom_variables = Plugin::apply_filters(
+			array(
+				'advanced_views/post_selection/custom_variables',
+				'acf_views/card/custom_variables',
+			),
 			$custom_variables,
 			$short_unique_card_id
 		);
-		$custom_variables = (array) apply_filters(
-			'acf_views/card/custom_variables/card_id=' . $short_unique_card_id,
+		$custom_variables = Plugin::apply_filters(
+			array(
+				sprintf( 'advanced_views/post_selection/custom_variables/selection_id=%s', $short_unique_card_id ),
+				sprintf( 'acf_views/card/custom_variables/card_id=%s', $short_unique_card_id ),
+			),
 			$custom_variables,
 			$short_unique_card_id
 		);
+		$custom_variables = arr( $custom_variables );
 
 		foreach ( $custom_variables as $name => $value ) {
+			$name = string( $name );
 			$name = str_replace( '-', '_', $name );
 			$name = str_replace( ' ', '_', $name );
 
@@ -279,21 +302,28 @@ class Post_Selection extends Instance {
 	 * @return array<string,mixed>
 	 */
 	protected function get_default_template_variables(): array {
-		return array(
-			'_card' => array(
+		$system_variables = array();
+
+		foreach ( $this->get_system_variable_names() as $name ) {
+			$short_layout_id = str_replace(
+				Layout_Settings::UNIQUE_ID_PREFIX,
+				'',
+				$this->settings->acf_view_id
+			);
+
+			$system_variables[ $name ] = array(
 				'id'                     => $this->settings->get_markup_id(),
 				// short unique id is expected in the shortcode arguments.
-				'view_id'                => str_replace(
-					Layout_Settings::UNIQUE_ID_PREFIX,
-					'',
-					$this->settings->acf_view_id
-				),
+				'view_id'                => $short_layout_id, // for back compatibility.
+				'layout_id'              => $short_layout_id,
 				'no_posts_found_message' => $this->settings->get_no_posts_found_message_translation(),
 				'post_ids'               => $this->post_ids,
 				'classes'                => $this->get_classes(),
 				'pages_amount'           => $this->get_pages_amount(),
-			),
-		);
+			);
+		}
+
+		return $system_variables;
 	}
 
 	/**

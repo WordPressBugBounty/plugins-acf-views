@@ -6,6 +6,7 @@ namespace Org\Wplake\Advanced_Views\Parents;
 
 use Error;
 use Org\Wplake\Advanced_Views\Groups\Parents\Cpt_Settings;
+use Org\Wplake\Advanced_Views\Plugin;
 use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
 use WP_REST_Request;
 
@@ -94,7 +95,20 @@ abstract class Instance {
 	 * @return \Psr\Container\ContainerInterface|null
 	 */
 	protected function get_container() {
-		return apply_filters( 'acf_views/container', null );
+		$container = Plugin::apply_filters(
+			array(
+				'advanced_views/container',
+				'acf_views/container',
+			),
+			null
+		);
+
+		if ( is_object( $container ) &&
+			is_a( $container, '\Psr\Container\ContainerInterface' ) ) {
+			return $container;
+		}
+
+		return null;
 	}
 
 	protected function print_template_engine_is_not_loaded_message(): void {

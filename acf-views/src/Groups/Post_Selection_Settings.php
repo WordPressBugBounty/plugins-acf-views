@@ -41,6 +41,7 @@ class Post_Selection_Settings extends Cpt_Settings {
 	const PAGINATION_TYPE_INFINITY         = 'infinity_scroll';
 	const PAGINATION_TYPE_PAGE_NUMBERS     = 'page_numbers';
 	const UNIQUE_ID_PREFIX                 = 'card_';
+	const MAGIC_CSS_SELECTOR               = 'selection';
 
 	const ITEMS_SOURCE_CONTEXT_POSTS = 'context_posts';
 
@@ -240,12 +241,12 @@ class Post_Selection_Settings extends Cpt_Settings {
 	/**
 	 * @a-type textarea
 	 * @label PHP Controller
-	 * @instructions By customizing the PHP Controller instance, you can add extra variables to the template, extra arguments to the <a target='_blank' href='https://developer.wordpress.org/reference/classes/wp_query/#parameters'>WP_Query instance</a>, and define the AJAX and REST API handlers. <a target='_blank' href='https://docs.advanced-views.com/query-content/custom-data-pro'>Read more</a> <br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace).
+	 * @instructions By customizing the PHP Controller instance, you can add extra variables to the template, extra arguments to the <a target='_blank' href='https://developer.wordpress.org/reference/classes/wp_query/#parameters'>WP_Query instance</a>, and define the AJAX and REST API handlers. <a target='_blank' href='https://docs.advanced-views.com/query-content/php-controller'>Read more</a> <br> Press Ctrl (Cmd) + Alt + L to format the code. Press Ctrl + F to search (or replace).
 	 */
 	public string $extra_query_arguments;
 	/**
 	 * @label BEM Unique Name
-	 * @instructions Define a unique <a target='_blank' href='https://getbem.com/introduction/'>BEM name</a> for the element that will be used in the markup, or leave it empty to use the default ('acf-card').
+	 * @instructions Define a unique <a target='_blank' href='https://getbem.com/introduction/'>BEM name</a> for the element that will be used in the markup, or leave it empty to use the default ('avf-selection').
 	 */
 	public string $bem_name;
 	/**
@@ -262,8 +263,7 @@ class Post_Selection_Settings extends Cpt_Settings {
 	/**
 	 * @a-type textarea
 	 * @label CSS Code
-	 * @instructions Define your CSS style rules. <br> This will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this Post Selection. <br><br> Press Ctrl (Cmd) + Alt + L to format the code; Ctrl + F to search/replace; Ctrl + Space for autocomplete. <br><br> Don't style the Layout fields here, each Layout has its own CSS field for this goal. <br><br> Magic shortcuts are available (and will use the BEM Unique Name if defined) : <br><br> '#card' will be replaced with '.acf-card--id--X' (or '.bem-name'). <br> '#this__' will be replaced with '.acf-card__' (or '.bem-name__'). <br><br> We recommend using #card { #this__items { //... }, #this__heading { //... } } format, which is possible thanks to the <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting/Using_CSS_nesting'>built-in CSS nesting</a>. <br><br> Alternatively, you can use '#card__', will be replaced with '.acf-card--id--X .acf-card__' (or '.bem-name .bem-name__').
-	 * /
+	 * @instructions Define your CSS style rules. <br> Rules defined here will be added within &lt;style&gt;&lt;/style&gt; tags ONLY to pages that have this Post Selection. <br><br> Press Ctrl (Cmd) + Alt + L to format the code; Ctrl + F to search/replace; Ctrl + Space for autocomplete. <br><br> Magic shortcuts are available: <br><br>  1. '#selection' as a unique instance selector, will be replaced with '.avf-selection--id--{x}' <br> 2. '#selection__' as a full element selector, so '#selection__element' will be replaced with '.avf-selection--id--{x} .avf-selection__element' <br> 3. '#this' as a short element selector, so '#this__element' will be replaced with '.avf-selection__element' <br> Note: all the shortcuts are compatible with the BEM name option.
 	 */
 	public string $css_code;
 	/**
@@ -490,88 +490,25 @@ return new class extends Selection_Controller_Base {
 		);
 	}
 
-	/**
-	 * @return string[]
-	 */
-	protected function get_used_meta_group_ids(): array {
-		return array( $this->acf_view_id );
-	}
+	public function has_unique_bem_name(): bool {
+		$bem_name = trim( $this->bem_name );
 
-	/**
-	 * @return array<string,string[]>
-	 */
-	protected function get_multilingual_strings_from_labels(): array {
-		$labels = array();
-
-		if ( '' !== $this->no_posts_found_message ) {
-			$labels[] = $this->no_posts_found_message;
-		}
-
-		if ( '' !== $this->load_more_button_label ) {
-			$labels[] = $this->load_more_button_label;
-		}
-
-		return array() !== $labels ?
-			array(
-				Plugin::get_theme_text_domain() => $labels,
-			) :
-			array();
+		return strlen( $bem_name ) > 0 &&
+				! in_array( $bem_name, array( 'acf-card', Hard_Post_Selection_Cpt::cpt_name() ), true );
 	}
 
 	public function get_css_code( string $mode ): string {
+		$aliases  = array( 'card', self::MAGIC_CSS_SELECTOR );
 		$css_code = $this->css_code;
 
-		if ( self::CODE_MODE_DISPLAY === $mode ) {
-			$markup_id = $this->get_markup_id();
-
-			if ( false === $this->is_with_shadow_dom() ) {
-				// do not use getBemName(), because it'll always return something.
-				$selector = '' !== $this->bem_name ?
-					'.' . $this->bem_name :
-					'.acf-card--id--' . $markup_id;
-			} else {
-				// previous doesn't work in the case of the shadow root, as top element is out of the shadow root.
-
-				$selector = ':host';
-			}
-
-			// magic shortcuts.
-			$css_code = str_replace(
-				'#card__',
-				sprintf( '%s .%s__', $selector, $this->get_bem_name() ),
-				$css_code
-			);
-
-			$css_code = str_replace(
-				'#card',
-				sprintf( '%s', $selector ),
-				$css_code
-			);
-
-			// covers #this__, #this--, and just #this { ... }.
-			$css_code = str_replace(
-				'#this',
-				// do not use $selector here, as we never need ':host' here.
-				sprintf( '.%s', $this->get_bem_name() ),
-				$css_code
-			);
-
-			// for back compatibility.
-			$css_code = str_replace(
-				'#__',
-				// do not use $selector here, as we never need ':host' here.
-				sprintf( '.%s__', $this->get_bem_name() ),
-				$css_code
-			);
-		} elseif ( self::CODE_MODE_PREVIEW === $mode ) {
-			$css_code = str_replace( '#card__', sprintf( '#card .%s__', $this->get_bem_name() ), $css_code );
+		foreach ( $aliases as $alias ) {
+			$css_code = $this->resolved_css_code( $css_code, $mode, $alias );
 		}
 
 		// back the right way, as before it was hack for CodeMirror.
 		$css_code = str_replace( '"1fr"', '1fr', $css_code );
-		$css_code = trim( $css_code );
 
-		return $css_code;
+		return trim( $css_code );
 	}
 
 	/**
@@ -600,15 +537,15 @@ return new class extends Selection_Controller_Base {
 	public function get_bem_name(): string {
 		$bem_name = trim( $this->bem_name );
 
-		if ( '' === $bem_name ) {
-			return 'acf-card';
+		if ( 0 === strlen( $bem_name ) ) {
+			return Hard_Post_Selection_Cpt::markup_name();
 		}
 
 		$bem_name = preg_replace( '/[^a-z0-9\-_]/', '', $bem_name );
 
-		return null !== $bem_name ?
+		return is_string( $bem_name ) ?
 			$bem_name :
-			'acf-card';
+			Hard_Post_Selection_Cpt::markup_name();
 	}
 
 	public function get_no_posts_found_message_translation(): string {
@@ -630,6 +567,34 @@ return new class extends Selection_Controller_Base {
 	}
 
 	public function get_tag_name( string $prefix = '' ): string {
-		return parent::get_tag_name( 'acf-card' );
+		return parent::get_tag_name( Hard_Post_Selection_Cpt::markup_name() );
+	}
+
+	/**
+	 * @return string[]
+	 */
+	protected function get_used_meta_group_ids(): array {
+		return array( $this->acf_view_id );
+	}
+
+	/**
+	 * @return array<string,string[]>
+	 */
+	protected function get_multilingual_strings_from_labels(): array {
+		$labels = array();
+
+		if ( '' !== $this->no_posts_found_message ) {
+			$labels[] = $this->no_posts_found_message;
+		}
+
+		if ( '' !== $this->load_more_button_label ) {
+			$labels[] = $this->load_more_button_label;
+		}
+
+		return array() !== $labels ?
+			array(
+				Plugin::get_theme_text_domain() => $labels,
+			) :
+			array();
 	}
 }

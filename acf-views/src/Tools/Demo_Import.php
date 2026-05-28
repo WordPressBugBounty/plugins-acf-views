@@ -321,12 +321,12 @@ final class Demo_Import extends Hookable implements Hooks_Interface {
 		$website_item->field->id         = 'website';
 		$view->items[]                   = $website_item;
 
-		// the checkbox is necessary to use #view__row.
+		// the checkbox is necessary to use #layout__row.
 		$view->is_with_common_classes = true;
-		$view->css_code               = "#view {\n padding: 30px;\n color: #444444;\n}\n\n" .
-										"#view__row {\n display:flex;\n margin:10px;\n}\n\n" .
-										"#view a {\n color:#008BB7;\n}\n\n" .
-										"#view__label {\n width: 100px;\n font-weight: bold;\n padding-right: 10px;\n}\n\n";
+		$view->css_code               = sprintf( "#%s {\n padding: 30px;\n color: #444444;\n}\n\n", Layout_Settings::MAGIC_CSS_SELECTOR ) .
+												sprintf( "#%s__row {\n display:flex;\n margin:10px;\n}\n\n", Layout_Settings::MAGIC_CSS_SELECTOR ) .
+														sprintf( "#%s a {\n color:#008BB7;\n}\n\n", Layout_Settings::MAGIC_CSS_SELECTOR ) .
+																sprintf( "#%s__label {\n width: 100px;\n font-weight: bold;\n padding-right: 10px;\n}\n\n", Layout_Settings::MAGIC_CSS_SELECTOR );
 
 		// it'll also save the data above.
 		$this->layouts_cpt_save_actions->perform_save_actions( $view->get_post_id() );
@@ -350,8 +350,8 @@ final class Demo_Import extends Hookable implements Hooks_Interface {
 		$card_data->post_statuses[] = 'publish';
 		$card_data->post_in         = array( $this->samsung_id, $this->xiaomi_id, $this->nokia_id );
 
-		$card_data->css_code = "#card__items {\n display:flex;\n}\n\n" .
-								"#card .acf-view {\n flex-basis:33%;\n flex-shrink:0;\n padding:10px 20px;\n}\n\n";
+		$card_data->css_code = sprintf( "#%s__items {\n display:flex;\n}\n\n", Post_Selection_Settings::MAGIC_CSS_SELECTOR ) .
+								sprintf( "#%s .acf-view {\n flex-basis:33%%;\n flex-shrink:0;\n padding:10px 20px;\n}\n\n", Post_Selection_Settings::MAGIC_CSS_SELECTOR );
 
 		// it'll also save the data above.
 		$this->post_selections_cpt_save_actions->perform_save_actions( $card_data->get_post_id() );
@@ -423,7 +423,7 @@ final class Demo_Import extends Hookable implements Hooks_Interface {
 				'<!-- wp:heading --><h2>%s</h2><!-- /wp:heading -->',
 				__( '"Phone" View to show fields of this page', 'acf-views' )
 			);
-			$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->layout_settings->get_unique_id(
+			$post_content .= '<!-- wp:shortcode -->[avf-layout id="' . $this->layout_settings->get_unique_id(
 				true
 			) . '"]<!-- /wp:shortcode -->';
 
@@ -444,7 +444,7 @@ final class Demo_Import extends Hookable implements Hooks_Interface {
 			'<!-- wp:heading --><h2>%s</h2><!-- /wp:heading -->',
 			__( "'Phone' View with the object-id argument to show Samsung Phone's fields", 'acf-views' )
 		);
-		$post_content .= '<!-- wp:shortcode -->[acf_views view-id="' . $this->layout_settings->get_unique_id(
+		$post_content .= '<!-- wp:shortcode -->[avf-layout id="' . $this->layout_settings->get_unique_id(
 			true
 		) . '" object-id="' . $this->samsung_id . '"]<!-- /wp:shortcode -->';
 		wp_update_post(

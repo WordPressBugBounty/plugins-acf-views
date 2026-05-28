@@ -82,6 +82,26 @@ class Plugin extends Hookable implements Hooks_Interface {
 	}
 
 	/**
+	 * @param string|string[] $hook_names
+	 * @param mixed $value
+	 * @param mixed[] $args
+	 *
+	 * @return mixed
+	 */
+	public static function apply_filters( $hook_names, $value, ...$args ) {
+		$hook_names = is_array( $hook_names ) ?
+			$hook_names :
+			array( $hook_names );
+
+		foreach ( $hook_names as $hook_name ) {
+			// @phpstan-ignore-next-line
+			$value = apply_filters( $hook_name, $value, ...$args );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * @param array<string,mixed> $field
 	 *
 	 * @return array<string,mixed>

@@ -107,10 +107,70 @@ abstract class Cpt_Settings extends Group {
 
 	abstract public function get_css_code( string $mode ): string;
 
+	abstract public function has_unique_bem_name(): bool;
+
 	/**
 	 * @return array<string,string[]>
 	 */
 	abstract public function get_multilingual_strings(): array;
+
+	abstract public function get_bem_name(): string;
+
+	protected function resolved_css_code( string $css_code, string $mode, string $alias ): string {
+		if ( self::CODE_MODE_DISPLAY === $mode ) {
+			$markup_id = $this->get_markup_id();
+			$selector  = $this->is_with_shadow_dom() ?
+				':host' : // direct won't work here, as the top element is out of the shadow root.
+				$this->resolve_css_selector( $markup_id );
+
+			// magic shortcuts.
+			$css_code = str_replace(
+				sprintf( '#%s__', $alias ),
+				sprintf( '%s .%s__', $selector, $this->get_bem_name() ),
+				$css_code
+			);
+
+			$css_code = str_replace(
+				sprintf( '#%s', $alias ),
+				sprintf( '%s', $selector ),
+				$css_code
+			);
+
+			// covers #this__, #this--, and just #this { ... }.
+			$css_code = str_replace(
+				'#this',
+				// do not use $selector here, as we never need ':host' here.
+				sprintf( '.%s', $this->get_bem_name() ),
+				$css_code
+			);
+
+			// for back compatibility.
+			$css_code = str_replace(
+				'#__',
+				// do not use $selector here, as we never need ':host' here.
+				sprintf( '.%s__', $this->get_bem_name() ),
+				$css_code
+			);
+
+			$css_code = trim( $css_code );
+		} elseif ( self::CODE_MODE_PREVIEW === $mode ) {
+			$css_code = str_replace(
+				sprintf( '#%s__', $alias ),
+				sprintf( '#%s .%s__', $alias, $this->get_bem_name() ),
+				$css_code
+			);
+		}
+
+		return $css_code;
+	}
+
+	protected function resolve_css_selector( string $markup_id ): string {
+		$bem_name = $this->get_bem_name();
+
+		return $this->has_unique_bem_name() ?
+			sprintf( '.%s', $bem_name ) :
+			sprintf( '.%s--id--%s', $bem_name, $markup_id );
+	}
 
 	/**
 	 * @param array<string,string[]> $ml_strings
@@ -293,18 +353,11 @@ abstract class Cpt_Settings extends Group {
 	}
 
 	public function get_tag_name( string $prefix = '' ): string {
-		if ( false === $this->is_web_component() ) {
-			return 'section';
+		if ( $this->is_web_component() ) {
+			return $this->get_web_component_tag_name( $prefix );
 		}
 
-		$bem_name = '' !== $this->bem_name ?
-			str_replace( '_', '-', $this->bem_name ) :
-			'';
-
-		// WebComponents require at least one dash in the name.
-		return ( '' !== $bem_name && false !== strpos( $bem_name, '-' ) ) ?
-			$bem_name :
-			sprintf( '%s-%s', $prefix, $this->get_unique_id( true ) );
+		return 'section';
 	}
 
 	public function is_wp_interactivity_in_use(): bool {
@@ -332,5 +385,19 @@ abstract class Cpt_Settings extends Group {
 		}
 
 		return $this->hashes;
+	}
+
+	protected function get_web_component_tag_name( string $prefix ): string {
+		$has_unique_bem_name = $this->has_unique_bem_name();
+		$prepared_bem_name   = str_replace( '_', '-', $this->bem_name );
+		$prepared_prefix     = strlen( $prepared_bem_name ) > 0 ?
+			$prepared_bem_name :
+			$prefix;
+		$is_dashed_bem_name  = false !== strpos( $prepared_bem_name, '-' );
+
+		// WebComponent requires unique name AND at least one dash in it.
+		return ( $has_unique_bem_name && $is_dashed_bem_name ) ?
+			$prepared_bem_name :
+			sprintf( '%s-%s', $prepared_prefix, $this->get_unique_id( true ) );
 	}
 }

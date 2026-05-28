@@ -18,8 +18,11 @@ use Org\Wplake\Advanced_Views\Groups\Item_Settings;
 use Org\Wplake\Advanced_Views\Groups\Layout_Settings;
 use Org\Wplake\Advanced_Views\Layouts\Fields\Field_Markup;
 use Org\Wplake\Advanced_Views\Parents\Instance;
+use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
 use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
 use WP_REST_Request;
+use function Org\Wplake\Advanced_Views\Vendors\WPLake\Typed\arr;
 
 class Layout extends Instance {
 	private Layout_Settings $layout_settings;
@@ -311,7 +314,7 @@ class Layout extends Instance {
 
 				// ignore the system variables.
 				if ( in_array( $twig_variable_value, array( '', array(), null ), true ) ||
-					'_view' === $twig_variable_name ||
+					in_array( $twig_variable_name, $this->get_system_variable_names(), true ) ||
 					$is_empty_value ) {
 					continue;
 				}
@@ -421,6 +424,16 @@ class Layout extends Instance {
 	}
 
 	/**
+	 * @return string[]
+	 */
+	protected function get_system_variable_names(): array {
+		return array(
+			'_view', // for back compatibility.
+			Hard_Layout_Cpt::variable_name(),
+		);
+	}
+
+	/**
 	 * @return array<string,mixed>
 	 */
 	protected function get_default_template_variables( bool $is_for_validation = false ): array {
@@ -429,15 +442,18 @@ class Layout extends Instance {
 			'0';
 
 		$this->field_values = array();
+		$twig_variables     = array();
+
 		// internal variables.
-		$twig_variables = array(
-			'_view' => array(
-				'classes'   => $this->get_classes(),
-				'id'        => $this->layout_settings->get_markup_id(),
-				// replace for others: term_6 to term-6.
-				'object_id' => str_replace( '_', '-', $object_id ),
-			),
+		$internal_variables = array(
+			'classes'   => $this->get_classes(),
+			'id'        => $this->layout_settings->get_markup_id(),
+			// replace for others: term_6 to term-6.
+			'object_id' => str_replace( '_', '-', $object_id ),
 		);
+		foreach ( $this->get_system_variable_names() as $name ) {
+			$twig_variables[ $name ] = $internal_variables;
+		}
 
 		foreach ( $this->layout_settings->items as $item ) {
 			$field_meta = $item->field->get_field_meta();
@@ -491,7 +507,7 @@ class Layout extends Instance {
 	 * @param array<string,mixed> $php_variables
 	 * @param mixed $object_id
 	 *
-	 * @return array<string,mixed>
+	 * @return mixed[]
 	 */
 	protected function apply_custom_variables_filter(
 		array $php_variables,
@@ -500,16 +516,22 @@ class Layout extends Instance {
 	): array {
 		$short_unique_view_id = $this->get_view_data()->get_unique_id( true );
 
-		$custom_variables = apply_filters(
-			'acf_views/view/custom_variables',
+		$custom_variables = Plugin::apply_filters(
+			array(
+				'advanced_views/layout/custom_variables',
+				'acf_views/view/custom_variables',
+			),
 			$php_variables,
 			$short_unique_view_id,
 			$object_id,
 			$this->get_field_values(),
 			$is_for_validation
 		);
-		$custom_variables = apply_filters(
-			'acf_views/view/custom_variables/view_id=' . $short_unique_view_id,
+		$custom_variables = Plugin::apply_filters(
+			array(
+				sprintf( 'advanced_views/layout/custom_variables/layout_id=%s', $short_unique_view_id ),
+				sprintf( 'acf_views/view/custom_variables/view_id=%s', $short_unique_view_id ),
+			),
 			$custom_variables,
 			$short_unique_view_id,
 			$object_id,
@@ -517,7 +539,7 @@ class Layout extends Instance {
 			$is_for_validation
 		);
 
-		return $custom_variables;
+		return arr( $custom_variables );
 	}
 
 	/**
