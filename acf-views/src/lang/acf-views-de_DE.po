@@ -1936,7 +1936,7 @@ msgstr "Fügen Sie eine kurze Beschreibung für den Zweck Ihrer Ansichten hinzu.
 msgid "If checked, a separate Gutenberg block for this view will be available. <a target='_blank' href='https://docs.advanced-views.com/display-content/custom-gutenberg-blocks-pro'>Read more</a>."
 msgstr "Wenn aktiviert, wird ein separater Gutenberg-Block für diese Ansicht verfügbar sein. <a target='_blank' href='https://docs.advanced-views.com/display-content/custom-gutenberg-blocks-pro'>Mehr erfahren</a>."
 
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:233
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:239
 msgid "Loading the Editor is taking longer than expected."
 msgstr ""
 
@@ -2116,7 +2116,7 @@ msgid "to improve Advanced Views."
 msgstr ""
 
 #. translators: 1 is the opening tag, 2 is the closing tag.
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:238
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:244
 #, php-format
 msgid "If you still see this message after an extended period, please visit the %1$s Settings %2$s and disable the screen performance optimization."
 msgstr ""

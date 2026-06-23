@@ -1936,7 +1936,7 @@ msgstr "Contexto de página (páginas de archivo)"
 msgid "Add a short description for your Views’ purpose. <br> Note : This description is only seen on the admin Advanced Views list."
 msgstr "Agrega una breve descripción para el propósito de tus Vistas. <br>Nota: Esta descripción solo se ve en la lista de Vistas Avanzadas del administrador."
 
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:233
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:239
 msgid "Loading the Editor is taking longer than expected."
 msgstr "Cargar el Editor está tardando más de lo esperado."
 
@@ -2116,7 +2116,7 @@ msgid "to improve Advanced Views."
 msgstr "para mejorar las vistas avanzadas."
 
 #. translators: 1 is the opening tag, 2 is the closing tag.
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:238
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:244
 #, php-format
 msgid "If you still see this message after an extended period, please visit the %1$s Settings %2$s and disable the screen performance optimization."
 msgstr "Si aún ve este mensaje después de un período prolongado, visite la configuración de %1$s %2$s y desactive la optimización del rendimiento de la pantalla."

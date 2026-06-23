@@ -1936,7 +1936,7 @@ msgstr "Aggiungi una breve descrizione per lo scopo delle tue Viste. <br> Nota: 
 msgid "If unchecked then sticky posts will be at the top of results. <a target='_blank' href='https://wordpress.org/support/article/sticky-posts/'>Learn more about Sticky Posts</a>."
 msgstr "Se non selezionato, gli articoli in evidenza saranno in cima ai risultati. <a target='_blank' href='https://wordpress.org/support/article/sticky-posts/'>Scopri di più sui post in evidenza</a>."
 
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:233
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:239
 msgid "Loading the Editor is taking longer than expected."
 msgstr ""
 
@@ -2116,7 +2116,7 @@ msgid "to improve Advanced Views."
 msgstr ""
 
 #. translators: 1 is the opening tag, 2 is the closing tag.
-#: src/Parents/Cpt/Cpt_Assets_Reducer.php:238
+#: src/Parents/Cpt/Cpt_Assets_Reducer.php:244
 #, php-format
 msgid "If you still see this message after an extended period, please visit the %1$s Settings %2$s and disable the screen performance optimization."
 msgstr ""
