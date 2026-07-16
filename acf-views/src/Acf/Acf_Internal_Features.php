@@ -4,13 +4,13 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Acf;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
-use Org\Wplake\Advanced_Views\Parents\Hookable;
-use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Plugin;
+use Org\Wplake\Advanced_Views\Cpt\Data_Vendors\Data_Vendors;
+use Org\Wplake\Advanced_Views\Plugin\Base\Hookable;
+use Org\Wplake\Advanced_Views\Plugin\Base\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
 use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
-use Org\Wplake\Advanced_Views\Utils\Route_Detector;
+use Org\Wplake\Advanced_Views\Plugin\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Utils\Route_Detector;
 
 class Acf_Internal_Features extends Hookable implements Hooks_Interface {
 	private Plugin $plugin;
@@ -20,7 +20,7 @@ class Acf_Internal_Features extends Hookable implements Hooks_Interface {
 	}
 
 	public function include_field_types(): void {
-		$internal_features_path = __DIR__ . '/../../vendor/acf-internal-features';
+		$internal_features_path = $this->plugin->get_standalone_vendor_dir( 'acf-internal-features' );
 
 		include_once $internal_features_path . '/inc/class-acf-field-clone.php';
 		include_once $internal_features_path . '/inc/class-acf-repeater-table.php';

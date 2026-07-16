@@ -4,7 +4,7 @@ Tags: post grid, wp_query, meta fields, custom post types, taxonomy, shortcodes,
 Requires at least: 5.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.8.11
+Stable tag: 3.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -197,6 +197,16 @@ Yes, we maintain an [official Git repository](https://github.com/wplake/advanced
 You're welcome to open issues or PRs there.
 
 == Changelog ==
+
+= 3.9.0 (2026-07-16) =
+- Enhance: vanilla PHP as a template engine option
+- Enhance: Layout & Selection - disabled automated markup minification (for better compatibility)
+- Enhance: Layout & Selection - faster saving on ACF 6.8.1+
+- Enhance: Starter Layout/Selection for new installations
+- Fix: Layout/Selection editor working without an active ACF plugin
+- Fix: Twig - escape filter support: |e("html_attr")
+- Fix: trick allowing users with non-admin roles to update Layout/Selection settings via ACF calls
+- Feature adoption: Pro Twig functions and filters
 
 = 3.8.11 (2026-06-23) =
 - Fix: ACF support - empty single Post Object field with the Null option - displayed the current page title

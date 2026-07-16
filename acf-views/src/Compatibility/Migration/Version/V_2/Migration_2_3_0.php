@@ -5,17 +5,18 @@ declare( strict_types=1 );
 namespace Org\Wplake\Advanced_Views\Compatibility\Migration\Version\V_2;
 
 defined( 'ABSPATH' ) || exit;
+
 use Org\Wplake\Advanced_Views\Compatibility\Migration\Version\Base\Version_Migration_Base;
-use Org\Wplake\Advanced_Views\Logger;
-use Org\Wplake\Advanced_Views\Template_Engines\Template_Engines;
+use Org\Wplake\Advanced_Views\Cpt\Template\Templates_Environment;
+use Org\Wplake\Advanced_Views\Plugin\Base\Logger;
 
 final class Migration_2_3_0 extends Version_Migration_Base {
-	private Template_Engines $template_engines;
+	private Templates_Environment $templates_environment;
 
-	public function __construct( Logger $logger, Template_Engines $template_engines ) {
+	public function __construct( Logger $logger, Templates_Environment $templates_environment ) {
 		parent::__construct( $logger );
 
-		$this->template_engines = $template_engines;
+		$this->templates_environment = $templates_environment;
 	}
 
 	public function introduced_version(): string {
@@ -26,7 +27,7 @@ final class Migration_2_3_0 extends Version_Migration_Base {
 		self::add_action(
 			'init',
 			function (): void {
-				$this->template_engines->create_templates_dir();
+				$this->templates_environment->create_templates_dir();
 			}
 		);
 	}

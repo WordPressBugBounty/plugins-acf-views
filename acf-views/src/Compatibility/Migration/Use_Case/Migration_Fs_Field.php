@@ -7,9 +7,10 @@ namespace Org\Wplake\Advanced_Views\Compatibility\Migration\Use_Case;
 defined( 'ABSPATH' ) || exit;
 
 use Org\Wplake\Advanced_Views\Compatibility\Migration\Base\Migration_Base;
-use Org\Wplake\Advanced_Views\Logger;
-use Org\Wplake\Advanced_Views\Parents\Cpt_Data_Storage\File_System;
-use Org\Wplake\Advanced_Views\Utils\WP_Filesystem_Factory;
+use Org\Wplake\Advanced_Views\Cpt\Base\Cpt_Data_Storage\File_System;
+use Org\Wplake\Advanced_Views\Cpt\Base\Cpt_Data_Storage\File_System_Loader;
+use Org\Wplake\Advanced_Views\Plugin\Base\Logger;
+use Org\Wplake\Advanced_Views\Plugin\Utils\WP_Filesystem_Factory;
 
 final class Migration_Fs_Field extends Migration_Base {
 	private File_System $file_system;
@@ -25,10 +26,11 @@ final class Migration_Fs_Field extends Migration_Base {
 	}
 
 	public function migrate(): void {
-		$this->file_system->add_on_loaded_callback( array( $this, 'rename_field_files' ) );
+		File_System_Loader::instance()
+			->add_loaded_callback( fn() => $this->rename_field_files() );
 	}
 
-	public function rename_field_files(): void {
+	protected function rename_field_files(): void {
 		if ( $this->file_system->is_active() ) {
 			$base_folder = $this->file_system->get_base_folder();
 

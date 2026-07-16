@@ -4,15 +4,15 @@ declare( strict_types=1 );
 
 namespace Org\Wplake\Advanced_Views\Acf;
 
-use Org\Wplake\Advanced_Views\Data_Vendors\Data_Vendors;
-use Org\Wplake\Advanced_Views\Parents\Hookable;
-use Org\Wplake\Advanced_Views\Parents\Hooks_Interface;
-use Org\Wplake\Advanced_Views\Plugin;
+defined( 'ABSPATH' ) || exit;
+
+use Org\Wplake\Advanced_Views\Cpt\Data_Vendors\Data_Vendors;
+use Org\Wplake\Advanced_Views\Plugin\Base\Hookable;
+use Org\Wplake\Advanced_Views\Plugin\Base\Hooks_Interface;
 use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Layout_Cpt;
 use Org\Wplake\Advanced_Views\Plugin\Cpt\Hard\Hard_Post_Selection_Cpt;
-use Org\Wplake\Advanced_Views\Utils\Route_Detector;
-
-defined( 'ABSPATH' ) || exit;
+use Org\Wplake\Advanced_Views\Plugin\Plugin;
+use Org\Wplake\Advanced_Views\Plugin\Utils\Route_Detector;
 
 class Acf_Dependency extends Hookable implements Hooks_Interface {
 	private Plugin $plugin;
@@ -26,10 +26,15 @@ class Acf_Dependency extends Hookable implements Hooks_Interface {
 			return;
 		}
 
+		$acf_file       = $this->plugin->get_standalone_vendor_dir( 'advanced-custom-fields/acf.php' );
+		$acf_plugin_url = $this->plugin->get_standalone_vendor_url( 'advanced-custom-fields/' );
+
 		// Hide ACF admin menu (as we loaded ACF only for our plugin).
 		self::add_filter( 'acf/settings/show_admin', '__return_false' );
+		// ensure right url, otherwise internal ACF asset paths are incorrect.
+		self::add_filter( 'acf/settings/url', fn() => $acf_plugin_url );
 
-		require_once __DIR__ . '/../../vendor/advanced-custom-fields/acf.php';
+		require_once $acf_file;
 
 		// used in the AcfDataVendor to skip loading if it's inner ACF.
 		define( 'ACF_VIEWS_INNER_ACF', true );
