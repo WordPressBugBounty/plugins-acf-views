@@ -1,10 +1,10 @@
 === Advanced Views - Display Custom Fields (ACF, Pods, MetaBox), Posts, CPT and Woo Products anywhere in Gutenberg, Elementor, Divi, Beaver... ===
 Contributors: wplakeorg
-Tags: post grid, wp_query, meta fields, custom post types, taxonomy, shortcodes, elementor, divi, bricks, layout
+Tags: post grid, wp_query, meta fields, custom post types, taxonomy
 Requires at least: 5.5
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -197,6 +197,10 @@ Yes, we maintain an [official Git repository](https://github.com/wplake/advanced
 You're welcome to open issues or PRs there.
 
 == Changelog ==
+
+= 3.9.1 (2026-07-20) =
+- UX improvements
+- Fix: custom Twig templates - false save-validation alarms
 
 = 3.9.0 (2026-07-16) =
 - Enhance: vanilla PHP as a template engine option

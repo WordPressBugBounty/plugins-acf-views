@@ -203,7 +203,7 @@ class Usage_Report extends Report_Base implements Hooks_Interface {
 							->add_loaded_callback(
 								function () {
 									$fields = array_merge(
-										$this->state_report->get_core_fields(),
+										$this->state_report->get_primary_fields(),
 										$this->get_usage_data(),
 									);
 
